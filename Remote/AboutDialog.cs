@@ -13,7 +13,7 @@ namespace GRemote
         public AboutDialog()
         {
             InitializeComponent();
-            versionLabel.Text = GRemote.Version;
+            versionLabel.Text = GRemoteDialog.Version;
         }
 
         #region Assembly Attribute Accessors

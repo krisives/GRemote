@@ -26,7 +26,7 @@ namespace GRemote
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GRemote());
+            Application.Run(new GRemoteDialog());
         }
     }
 }

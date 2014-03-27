@@ -12,14 +12,16 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Cache;
 
 // using DirectShowLib;
 
 namespace GRemote
 {
-    public partial class GRemote : Form
+    public partial class GRemoteDialog : Form
     {
-        public static String Version = "0.0.2";
+        public static String Version = "0.0.3";
 
         BoundsForm boundsForm = new BoundsForm();
         volatile bool recording = false;
@@ -35,10 +37,17 @@ namespace GRemote
 
         AboutDialog aboutDialog;
         PreferencesDialog prefsDialog;
+        WebClient client;
 
-        public GRemote()
+        public GRemoteDialog()
         {
             ffmpeg = new FFMpeg();
+
+            WebRequest.DefaultWebProxy = null;
+            WebRequest.DefaultCachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            client = new WebClient();
 
             bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
@@ -119,7 +128,7 @@ namespace GRemote
             recordButton.Text = "Stop Recording";
             statusLabel.Text = "Recording...";
 
-            bg = bufferContext.Allocate(previewPanel.CreateGraphics(), new Rectangle(0, 0, w, h));
+            bg = bufferContext.Allocate(videoPreview.CreateGraphics(), new Rectangle(0, 0, w, h));
             g = bg.Graphics;
 
             //targetWindowPtr =  boundsForm.TargetWindow;
@@ -157,7 +166,7 @@ namespace GRemote
             recordButton.Text = "Start";
             statusLabel.Text = "Not Recording";
 
-            previewPanel.Refresh();
+            videoPreview.Refresh();
         }
 
         private void previewPanel_Paint(object sender, PaintEventArgs e)
@@ -240,5 +249,23 @@ namespace GRemote
             prefsDialog.Show();
         }
 
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            Uri uri = new Uri("https://raw.githubusercontent.com:443/krisives/GRemote/master/VERSION.txt");
+
+            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadStringCompleted);
+            client.DownloadStringAsync(uri);
+        }
+
+        void client_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            String version = e.Result.Trim();
+            Console.WriteLine(version);
+
+            if (version != GRemoteDialog.Version)
+            {
+                MessageBox.Show("Version " + version + " is available!");
+            }
+        }
     }
 }

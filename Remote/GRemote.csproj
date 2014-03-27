@@ -75,11 +75,11 @@
       <DependentUpon>BoundsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="FFMpeg.cs" />
-    <Compile Include="GRemote.cs">
+    <Compile Include="GRemoteDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GRemote.Designer.cs">
-      <DependentUpon>GRemote.cs</DependentUpon>
+    <Compile Include="GRemoteDialog.Designer.cs">
+      <DependentUpon>GRemoteDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="PreferencesDialog.cs">
       <SubType>Form</SubType>
@@ -94,6 +94,12 @@
     <Compile Include="VideoDecoder.cs" />
     <Compile Include="BufferPool.cs" />
     <Compile Include="VideoEncoder.cs" />
+    <Compile Include="VideoPreview.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="VideoPreview.Designer.cs">
+      <DependentUpon>VideoPreview.cs</DependentUpon>
+    </Compile>
     <Compile Include="VirtualInput.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
@@ -101,8 +107,8 @@
     <EmbeddedResource Include="BoundsForm.resx">
       <DependentUpon>BoundsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GRemote.resx">
-      <DependentUpon>GRemote.cs</DependentUpon>
+    <EmbeddedResource Include="GRemoteDialog.resx">
+      <DependentUpon>GRemoteDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PreferencesDialog.resx">
       <DependentUpon>PreferencesDialog.cs</DependentUpon>
@@ -117,6 +123,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="VideoPreview.resx">
+      <DependentUpon>VideoPreview.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
