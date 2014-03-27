@@ -32,7 +32,9 @@ namespace GRemote
         VideoDecoder videoDecoder;
         VirtualInput virtualInput;
         IntPtr targetWindowPtr;
+
         AboutDialog aboutDialog;
+        PreferencesDialog prefsDialog;
 
         public GRemote()
         {
@@ -221,6 +223,21 @@ namespace GRemote
         private void pToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowPreferences();
+        }
+
+        public void ShowPreferences()
+        {
+            if (prefsDialog == null)
+            {
+                prefsDialog = new PreferencesDialog();
+            }
+
+            prefsDialog.Show();
         }
 
     }
