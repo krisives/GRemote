@@ -37,6 +37,7 @@ namespace GRemote
 
             running = true;
             readThread = new Thread(new ThreadStart(readThreadMain));
+            readThread.Start();
         }
 
         protected void readThreadMain()

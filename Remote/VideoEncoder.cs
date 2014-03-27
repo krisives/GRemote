@@ -217,7 +217,7 @@ namespace GRemote
 
             if (str != null && str.Length > 0)
             {
-                Console.WriteLine("[ENCODE] {0}", str);
+               // Console.WriteLine("[ENCODE] {0}", str);
             }
         }
 

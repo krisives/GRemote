@@ -216,7 +216,7 @@ namespace GRemote
                 return;
             }
 
-            Console.WriteLine("[DECODE] {0}", msg);
+           // Console.WriteLine("[DECODE] {0}", msg);
         }
     }
 }
