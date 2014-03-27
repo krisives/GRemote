@@ -74,6 +74,7 @@
     <Compile Include="BoundsForm.Designer.cs">
       <DependentUpon>BoundsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ClientSession.cs" />
     <Compile Include="FFMpeg.cs" />
     <Compile Include="GRemoteDialog.cs">
       <SubType>Form</SubType>
@@ -95,7 +96,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server.cs" />
+    <Compile Include="ServerSession.cs" />
     <Compile Include="VideoCapture.cs" />
     <Compile Include="VideoDecoder.cs" />
     <Compile Include="BufferPool.cs" />

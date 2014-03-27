@@ -102,8 +102,8 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.CheckBox enableSave;
-        private System.Windows.Forms.TextBox saveFilename;
         private System.Windows.Forms.Button browseSaveButton;
+        public System.Windows.Forms.CheckBox enableSave;
+        public System.Windows.Forms.TextBox saveFilename;
     }
 }

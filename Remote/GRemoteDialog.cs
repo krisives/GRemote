@@ -25,9 +25,6 @@ namespace GRemote
 
         BoundsForm boundsForm = new BoundsForm();
         volatile bool recording = false;
-        //BufferedGraphicsContext bufferContext;
-        //BufferedGraphics bg;
-      //  Graphics g;
         FFMpeg ffmpeg;
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
@@ -49,14 +46,8 @@ namespace GRemote
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             client = new WebClient();
-
-           // bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
-             
-            
         }
-
-   
 
         // Happens X times per second (FPS)
         private void snapshotTimer_Tick(object sender, EventArgs e)
@@ -79,18 +70,6 @@ namespace GRemote
             {
                 videoDecoder.Decode(encodedBuffer);
             }
-
-           // g.DrawImage(videoCapture.Buffer, 0, 0);
-
-            //while (videoDecoder.Read())
-           // {
-//
-            //}
-
-            //lock (videoDecoder.Buffer)
-            //{
-            //    g.DrawImage(videoDecoder.Buffer, 0, 0);
-            //}
 
             if (WindowState != FormWindowState.Minimized)
             {
@@ -135,12 +114,14 @@ namespace GRemote
 
             //targetWindowPtr =  boundsForm.TargetWindow;
             //Process gameProcess = Process.GetProcessesByName("LANoire")[0];
-           // targetWindowPtr = gameProcess.MainWindowHandle;
+            //targetWindowPtr = gameProcess.MainWindowHandle;
 
             videoCapture = new VideoCapture(w, h);
             videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
 
             videoEncoder = new VideoEncoder(ffmpeg, w, h);
+            videoEncoder.FileRecordingEnabled = prefsDialog.enableSave.Checked;
+            videoEncoder.FileRecordingPath = prefsDialog.saveFilename.Text;
             videoEncoder.StartEncoding();
 
             videoDecoder = new VideoDecoder(ffmpeg, w, h);
@@ -274,16 +255,29 @@ namespace GRemote
 
         private void hostMenuItem_Click(object sender, EventArgs e)
         {
+            HostSession();
+        }
+
+        public void JoinSession()
+        {
+            sessionDialog.addressBox.Text = "";
+            sessionDialog.button1.Text = "Join Session";
+            sessionDialog.Text = "Join Session";
+            sessionDialog.ShowDialog(this);
+        }
+
+        public void HostSession()
+        {
+            sessionDialog.addressBox.Text = "0.0.0.0";
             sessionDialog.button1.Text = "Begin Hosting";
             sessionDialog.Text = "Host Session";
             sessionDialog.ShowDialog(this);
         }
 
+
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            sessionDialog.button1.Text = "Join Session";
-            sessionDialog.Text = "Join Session";
-            sessionDialog.ShowDialog(this);
+            JoinSession();
         }
 
         public void SetPreviewMode(PreviewMode mode)
@@ -291,6 +285,34 @@ namespace GRemote
             if (videoPreview != null)
             {
                 videoPreview.PreviewMode = mode;
+            }
+
+            switch (mode)
+            {
+                case PreviewMode.NONE:
+                    noneToolStripMenuItem.Checked = true;
+                    uncompressedToolStripMenuItem.Checked = false;
+                    compressedToolStripMenuItem.Checked = false;
+                    splitViewToolStripMenuItem.Checked = false;
+                    break;
+                case PreviewMode.UNCOMPRESSED:
+                    noneToolStripMenuItem.Checked = false;
+                    uncompressedToolStripMenuItem.Checked = true;
+                    compressedToolStripMenuItem.Checked = false;
+                    splitViewToolStripMenuItem.Checked = false;
+                    break;
+                case PreviewMode.COMPRESSED:
+                    noneToolStripMenuItem.Checked = false;
+                    uncompressedToolStripMenuItem.Checked = false;
+                    compressedToolStripMenuItem.Checked = true;
+                    splitViewToolStripMenuItem.Checked = false;
+                    break;
+                case PreviewMode.SPLIT:
+                    noneToolStripMenuItem.Checked = false;
+                    uncompressedToolStripMenuItem.Checked = false;
+                    compressedToolStripMenuItem.Checked = false;
+                    splitViewToolStripMenuItem.Checked = true;
+                    break;
             }
         }
 

@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.addressBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.passwordBox = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.portBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -46,12 +46,13 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Server IP:";
             // 
-            // textBox1
+            // addressBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(72, 6);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(126, 20);
-            this.textBox1.TabIndex = 1;
+            this.addressBox.Location = new System.Drawing.Point(72, 6);
+            this.addressBox.Name = "addressBox";
+            this.addressBox.Size = new System.Drawing.Size(126, 20);
+            this.addressBox.TabIndex = 1;
+            this.addressBox.Text = "0.0.0.0";
             // 
             // label2
             // 
@@ -62,12 +63,12 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "Password:";
             // 
-            // textBox2
+            // passwordBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(72, 32);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(236, 20);
-            this.textBox2.TabIndex = 3;
+            this.passwordBox.Location = new System.Drawing.Point(72, 32);
+            this.passwordBox.Name = "passwordBox";
+            this.passwordBox.Size = new System.Drawing.Size(236, 20);
+            this.passwordBox.TabIndex = 3;
             // 
             // button1
             // 
@@ -87,24 +88,25 @@
             this.label3.TabIndex = 5;
             this.label3.Text = "Port:";
             // 
-            // textBox3
+            // portBox
             // 
-            this.textBox3.Location = new System.Drawing.Point(235, 6);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(73, 20);
-            this.textBox3.TabIndex = 6;
+            this.portBox.Location = new System.Drawing.Point(235, 6);
+            this.portBox.Name = "portBox";
+            this.portBox.Size = new System.Drawing.Size(73, 20);
+            this.portBox.TabIndex = 6;
+            this.portBox.Text = "9999";
             // 
             // SessionDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(320, 92);
-            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.portBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.passwordBox);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.addressBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -121,11 +123,11 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox portBox;
         public System.Windows.Forms.Button button1;
+        public System.Windows.Forms.TextBox addressBox;
+        public System.Windows.Forms.TextBox passwordBox;
     }
 }

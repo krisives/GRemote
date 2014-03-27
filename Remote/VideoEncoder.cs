@@ -28,6 +28,7 @@ namespace GRemote
         List<Stream> listenerStreams = new List<Stream>();
         volatile int totalBytes = 0;
         Stream fout;
+        String fileOutputPath;
         bool enableFileRecording = false;
 
         public VideoEncoder(FFMpeg ffmpeg, int width, int height)
@@ -47,6 +48,30 @@ namespace GRemote
             this.width = width;
             this.height = height;
             this.lockBounds = new Rectangle(0, 0, width, height);
+        }
+
+        public Boolean FileRecordingEnabled
+        {
+            get
+            {
+                return enableFileRecording;
+            }
+            set
+            {
+                enableFileRecording = value;
+            }
+        }
+
+        public String FileRecordingPath
+        {
+            get
+            {
+                return fileOutputPath;
+            }
+            set
+            {
+                fileOutputPath = value;
+            }
         }
 
         public int TotalBytes
@@ -90,10 +115,8 @@ namespace GRemote
 
             if (enableFileRecording)
             {
-                fout = new BufferedStream(File.Open("X:\\GRemote\\test.avi", FileMode.Create));
+                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
             }
-
-            
         }
 
         public string GetFFMpegArguments()

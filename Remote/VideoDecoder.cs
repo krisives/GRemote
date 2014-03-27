@@ -214,7 +214,15 @@ namespace GRemote
                     continue;
                 }
 
-                bufferedOutputStream.Write(nextBuffer, 0, nextBuffer.Length);
+                try
+                {
+                    bufferedOutputStream.Write(nextBuffer, 0, nextBuffer.Length);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    break;
+                }
             }
         }
 
