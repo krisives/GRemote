@@ -88,5 +88,14 @@ namespace GRemote
                 Monitor.PulseAll(buffers);
             }
         }
+
+        public void Clear()
+        {
+            lock (buffers)
+            {
+                buffers.Clear();
+                Monitor.PulseAll(buffers);
+            }
+        }
     }
 }

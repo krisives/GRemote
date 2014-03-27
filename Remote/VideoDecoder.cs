@@ -46,6 +46,7 @@ namespace GRemote
             }
 
             started = true;
+            buffers.Clear();
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments();
@@ -75,29 +76,14 @@ namespace GRemote
         {
             String args = "";
 
-           // args += " -y ";
-          //  args += " -t 01:00:00 ";
-        //    args += " -f rawvideo ";
-         //   args += " -pixel_format bgr24 ";
-           // args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
-        //    args += " -framerate 30 ";
             args += " -f avi ";
-            //args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
-            //args += " -c:v libxvid ";
             args += " -i - ";
-          //  args += " -vframes 99999 ";
-          //  args += " -vb 900K ";
-         //   args += " -c:v libxvid ";
             args += " -f rawvideo ";
             args += " -c:v rawvideo ";
             args += "  -tune zerolatency ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
-
             args += " -pixel_format bgr24 -pix_fmt bgr24 ";
-           // args += " -framerate 30 ";
-
             args += " - ";
-            //args += " X:\\GRemote\\xxx.avi ";
 
             return args;
         }
@@ -106,35 +92,6 @@ namespace GRemote
         {
             buffers.Add(buffer);
         }
-
-        /*
-        public bool Read()
-        {
-            BitmapData data;
-            byte[] buffer;
-
-            buffer = decodedBuffers.Remove();
-
-            if (buffer == null)
-            {
-                return false;
-            }
-
-
-            lock (decodeBuffer)
-            {
-                //Console.WriteLine("--- {0} ----", buffer.Length);
-                data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                Marshal.Copy(buffer, 0, data.Scan0, buffer.Length);
-                decodeBuffer.UnlockBits(data);
-            }
-
-
-
-            data = null;
-            return true;
-        }
-        */
 
         public Bitmap Buffer
         {
@@ -153,12 +110,20 @@ namespace GRemote
             }
 
             started = false;
-            buffers.Pulse();
+            buffers.Clear();
 
             process.StandardError.Close();
             process.StandardInput.Close();
             process.StandardOutput.Close();
             process.Close();
+
+            Thread.Sleep(1000);
+
+            if (!process.HasExited)
+            {
+                process.Kill();
+            }
+
             process = null;
         }
 

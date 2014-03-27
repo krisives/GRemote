@@ -21,21 +21,29 @@ namespace GRemote
 {
     public partial class GRemoteDialog : Form
     {
-        public static String Version = "0.0.3";
+        public static String Version = "0.0.4";
 
         BoundsForm boundsForm = new BoundsForm();
+
         volatile bool recording = false;
+        volatile bool playback = false;
+
         FFMpeg ffmpeg;
+
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
         VideoDecoder videoDecoder;
+
         VirtualInput virtualInput;
         IntPtr targetWindowPtr;
 
         SessionDialog sessionDialog = new SessionDialog();
         AboutDialog aboutDialog;
-        PreferencesDialog prefsDialog;
+        PreferencesDialog prefsDialog = new PreferencesDialog();
         WebClient client;
+
+        ServerSession serverSession;
+        ClientSession clientSession;
 
         public GRemoteDialog()
         {
@@ -69,11 +77,30 @@ namespace GRemote
             while ((encodedBuffer = videoEncoder.Read()) != null)
             {
                 videoDecoder.Decode(encodedBuffer);
+
+                if (serverSession != null)
+                {
+                    serverSession.AddVideoBuffer(encodedBuffer);
+                }
             }
 
             if (WindowState != FormWindowState.Minimized)
             {
                 //bg.Render();
+                videoPreview.Render();
+            }
+        }
+
+        private void playbackTimer_Tick(object sender, EventArgs e)
+        {
+            if (!playback)
+            {
+                return;
+            }
+
+            if (WindowState != FormWindowState.Minimized)
+            {
+                videoPreview.RenderDirect(videoDecoder.Buffer);
                 videoPreview.Render();
             }
         }
@@ -131,8 +158,25 @@ namespace GRemote
 
             videoPreview.SetBuffers(videoCapture.Buffer, videoDecoder.Buffer);
 
+            if (clientSession != null) {
+                clientSession.SetDecoder(videoDecoder);
+            }
+
             bandwidthTimer.Start();
             snapshotTimer.Start();
+        }
+
+        public void RestartStream()
+        {
+            /*
+            videoEncoder.StopEncoding();
+            videoDecoder.StopDecoding();
+
+            videoEncoder.StartEncoding();
+            videoDecoder.StopDecoding();
+            */
+            StopRecording();
+            StartRecording();
         }
 
         public void StopRecording()
@@ -226,11 +270,6 @@ namespace GRemote
 
         public void ShowPreferences()
         {
-            if (prefsDialog == null)
-            {
-                prefsDialog = new PreferencesDialog();
-            }
-
             prefsDialog.Show();
         }
 
@@ -255,7 +294,42 @@ namespace GRemote
 
         private void hostMenuItem_Click(object sender, EventArgs e)
         {
-            HostSession();
+            ToggleHosting();
+        }
+
+        public void ToggleHosting()
+        {
+            if (serverSession == null)
+            {
+                HostSession();
+            }
+            else
+            {
+                serverSession.StopServer();
+                serverSession = null;
+                hostMenuItem.Text = "Host";
+            }
+        }
+
+        public void TogglePlayback()
+        {
+            if (clientSession == null)
+            {
+                JoinSession();
+            }
+            else
+            {
+                StopPlayback();
+            }
+        }
+
+        public void StopPlayback()
+        {
+            playback = false;
+            clientSession.StopClient();
+            clientSession = null;
+            joinMenuItem.Text = "Connect";
+            playbackTimer.Stop();
         }
 
         public void JoinSession()
@@ -264,6 +338,13 @@ namespace GRemote
             sessionDialog.button1.Text = "Join Session";
             sessionDialog.Text = "Join Session";
             sessionDialog.ShowDialog(this);
+
+            joinMenuItem.Text = "Disconnect";
+            clientSession = new ClientSession(this, sessionDialog.addressBox.Text, int.Parse(sessionDialog.portBox.Text));
+
+            playback = true;
+            clientSession.StartClient();
+            playbackTimer.Start();
         }
 
         public void HostSession()
@@ -272,12 +353,17 @@ namespace GRemote
             sessionDialog.button1.Text = "Begin Hosting";
             sessionDialog.Text = "Host Session";
             sessionDialog.ShowDialog(this);
+
+            hostMenuItem.Text = "Stop Hosting";
+            serverSession = new ServerSession(this, sessionDialog.addressBox.Text, int.Parse(sessionDialog.portBox.Text));
+            serverSession.StartServer();
+            
         }
 
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            JoinSession();
+            TogglePlayback();
         }
 
         public void SetPreviewMode(PreviewMode mode)
@@ -334,6 +420,21 @@ namespace GRemote
         private void noneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetPreviewMode(PreviewMode.NONE);
+        }
+
+        private void toolStripStatusLabel2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void GRemoteDialog_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            StopRecording();
+
+            if (serverSession != null)
+            {
+                serverSession.StopServer();
+            }
         }
     }
 }

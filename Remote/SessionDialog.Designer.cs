@@ -78,6 +78,7 @@
             this.button1.TabIndex = 4;
             this.button1.Text = "Begin Hosting";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label3
             // 
@@ -125,9 +126,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox portBox;
         public System.Windows.Forms.Button button1;
         public System.Windows.Forms.TextBox addressBox;
         public System.Windows.Forms.TextBox passwordBox;
+        public System.Windows.Forms.TextBox portBox;
     }
 }

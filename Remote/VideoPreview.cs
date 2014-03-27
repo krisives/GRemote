@@ -65,6 +65,14 @@ namespace GRemote
             }
         }
 
+        public void RenderDirect(Bitmap screen)
+        {
+            lock (screen)
+            {
+                g.DrawImage(screen, 0, 0);
+            }
+        }
+
         public void Render()
         {
             switch (previewMode)

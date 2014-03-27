@@ -91,6 +91,7 @@ namespace GRemote
 
             started = true;
             totalBytes = 0;
+            buffers.Clear();
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments();
@@ -136,9 +137,7 @@ namespace GRemote
             args += "  -tune zerolatency ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
             args += " -f avi ";
-
             args += " - ";
-            //args += " X:\\GRemote\\xxx.avi ";
 
             return args;
         }
@@ -174,12 +173,19 @@ namespace GRemote
             }
 
             started = false;
-            buffers.Pulse();
+            buffers.Clear();
             process.StandardInput.Close();
             process.StandardError.Close();
             process.StandardOutput.Close();
             process.Close();
-            process.Dispose();
+
+            Thread.Sleep(1000);
+
+            if (!process.HasExited)
+            {
+                process.Kill();
+            }
+
             process = null;
         }
 
