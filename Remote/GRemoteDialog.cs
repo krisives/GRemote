@@ -339,6 +339,12 @@ namespace GRemote
             sessionDialog.Text = "Join Session";
             sessionDialog.ShowDialog(this);
 
+            int w = boundsForm.Width;
+            int h = boundsForm.Height;
+
+            videoDecoder = new VideoDecoder(ffmpeg, w, h);
+            videoDecoder.StartDecoding();
+
             joinMenuItem.Text = "Disconnect";
             clientSession = new ClientSession(this, sessionDialog.addressBox.Text, int.Parse(sessionDialog.portBox.Text));
 
