@@ -25,9 +25,9 @@ namespace GRemote
 
         BoundsForm boundsForm = new BoundsForm();
         volatile bool recording = false;
-        BufferedGraphicsContext bufferContext;
-        BufferedGraphics bg;
-        Graphics g;
+        //BufferedGraphicsContext bufferContext;
+        //BufferedGraphics bg;
+      //  Graphics g;
         FFMpeg ffmpeg;
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
@@ -35,6 +35,7 @@ namespace GRemote
         VirtualInput virtualInput;
         IntPtr targetWindowPtr;
 
+        SessionDialog sessionDialog = new SessionDialog();
         AboutDialog aboutDialog;
         PreferencesDialog prefsDialog;
         WebClient client;
@@ -49,7 +50,7 @@ namespace GRemote
 
             client = new WebClient();
 
-            bufferContext = BufferedGraphicsManager.Current;
+           // bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
              
             
@@ -57,7 +58,7 @@ namespace GRemote
 
    
 
-
+        // Happens X times per second (FPS)
         private void snapshotTimer_Tick(object sender, EventArgs e)
         {
             if (!recording)
@@ -65,8 +66,11 @@ namespace GRemote
                 return;
             }
 
+            // Capture raw screen
             videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
             videoCapture.Capture();
+
+            // Pass screen off to encoder (asynchronous)
             videoEncoder.Encode(videoCapture.Buffer);
 
             byte[] encodedBuffer;
@@ -76,22 +80,22 @@ namespace GRemote
                 videoDecoder.Decode(encodedBuffer);
             }
 
-            g.DrawImage(videoCapture.Buffer, 0, 0);
+           // g.DrawImage(videoCapture.Buffer, 0, 0);
 
-           // while (videoDecoder.Read())
+            //while (videoDecoder.Read())
            // {
-          //      
-           // }
+//
+            //}
 
-            lock (videoDecoder.Buffer)
-            {
-                g.DrawImage(videoDecoder.Buffer, 0, 0);
-
-            }
+            //lock (videoDecoder.Buffer)
+            //{
+            //    g.DrawImage(videoDecoder.Buffer, 0, 0);
+            //}
 
             if (WindowState != FormWindowState.Minimized)
             {
-                bg.Render();
+                //bg.Render();
+                videoPreview.Render();
             }
         }
 
@@ -112,8 +116,6 @@ namespace GRemote
             }
         }
 
-        
-
         public void StartRecording()
         {
             if (recording)
@@ -128,8 +130,8 @@ namespace GRemote
             recordButton.Text = "Stop Recording";
             statusLabel.Text = "Recording...";
 
-            bg = bufferContext.Allocate(videoPreview.CreateGraphics(), new Rectangle(0, 0, w, h));
-            g = bg.Graphics;
+            //bg = bufferContext.Allocate(videoPreview.CreateGraphics(), new Rectangle(0, 0, w, h));
+            //g = bg.Graphics;
 
             //targetWindowPtr =  boundsForm.TargetWindow;
             //Process gameProcess = Process.GetProcessesByName("LANoire")[0];
@@ -145,6 +147,8 @@ namespace GRemote
             videoDecoder.StartDecoding();
 
             virtualInput = new VirtualInput(targetWindowPtr);
+
+            videoPreview.SetBuffers(videoCapture.Buffer, videoDecoder.Buffer);
 
             bandwidthTimer.Start();
             snapshotTimer.Start();
@@ -266,6 +270,48 @@ namespace GRemote
             {
                 MessageBox.Show("Version " + version + " is available!");
             }
+        }
+
+        private void hostMenuItem_Click(object sender, EventArgs e)
+        {
+            sessionDialog.button1.Text = "Begin Hosting";
+            sessionDialog.Text = "Host Session";
+            sessionDialog.ShowDialog(this);
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            sessionDialog.button1.Text = "Join Session";
+            sessionDialog.Text = "Join Session";
+            sessionDialog.ShowDialog(this);
+        }
+
+        public void SetPreviewMode(PreviewMode mode)
+        {
+            if (videoPreview != null)
+            {
+                videoPreview.PreviewMode = mode;
+            }
+        }
+
+        private void uncompressedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetPreviewMode(PreviewMode.UNCOMPRESSED);
+        }
+
+        private void compressedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetPreviewMode(PreviewMode.COMPRESSED);
+        }
+
+        private void splitViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetPreviewMode(PreviewMode.SPLIT);
+        }
+
+        private void noneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetPreviewMode(PreviewMode.NONE);
         }
     }
 }

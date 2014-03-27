@@ -215,6 +215,7 @@ namespace GRemote
 
         public void readThreadMain()
         {
+            // Encoded data is read from FFMPeg in 16K chunks
             byte[] readBuffer = new byte[1024 * 16];
             int readCount;
             Stream stream = new BufferedStream(process.StandardOutput.BaseStream);

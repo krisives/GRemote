@@ -81,6 +81,12 @@
     <Compile Include="GRemoteDialog.Designer.cs">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SessionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SessionDialog.Designer.cs">
+      <DependentUpon>SessionDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="PreferencesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -109,6 +115,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GRemoteDialog.resx">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SessionDialog.resx">
+      <DependentUpon>SessionDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PreferencesDialog.resx">
       <DependentUpon>PreferencesDialog.cs</DependentUpon>
