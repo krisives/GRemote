@@ -88,8 +88,9 @@ namespace GRemote
                 }
 
                 ConnectedClient client = new ConnectedClient();
-                client.socket = socket;
-                client.stream = new NetworkStream(socket);
+
+                client.socket = clientSocket;
+                client.stream = new NetworkStream(clientSocket);
                 client.writer = new BinaryWriter(client.stream);
 
                 clients.Add(client);
