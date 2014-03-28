@@ -11,25 +11,46 @@ namespace GRemote
 {
     class ServerSession
     {
-        BufferPool outputBuffers = new BufferPool();
+        FFMpeg ffmpeg;
+
+        // Listening socket
         Socket socket;
+
+        // True if server is running
         bool running;
+
+        // Address to listen on
         int port;
         String address;
+
+        // Threads used to accept and process network data
         Thread listenThread;
         Thread writeThread;
         Thread readThread;
+
+        // List of clients that are connected
         List<ConnectedClient> clients = new List<ConnectedClient>();
 
+        // When data is broadcast to connected peers it goes
+        // into this pool for the threads to read
+        BufferPool outputBuffers = new BufferPool();
+
+        // Capture, encoder and decoder for processing video data
+        VideoCapture videoCapture;
+        VideoEncoder videoEncoder;
+        VideoDecoder videoDecoder;
+
+        // 1K buffer for constructing header packets
         byte[] headerBuffer;
         MemoryStream headerStream;
         BinaryWriter headerBinary;
 
-        GRemoteDialog gRemote;
+        VideoPreview videoPreview;
 
-        public ServerSession(GRemoteDialog gRemote, String address, int port)
+        public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, String address, int port)
         {
-            this.gRemote = gRemote;
+            this.ffmpeg = ffmpeg;
+            this.videoCapture = videoCapture;
             this.address = address;
             this.port = port;
 
@@ -38,26 +59,140 @@ namespace GRemote
             headerBinary = new BinaryWriter(headerStream);
         }
 
+        public VideoPreview Preview
+        {
+            set
+            {
+                videoPreview = value;
+            }
+            get
+            {
+                return videoPreview;
+            }
+        }
+
         public void StartServer()
         {
-            if (running)
+            if (IsRunning())
             {
                 return;
             }
 
-            running = true;
+            lock (this)
+            {
+                running = true;
+            }
+
+            // Start the listening socket
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+            // Begin the capture and encoding process
+            videoCapture.Listener = Snapshot;
 
+            videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
+            videoEncoder.StartEncoding();
 
+            videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
+            videoDecoder.StartDecoding();
+
+            // Create networking threads
             listenThread = new Thread(listenThreadMain);
-            listenThread.Start();
-
             readThread = new Thread(readThreadMain);
-            readThread.Start();
-
             writeThread = new Thread(writeThreadMain);
+
+            // Start networking threads
+            listenThread.Start();
+            readThread.Start();
             writeThread.Start();
+
+            videoCapture.StartCapturing();
+        }
+
+        protected void RestartStream()
+        {
+            // TODO add "restart stream" packet
+            outputBuffers.Clear();
+
+            videoEncoder.StopEncoding();
+            videoDecoder.StopDecoding();
+
+            videoEncoder.StartEncoding();
+            videoDecoder.StartDecoding();
+        }
+
+        protected void Snapshot()
+        {
+            byte[] encodedVideoBuffer;
+
+            if (!IsRunning())
+            {
+                return;
+            }
+
+            videoEncoder.Encode(videoCapture.Buffer);
+
+            while ((encodedVideoBuffer = videoEncoder.Read()) != null)
+            {
+                if (videoDecoder != null)
+                {
+                    videoDecoder.Decode(encodedVideoBuffer);
+                }
+
+                AddVideoBuffer(encodedVideoBuffer);
+            }
+
+            if (videoPreview != null)
+            {
+                videoPreview.RenderDirect(videoCapture.Buffer);
+            }
+        }
+
+        public bool IsRunning()
+        {
+            lock (this)
+            {
+                return running;
+            }
+        }
+
+        public void StopServer()
+        {
+            if (!IsRunning())
+            {
+                return;
+            }
+
+            lock (this)
+            {
+                running = false;
+            }
+            
+            if (videoEncoder != null)
+            {
+                videoEncoder.StopEncoding();
+                videoEncoder = null;
+            }
+
+            if (videoDecoder != null)
+            {
+                videoDecoder.StopDecoding();
+                videoDecoder = null;
+            }
+
+            if (videoCapture != null)
+            {
+                videoCapture.StopCapturing();
+                videoCapture = null;
+            }
+
+            socket.Close();
+            outputBuffers.Clear();
+
+            readThread = null;
+            writeThread = null;
+            listenThread = null;
+            socket = null;
+            outputBuffers = new BufferPool();
         }
 
         protected void listenThreadMain()
@@ -89,30 +224,25 @@ namespace GRemote
 
                 ConnectedClient client = new ConnectedClient();
 
+                RestartStream();
+
                 client.socket = clientSocket;
                 client.stream = new NetworkStream(clientSocket);
                 client.writer = new BinaryWriter(client.stream);
 
                 clients.Add(client);
-                gRemote.RestartStream();
+                
             }
         }
 
-        public void StopServer()
+        protected void AddVideoBuffer(byte[] buffer)
         {
-            if (!running)
-            {
+            if (!IsRunning() || clients.Count <= 0) {
                 return;
             }
 
-            running = false;
-            socket.Close();
-            outputBuffers.Pulse();
-        }
-
-        public void AddVideoBuffer(byte[] buffer)
-        {
-            if (!running || clients.Count <= 0) {
+            if (buffer.Length <= 0)
+            {
                 return;
             }
 
@@ -129,9 +259,12 @@ namespace GRemote
             outputBuffers.Add(buffer);
         }
 
+        List<ConnectedClient> killList = new List<ConnectedClient>();
+
         protected void writeThreadMain()
         {
             byte[] nextBuffer;
+            
 
             while (running)
             {
@@ -144,8 +277,33 @@ namespace GRemote
                 }
 
                 foreach (ConnectedClient client in clients) {
-                    client.writer.Write(nextBuffer);
+                    try
+                    {
+                        client.writer.Write(nextBuffer);
+                    }
+                    catch (Exception e)
+                    {
+                        KillClient(client);
+                    }
                 }
+
+                foreach (ConnectedClient client in killList)
+                {
+                    clients.Remove(client);
+                }
+
+                killList.Clear();
+            }
+        }
+
+        public void KillClient(ConnectedClient client)
+        {
+            client.writer.Close();
+            client.socket.Close();
+
+            lock (killList)
+            {
+                killList.Add(client);
             }
         }
 
@@ -154,7 +312,7 @@ namespace GRemote
 
         }
 
-        class ConnectedClient
+        public class ConnectedClient
         {
             public Socket socket;
             public NetworkStream stream;
@@ -174,6 +332,4 @@ namespace GRemote
 
         KEYBOARD = 0x20
     }
-
-
 }

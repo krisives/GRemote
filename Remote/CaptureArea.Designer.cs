@@ -1,6 +1,6 @@
 ﻿namespace GRemote
 {
-    partial class BoundsForm
+    partial class CaptureArea
     {
         /// <summary>
         /// Required designer variable.

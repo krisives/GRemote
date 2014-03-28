@@ -20,22 +20,42 @@ namespace GRemote
         int port;
         bool running;
         VideoDecoder videoDecoder;
+        VideoPreview videoPreview;
 
         public ClientSession(GRemoteDialog gRemote, String address, int port)
         {
             this.gRemote = gRemote;
             this.address = address;
             this.port = port;
+            this.videoPreview = gRemote.VideoPreview;
+        }
+
+        public bool IsRunning
+        {
+            get
+            {
+                lock (this)
+                {
+                    return running;
+                }
+            }
         }
 
         public void StartClient()
         {
-            if (running)
+            if (IsRunning)
             {
                 return;
             }
 
-            running = true;
+            lock (this)
+            {
+                running = true;
+            }
+
+            videoDecoder = new VideoDecoder(gRemote.FFmpeg, 800, 600);
+            videoDecoder.StartDecoding();
+
             readThread = new Thread(new ThreadStart(readThreadMain));
             readThread.Start();
         }
@@ -71,6 +91,7 @@ namespace GRemote
             int packetLength = binaryReader.ReadInt32();
             byte[] buffer = binaryReader.ReadBytes(packetLength);
             videoDecoder.Decode(buffer);
+            videoPreview.RenderDirect(videoDecoder.Buffer);
         }
 
         public void StopClient()

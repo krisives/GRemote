@@ -19,12 +19,30 @@ namespace GRemote
         Graphics g;
         Rectangle leftHalf = new Rectangle();
         Rectangle rightHalf = new Rectangle();
+        int width, height;
 
         public VideoPreview()
         {
             bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
         }
+
+        public void SetSize(int width, int height)
+        {
+            bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, width, height));
+            g = bg.Graphics;
+
+            leftHalf.X = 0;
+            leftHalf.Y = 0;
+            leftHalf.Width = width / 2;
+            leftHalf.Height = height;
+
+            rightHalf.X = leftHalf.Width;
+            rightHalf.Y = 0;
+            rightHalf.Width = leftHalf.Width;
+            rightHalf.Height = height;
+        }
+
 
         public void SetBuffers(Bitmap uncompressedImage, Bitmap compressedImage)
         {
@@ -39,18 +57,7 @@ namespace GRemote
             this.uncompressedImage = uncompressedImage;
             this.compressedImage = compressedImage;
 
-            this.bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, w, h));
-            this.g = bg.Graphics;
-
-            leftHalf.X = 0;
-            leftHalf.Y = 0;
-            leftHalf.Width = w / 2;
-            leftHalf.Height = h;
-
-            rightHalf.X = leftHalf.Width;
-            rightHalf.Y = 0;
-            rightHalf.Width = leftHalf.Width;
-            rightHalf.Height = h;
+            
         }
 
         public PreviewMode PreviewMode
@@ -70,6 +77,7 @@ namespace GRemote
             lock (screen)
             {
                 g.DrawImage(screen, 0, 0);
+                bg.Render();
             }
         }
 

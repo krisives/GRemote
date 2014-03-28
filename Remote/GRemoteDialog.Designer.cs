@@ -54,7 +54,6 @@
             this.splitViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.recordButton = new System.Windows.Forms.ToolStripMenuItem();
             this.selectAreaButton = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,7 +74,6 @@
             // snapshotTimer
             // 
             this.snapshotTimer.Interval = 33;
-            this.snapshotTimer.Tick += new System.EventHandler(this.snapshotTimer_Tick);
             // 
             // menuStrip1
             // 
@@ -114,7 +112,7 @@
             this.joinMenuItem.Name = "joinMenuItem";
             this.joinMenuItem.Size = new System.Drawing.Size(152, 22);
             this.joinMenuItem.Text = "Connect";
-            this.joinMenuItem.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            this.joinMenuItem.Click += new System.EventHandler(this.joinMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
@@ -148,7 +146,6 @@
             this.bitrateToolStripMenuItem,
             this.previewToolStripMenuItem,
             this.toolStripSeparator2,
-            this.recordButton,
             this.selectAreaButton});
             this.videoToolStripMenuItem.Name = "videoToolStripMenuItem";
             this.videoToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
@@ -159,7 +156,7 @@
             this.codecToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.xVidToolStripMenuItem});
             this.codecToolStripMenuItem.Name = "codecToolStripMenuItem";
-            this.codecToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.codecToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.codecToolStripMenuItem.Text = "Codec";
             // 
             // xVidToolStripMenuItem
@@ -178,7 +175,7 @@
             this.toolStripMenuItem3,
             this.toolStripMenuItem4});
             this.resolutionToolStripMenuItem.Name = "resolutionToolStripMenuItem";
-            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.resolutionToolStripMenuItem.Text = "Downscale";
             // 
             // pToolStripMenuItem
@@ -216,7 +213,7 @@
             this.bitrateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.kToolStripMenuItem});
             this.bitrateToolStripMenuItem.Name = "bitrateToolStripMenuItem";
-            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.bitrateToolStripMenuItem.Text = "Bitrate";
             // 
             // kToolStripMenuItem
@@ -235,7 +232,7 @@
             this.splitViewToolStripMenuItem,
             this.noneToolStripMenuItem});
             this.previewToolStripMenuItem.Name = "previewToolStripMenuItem";
-            this.previewToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.previewToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.previewToolStripMenuItem.Text = "Preview";
             // 
             // uncompressedToolStripMenuItem
@@ -271,19 +268,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(146, 6);
-            // 
-            // recordButton
-            // 
-            this.recordButton.Name = "recordButton";
-            this.recordButton.Size = new System.Drawing.Size(149, 22);
-            this.recordButton.Text = "Start Recording";
-            this.recordButton.Click += new System.EventHandler(this.recordButton_Click);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(126, 6);
             // 
             // selectAreaButton
             // 
             this.selectAreaButton.Name = "selectAreaButton";
-            this.selectAreaButton.Size = new System.Drawing.Size(149, 22);
+            this.selectAreaButton.Size = new System.Drawing.Size(129, 22);
             this.selectAreaButton.Text = "Select Area";
             this.selectAreaButton.Click += new System.EventHandler(this.selectAreaButton_Click);
             // 
@@ -302,7 +292,6 @@
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
             this.toolStripMenuItem5.Size = new System.Drawing.Size(163, 22);
             this.toolStripMenuItem5.Text = "Check for Updates";
-            this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
             // 
             // toolStripSeparator3
             // 
@@ -374,7 +363,6 @@
             // playbackTimer
             // 
             this.playbackTimer.Interval = 33;
-            this.playbackTimer.Tick += new System.EventHandler(this.playbackTimer_Tick);
             // 
             // GRemoteDialog
             // 
@@ -424,7 +412,6 @@
         private System.Windows.Forms.ToolStripMenuItem splitViewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem joinMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem recordButton;
         private System.Windows.Forms.ToolStripMenuItem selectAreaButton;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;

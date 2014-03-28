@@ -21,191 +21,168 @@ namespace GRemote
 {
     public partial class GRemoteDialog : Form
     {
-        public static String Version = "0.0.4";
-
-        BoundsForm boundsForm = new BoundsForm();
-
-        volatile bool recording = false;
-        volatile bool playback = false;
-
-        FFMpeg ffmpeg;
+        public static String Version
+        {
+            get
+            {
+                return "0.0.5";
+            }
+        }
 
         VideoCapture videoCapture;
-        VideoEncoder videoEncoder;
-        VideoDecoder videoDecoder;
-
+        CaptureArea boundsForm = new CaptureArea();
+        FFMpeg ffmpeg;
         VirtualInput virtualInput;
         IntPtr targetWindowPtr;
-
         SessionDialog sessionDialog = new SessionDialog();
-        AboutDialog aboutDialog;
         PreferencesDialog prefsDialog = new PreferencesDialog();
-        WebClient client;
-
+        AboutDialog aboutDialog;
         ServerSession serverSession;
         ClientSession clientSession;
+        int lastEncodedBytes = 0;
+        int lastKBps = 0;
 
         public GRemoteDialog()
         {
             ffmpeg = new FFMpeg();
-
-            WebRequest.DefaultWebProxy = null;
-            WebRequest.DefaultCachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            client = new WebClient();
             InitializeComponent();
         }
 
-        // Happens X times per second (FPS)
-        private void snapshotTimer_Tick(object sender, EventArgs e)
+        public bool IsServerRunning
         {
-            if (!recording)
+            get
             {
-                return;
-            }
-
-            // Capture raw screen
-            videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
-            videoCapture.Capture();
-
-            // Pass screen off to encoder (asynchronous)
-            videoEncoder.Encode(videoCapture.Buffer);
-
-            byte[] encodedBuffer;
-
-            while ((encodedBuffer = videoEncoder.Read()) != null)
-            {
-                videoDecoder.Decode(encodedBuffer);
-
-                if (serverSession != null)
-                {
-                    serverSession.AddVideoBuffer(encodedBuffer);
-                }
-            }
-
-            if (WindowState != FormWindowState.Minimized)
-            {
-                //bg.Render();
-                videoPreview.Render();
+                return serverSession != null && serverSession.IsRunning();
             }
         }
 
-        private void playbackTimer_Tick(object sender, EventArgs e)
+        public void ToggleServer()
         {
-            if (!playback)
+            if (IsServerRunning)
             {
-                return;
-            }
-
-            if (WindowState != FormWindowState.Minimized)
-            {
-                videoPreview.RenderDirect(videoDecoder.Buffer);
-                videoPreview.Render();
-            }
-        }
-
-        private void recordButton_Click(object sender, EventArgs e)
-        {
-            ToggleRecording();
-        }
-
-        public void ToggleRecording()
-        {
-            if (recording)
-            {
-                StopRecording();
+                StopServer();
+                hostMenuItem.Text = "Host";
+                joinMenuItem.Enabled = true;
+                hostMenuItem.Enabled = true;
             }
             else
             {
-                StartRecording();
+                StartServer();
+                hostMenuItem.Text = "Stop Server";
+                hostMenuItem.Enabled = true;
+                joinMenuItem.Enabled = false;
             }
         }
 
-        public void StartRecording()
+        public void StartServer()
         {
-            if (recording)
+            sessionDialog.addressBox.Text = "0.0.0.0";
+            sessionDialog.portBox.Text = "9999";
+            sessionDialog.finishButton.Text = "Begin Recording";
+            
+            switch (sessionDialog.ShowDialog())
             {
-                return;
+                case DialogResult.OK:
+                    break;
+                default:
+                    return;
             }
 
-            recording = true;
+            int portNumber;
 
-            int w = boundsForm.Width, h = boundsForm.Height;
+            try
+            {
+                portNumber = int.Parse(sessionDialog.portBox.Text);
+            }
+            catch (Exception e)
+            {
+                portNumber = 9999;
+            }
 
-            recordButton.Text = "Stop Recording";
+            if (videoCapture == null)
+            {
+                videoCapture = new VideoCapture(boundsForm.Width, boundsForm.Height);
+            }
+
+            videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
+            serverSession = new ServerSession(FFmpeg, videoCapture, sessionDialog.addressBox.Text, portNumber);
+            serverSession.Preview = videoPreview;
+            serverSession.StartServer();
             statusLabel.Text = "Recording...";
-
-            //bg = bufferContext.Allocate(videoPreview.CreateGraphics(), new Rectangle(0, 0, w, h));
-            //g = bg.Graphics;
-
-            //targetWindowPtr =  boundsForm.TargetWindow;
-            //Process gameProcess = Process.GetProcessesByName("LANoire")[0];
-            //targetWindowPtr = gameProcess.MainWindowHandle;
-
-            videoCapture = new VideoCapture(w, h);
-            videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
-
-            videoEncoder = new VideoEncoder(ffmpeg, w, h);
-            videoEncoder.FileRecordingEnabled = prefsDialog.enableSave.Checked;
-            videoEncoder.FileRecordingPath = prefsDialog.saveFilename.Text;
-            videoEncoder.StartEncoding();
-
-            videoDecoder = new VideoDecoder(ffmpeg, w, h);
-            videoDecoder.StartDecoding();
-
-            virtualInput = new VirtualInput(targetWindowPtr);
-
-            videoPreview.SetBuffers(videoCapture.Buffer, videoDecoder.Buffer);
-
-            if (clientSession != null) {
-                clientSession.SetDecoder(videoDecoder);
-            }
-
-            bandwidthTimer.Start();
-            snapshotTimer.Start();
         }
 
-        public void RestartStream()
+        public void StopServer()
         {
-            /*
-            videoEncoder.StopEncoding();
-            videoDecoder.StopDecoding();
-
-            videoEncoder.StartEncoding();
-            videoDecoder.StopDecoding();
-            */
-            StopRecording();
-            StartRecording();
-        }
-
-        public void StopRecording()
-        {
-            if (!recording)
+            if (serverSession != null)
             {
-                return;
+                serverSession.StopServer();
             }
 
-            recording = false;
-            snapshotTimer.Stop();
-            bandwidthTimer.Stop();
-            videoEncoder.StopEncoding();
-            videoDecoder.StopDecoding();
-
-            recordButton.Text = "Start";
             statusLabel.Text = "Not Recording";
-
             videoPreview.Refresh();
         }
 
-        private void previewPanel_Paint(object sender, PaintEventArgs e)
+        public void StartClient()
         {
+            if (clientSession != null)
+            {
+                clientSession.StopClient();
+                clientSession = null;
+            }
 
+            sessionDialog.addressBox.Text = "";
+            sessionDialog.portBox.Text = "9999";
+            sessionDialog.finishButton.Text = "Connect";
+
+            switch (sessionDialog.ShowDialog())
+            {
+                case DialogResult.OK:
+                    break;
+                default:
+                    return;
+            }
+
+            int portNumber;
+
+            try
+            {
+                portNumber = int.Parse(sessionDialog.portBox.Text);
+            }
+            catch (Exception e)
+            {
+                portNumber = 9999;
+            }
+
+            videoPreview.SetSize(800, 600);
+            clientSession = new ClientSession(this, sessionDialog.addressBox.Text, portNumber);
+            clientSession.StartClient();
         }
 
-        private void enabledToolStripMenuItem_Click(object sender, EventArgs e)
+        public void StopClient()
         {
+            if (clientSession != null)
+            {
+                clientSession.StopClient();
+            }
+        }
 
+        public void Stop()
+        {
+            if (videoCapture != null)
+            {
+                videoCapture.StopCapturing();
+            }
+
+            StopServer();
+            StopClient();
+        }
+
+        public FFMpeg FFmpeg
+        {
+            get
+            {
+                return ffmpeg;
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -213,17 +190,15 @@ namespace GRemote
             Close();
         }
 
-        int lastEncodedBytes = 0;
-        int lastKBps = 0;
+
 
         private void bandwidthTimer_Tick(object sender, EventArgs e)
         {
-            if (recording == false || videoEncoder == null)
+            /*
+            if (IsServerRunning)
             {
-                return;
+                
             }
-
-            virtualInput.TriggerKey();
 
             int encodedBytes = videoEncoder.TotalBytes;
             int delta = (encodedBytes - lastEncodedBytes);
@@ -236,6 +211,7 @@ namespace GRemote
 
             lastKBps = KBps;
             lastEncodedBytes = encodedBytes;
+            */
         }
 
         private void selectAreaButton_Click(object sender, EventArgs e)
@@ -255,7 +231,7 @@ namespace GRemote
                 aboutDialog = new AboutDialog();
             }
 
-            aboutDialog.Show();
+            aboutDialog.ShowDialog(this);
         }
 
         private void pToolStripMenuItem_Click(object sender, EventArgs e)
@@ -273,103 +249,14 @@ namespace GRemote
             prefsDialog.Show();
         }
 
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            Uri uri = new Uri("https://raw.githubusercontent.com:443/krisives/GRemote/master/VERSION.txt");
-
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadStringCompleted);
-            client.DownloadStringAsync(uri);
-        }
-
-        void client_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            String version = e.Result.Trim();
-            Console.WriteLine(version);
-
-            if (version != GRemoteDialog.Version)
-            {
-                MessageBox.Show("Version " + version + " is available!");
-            }
-        }
-
         private void hostMenuItem_Click(object sender, EventArgs e)
         {
-            ToggleHosting();
+            ToggleServer();
         }
 
-        public void ToggleHosting()
+        private void joinMenuItem_Click(object sender, EventArgs e)
         {
-            if (serverSession == null)
-            {
-                HostSession();
-            }
-            else
-            {
-                serverSession.StopServer();
-                serverSession = null;
-                hostMenuItem.Text = "Host";
-            }
-        }
-
-        public void TogglePlayback()
-        {
-            if (clientSession == null)
-            {
-                JoinSession();
-            }
-            else
-            {
-                StopPlayback();
-            }
-        }
-
-        public void StopPlayback()
-        {
-            playback = false;
-            clientSession.StopClient();
-            clientSession = null;
-            joinMenuItem.Text = "Connect";
-            playbackTimer.Stop();
-        }
-
-        public void JoinSession()
-        {
-            sessionDialog.addressBox.Text = "";
-            sessionDialog.button1.Text = "Join Session";
-            sessionDialog.Text = "Join Session";
-            sessionDialog.ShowDialog(this);
-
-            int w = boundsForm.Width;
-            int h = boundsForm.Height;
-
-            videoDecoder = new VideoDecoder(ffmpeg, w, h);
-            videoDecoder.StartDecoding();
-
-            joinMenuItem.Text = "Disconnect";
-            clientSession = new ClientSession(this, sessionDialog.addressBox.Text, int.Parse(sessionDialog.portBox.Text));
-
-            playback = true;
-            clientSession.StartClient();
-            playbackTimer.Start();
-        }
-
-        public void HostSession()
-        {
-            sessionDialog.addressBox.Text = "0.0.0.0";
-            sessionDialog.button1.Text = "Begin Hosting";
-            sessionDialog.Text = "Host Session";
-            sessionDialog.ShowDialog(this);
-
-            hostMenuItem.Text = "Stop Hosting";
-            serverSession = new ServerSession(this, sessionDialog.addressBox.Text, int.Parse(sessionDialog.portBox.Text));
-            serverSession.StartServer();
-            
-        }
-
-
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            TogglePlayback();
+            StartClient();
         }
 
         public void SetPreviewMode(PreviewMode mode)
@@ -435,11 +322,14 @@ namespace GRemote
 
         private void GRemoteDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
-            StopRecording();
+            Stop();
+        }
 
-            if (serverSession != null)
+        public VideoPreview VideoPreview
+        {
+            get
             {
-                serverSession.StopServer();
+                return videoPreview;
             }
         }
     }

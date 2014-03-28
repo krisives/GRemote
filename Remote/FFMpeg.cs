@@ -6,7 +6,7 @@ using System.IO;
 
 namespace GRemote
 {
-    class FFMpeg
+    public class FFMpeg
     {
         String path;
 

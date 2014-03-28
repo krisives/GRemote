@@ -17,7 +17,7 @@ namespace GRemote
         int width;
         int height;
         Rectangle lockBounds;
-        bool started = false;
+        volatile bool started = false;
         BufferPool buffers = new BufferPool();
         BufferPool encodedBuffers = new BufferPool();
         Process process;
@@ -161,6 +161,11 @@ namespace GRemote
 
         public void Encode(byte[] buffer)
         {
+            if (!started)
+            {
+                return;
+            }
+
             // Add the buffer to the pool to write to FFMpeg
             buffers.Add(buffer);
         }
@@ -179,12 +184,12 @@ namespace GRemote
             process.StandardOutput.Close();
             process.Close();
 
-            Thread.Sleep(1000);
+          //  Thread.Sleep(1000);
 
-            if (!process.HasExited)
-            {
-                process.Kill();
-            }
+            //if (process != null) //&& !process.HasExited)
+           // {
+           //     process.Kill();
+           // }
 
             process = null;
         }
@@ -225,8 +230,16 @@ namespace GRemote
         {
             while (started)
             {
-                buffers.Wait();
-                writeBuffer();
+                try
+                {
+                    buffers.Wait();
+                    writeBuffer();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
             }
         }
 
@@ -251,8 +264,16 @@ namespace GRemote
 
             while (started)
             {
-                readCount = stream.Read(readBuffer, 0, readBuffer.Length);
-                
+                try
+                {
+                    readCount = stream.Read(readBuffer, 0, readBuffer.Length);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
+
                 if (readCount <= 0)
                 {
                     continue;

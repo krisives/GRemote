@@ -10,9 +10,9 @@ using System.Runtime.InteropServices;
 
 namespace GRemote
 {
-    public partial class BoundsForm : Form
+    public partial class CaptureArea : Form
     {
-        public BoundsForm()
+        public CaptureArea()
         {
             InitializeComponent();
         }

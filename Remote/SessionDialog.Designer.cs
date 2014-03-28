@@ -32,7 +32,7 @@
             this.addressBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.passwordBox = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.finishButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.portBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
@@ -70,15 +70,15 @@
             this.passwordBox.Size = new System.Drawing.Size(236, 20);
             this.passwordBox.TabIndex = 3;
             // 
-            // button1
+            // finishButton
             // 
-            this.button1.Location = new System.Drawing.Point(223, 58);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(85, 23);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "Begin Hosting";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.finishButton.Location = new System.Drawing.Point(223, 58);
+            this.finishButton.Name = "finishButton";
+            this.finishButton.Size = new System.Drawing.Size(85, 23);
+            this.finishButton.TabIndex = 4;
+            this.finishButton.Text = "Begin Hosting";
+            this.finishButton.UseVisualStyleBackColor = true;
+            this.finishButton.Click += new System.EventHandler(this.button1_Click);
             // 
             // label3
             // 
@@ -104,7 +104,7 @@
             this.ClientSize = new System.Drawing.Size(320, 92);
             this.Controls.Add(this.portBox);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.finishButton);
             this.Controls.Add(this.passwordBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.addressBox);
@@ -126,7 +126,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        public System.Windows.Forms.Button button1;
+        public System.Windows.Forms.Button finishButton;
         public System.Windows.Forms.TextBox addressBox;
         public System.Windows.Forms.TextBox passwordBox;
         public System.Windows.Forms.TextBox portBox;

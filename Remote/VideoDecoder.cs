@@ -13,7 +13,7 @@ namespace GRemote
 {
     class VideoDecoder
     {
-        bool started;
+        volatile bool started;
         FFMpeg ffmpeg;
         Process process;
         Thread readThread;
@@ -34,8 +34,6 @@ namespace GRemote
             this.height = height;
             this.lockBounds = new Rectangle(0, 0, width, height);
             this.decodeBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            Console.WriteLine("{0}x{1}", width, height);
-
         }
 
         public void StartDecoding()
@@ -117,12 +115,12 @@ namespace GRemote
             process.StandardOutput.Close();
             process.Close();
 
-            Thread.Sleep(1000);
+           // Thread.Sleep(1000);
 
-            if (!process.HasExited)
-            {
-                process.Kill();
-            }
+            //if (!process.HasExited)
+           // {
+             //   process.Kill();
+           // }
 
             process = null;
         }
@@ -149,7 +147,7 @@ namespace GRemote
                 if (pos >= frameSize)
                 {
                    // decodedBuffers.Add(readBuffer);
-
+                    Console.WriteLine("BUFFER");
 
                     //Console.WriteLine("--- {0} ----", buffer.Length);
                     lock (decodeBuffer)

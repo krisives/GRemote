@@ -13,6 +13,7 @@ namespace GRemote
 {
     class VideoCapture
     {
+        bool capturing;
         int x, y;
         int width;
         int height;
@@ -21,6 +22,8 @@ namespace GRemote
         Bitmap captureBuffer;
         Graphics captureGraphics;
         Rectangle bounds, lockBounds;
+        Thread captureThread;
+        SnapshotListener listener;
 
         public VideoCapture(int width, int height)
         {
@@ -44,6 +47,16 @@ namespace GRemote
             captureGraphics = Graphics.FromImage(captureBuffer);
         }
 
+        public delegate void SnapshotListener();
+
+        public SnapshotListener Listener
+        {
+            set
+            {
+                listener = value;
+            }
+        }
+
         public void SetCapturePos(int x, int y)
         {
             if (x < 0 || y < 0)
@@ -57,16 +70,102 @@ namespace GRemote
             this.bounds.Y = y;
         }
 
-        public void Capture()
-        {
-            captureGraphics.CopyFromScreen(x, y, 0, 0, size);
-        }
-
         public Bitmap Buffer
         {
             get
             {
                 return captureBuffer;
+            }
+        }
+
+        public int Width
+        {
+            get
+            {
+                return width;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return height;
+            }
+        }
+
+        public void StartCapturing()
+        {
+            if (IsCapturing())
+            {
+                return;
+            }
+
+            lock (this)
+            {
+                capturing = true;
+            }
+
+            captureThread = new Thread(new ThreadStart(captureThreadMain));
+            captureThread.Start();
+        }
+
+        public void StopCapturing()
+        {
+            if (!capturing)
+            {
+                return;
+            }
+
+            lock (this)
+            {
+                capturing = false;
+            }
+
+            captureThread = null;
+        }
+
+        public bool IsCapturing()
+        {
+            lock (this)
+            {
+                return capturing;
+            }
+        }
+
+        protected void captureThreadMain()
+        {
+            int frameDelay = (10000 / 30);
+            long last = DateTime.Now.Ticks;
+            long target;
+            long now;
+            int distance;
+
+            while (IsCapturing())
+            {
+                captureGraphics.CopyFromScreen(x, y, 0, 0, size);
+
+                if (listener != null)
+                {
+                    listener();
+                }
+
+                now = DateTime.Now.Ticks;
+                target = last + frameDelay;
+                distance = (int)(now - target);
+                last = now;
+
+                if (distance > frameDelay)
+                {
+                    distance = frameDelay;
+                }
+                else if (distance <= 0)
+                {
+                    continue;
+                }
+
+                //Console.WriteLine(distance / 10);
+                Thread.Sleep(distance / 10);
             }
         }
     }
