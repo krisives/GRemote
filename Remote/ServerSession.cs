@@ -96,7 +96,7 @@ namespace GRemote
 
         public void StartServer()
         {
-            if (IsRunning())
+            if (IsRunning)
             {
                 return;
             }
@@ -164,7 +164,7 @@ namespace GRemote
         {
             byte[] encodedVideoBuffer;
 
-            if (!IsRunning())
+            if (!IsRunning)
             {
                 return;
             }
@@ -187,17 +187,19 @@ namespace GRemote
             }
         }
 
-        public bool IsRunning()
+        public bool IsRunning
         {
-            lock (this)
-            {
-                return running;
+            get {
+                lock (this)
+                {
+                    return running;
+                }
             }
         }
 
         public void StopServer()
         {
-            if (!IsRunning())
+            if (!IsRunning)
             {
                 return;
             }
@@ -267,7 +269,7 @@ namespace GRemote
 
         protected void AddVideoBuffer(byte[] buffer)
         {
-            if (!IsRunning() || clients.Count <= 0) {
+            if (!IsRunning || clients.Count <= 0) {
                 return;
             }
 
@@ -354,6 +356,12 @@ namespace GRemote
             settings.EncoderSettings.codec = codec;
             RestartStream();
 
+        }
+
+        public void SetBitrate(int kbps)
+        {
+            settings.EncoderSettings.videoRate = kbps;
+            RestartStream();
         }
     }
 

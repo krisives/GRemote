@@ -56,8 +56,6 @@ namespace GRemote
 
             this.uncompressedImage = uncompressedImage;
             this.compressedImage = compressedImage;
-
-            
         }
 
         public PreviewMode PreviewMode
@@ -69,11 +67,17 @@ namespace GRemote
             set
             {
                 previewMode = value;
+                Refresh();
             }
         }
 
         public void RenderDirect(Bitmap screen)
         {
+            if (previewMode == PreviewMode.NONE)
+            {
+                return;
+            }
+
             lock (screen)
             {
                 g.DrawImage(screen, 0, 0);

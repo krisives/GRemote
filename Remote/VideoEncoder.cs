@@ -50,6 +50,17 @@ namespace GRemote
             this.lockBounds = new Rectangle(0, 0, width, height);
         }
 
+        public bool IsEncoding
+        {
+            get
+            {
+                lock (this)
+                {
+                    return started;
+                }
+            }
+        }
+
         public Boolean FileRecordingEnabled
         {
             get
@@ -88,14 +99,23 @@ namespace GRemote
 
         public void StartEncoding(EncoderSettings settings)
         {
-            if (started)
+            if (IsEncoding)
             {
                 return;
             }
 
-            started = true;
+            lock (this)
+            {
+                started = true;
+            }
+
             totalBytes = 0;
             buffers.Clear();
+
+            if (enableFileRecording)
+            {
+                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
+            }
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments(settings);
@@ -109,11 +129,6 @@ namespace GRemote
             process.Start();
 
             bufferedStream = new BufferedStream(process.StandardInput.BaseStream);
-
-            if (enableFileRecording)
-            {
-                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
-            }
 
             readThread = new Thread(new ThreadStart(readThreadMain));
             writeThread = new Thread(new ThreadStart(writeThreadMain));
@@ -129,19 +144,17 @@ namespace GRemote
             String args = "";
 
             args += " -y ";
-            //args += " -t 01:00:00 ";
             args += " -f rawvideo ";
             args += " -pixel_format bgr24 ";
-            args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
-            args += " -framerate 30 ";
+            args += String.Format(" -video_size {0}x{1} ", width, height);
+            args += " -framerate " + settings.framerate;
             args += " -i - ";
-            //args += " -vframes 99999 ";
-            args += " -vb 900K ";
-            //args += " -c:v libxvid ";
+            args += String.Format(" -vb {0}K ", settings.videoRate);
             args += " -c:v " + settings.codec;
             args += "  -tune zerolatency ";
-            args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
-            args += " -f avi ";
+            args += String.Format(" -video_size {0}x{1} ", width, height);
+            args += " -f mpegts ";
+            args += " -bufsize 2M -g 300 -ps 4096 ";
             args += " - ";
 
             return args;
@@ -177,25 +190,31 @@ namespace GRemote
 
         public void StopEncoding()
         {
-            if (!started)
+            if (!IsEncoding)
             {
                 return;
             }
 
-            started = false;
+            lock (this)
+            {
+                started = false;
+            }
+
             process.StandardInput.Close();
             process.StandardError.Close();
-            process.StandardOutput.Close();
-            process.Close();
-           // process = null;
+            process.WaitForExit();
+            //process.StandardOutput.Close();
+            //process.Close();
+            //process = null;
 
-           
+            buffers.Pulse();
+            encodedBuffers.Pulse();
 
-            buffers.Clear();
-            buffers = new BufferPool();
+            //buffers.Clear();
+            //buffers = new BufferPool();
 
-            encodedBuffers.Clear();
-            encodedBuffers = new BufferPool();
+            //encodedBuffers.Clear();
+            //encodedBuffers = new BufferPool();
         }
 
         public byte[] Read()
@@ -259,21 +278,25 @@ namespace GRemote
             bufferedStream.Write(nextBuffer, 0, nextBuffer.Length);
         }
 
+        /// <summary>
+        /// Reads the encoded output of FFMpeg.
+        /// </summary>
         public void readThreadMain()
         {
             // Encoded data is read from FFMPeg in 16K chunks
             byte[] readBuffer = new byte[1024 * 16];
             int readCount;
-            int pos = 0;
+            //int pos = 0;
             Stream stream = new BufferedStream(process.StandardOutput.BaseStream);
             BufferPool encodedBufers = this.encodedBuffers;
+            Stream fout = this.fout;
 
-            while (started)
+            while (IsEncoding)
             {
                 try
                 {
                     // Read encoded output of FFMpeg
-                    readCount = stream.Read(readBuffer, pos, readBuffer.Length - pos);
+                    readCount = stream.Read(readBuffer, 0, readBuffer.Length);
                 }
                 catch (Exception e)
                 {
@@ -286,16 +309,16 @@ namespace GRemote
                     continue;
                 }
 
-                pos += readCount;
+                //pos += readCount;
 
-                if (pos < readBuffer.Length)
-                {
-                    // Process 16K data at a time from FFMpeg
-                    continue;
-                }
+                //if (pos < readBuffer.Length)
+                //{
+                //    // Process 16K data at a time from FFMpeg
+                //    continue;
+                //}
 
-                readCount = pos;
-                pos = 0;
+                //readCount = pos;
+                //pos = 0;
 
                 byte[] resized = new byte[readCount];
                 Array.Copy(readBuffer, resized, readCount);
@@ -326,6 +349,8 @@ namespace GRemote
     public class EncoderSettings
     {
         public String codec = "libx264";
+        public int videoRate = 900;
+        public int framerate = 30;
     }
 
 }

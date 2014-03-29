@@ -78,6 +78,12 @@
       <DependentUpon>CaptureArea.cs</DependentUpon>
     </Compile>
     <Compile Include="ClientSession.cs" />
+    <Compile Include="CustomBitrateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomBitrateForm.Designer.cs">
+      <DependentUpon>CustomBitrateForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="FFMpeg.cs" />
     <Compile Include="GRemoteDialog.cs">
       <SubType>Form</SubType>
@@ -119,6 +125,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CaptureArea.resx">
       <DependentUpon>CaptureArea.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomBitrateForm.resx">
+      <DependentUpon>CustomBitrateForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GRemoteDialog.resx">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>

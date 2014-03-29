@@ -25,7 +25,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.6";
+                return "0.0.7";
             }
         }
 
@@ -55,13 +55,24 @@ namespace GRemote
         }
 
         /// <summary>
-        /// Checks if the server has been created and is running.
+        /// Checks if the server has been started and is running.
         /// </summary>
         public bool IsServerRunning
         {
             get
             {
-                return serverSession != null && serverSession.IsRunning();
+                return serverSession != null && serverSession.IsRunning;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the client has been started and is running.
+        /// </summary>
+        public bool IsClientRunning
+        {
+            get
+            {
+                return clientSession != null && clientSession.IsRunning;
             }
         }
 
@@ -184,6 +195,9 @@ namespace GRemote
             clientSession = new ClientSession(this, sessionDialog.addressBox.Text, portNumber);
             clientSession.StartClient();
             statusLabel.Text = "Connecting...";
+            recordItem.Enabled = false;
+            joinMenuItem.Text = "Disconnect";
+            Refresh();
         }
 
         /// <summary>
@@ -197,6 +211,8 @@ namespace GRemote
                 clientSession.StopClient();
             }
 
+            recordItem.Enabled = true;
+            joinMenuItem.Text = "Connect";
             Refresh();
         }
 
@@ -343,14 +359,44 @@ namespace GRemote
             }
         }
 
+        public void SetBitrate(int kbps)
+        {
+            if (IsServerRunning)
+            {
+                serverSession.SetBitrate(kbps);
+            }
+            else
+            {
+                serverSettings.EncoderSettings.videoRate = kbps;
+            }
+
+            foreach (ToolStripMenuItem item in bitrateItem.DropDownItems)
+            {
+                item.Checked = int.Parse(item.Tag as String) == kbps;
+            }
+        }
+
+        public void SetBitrate(String str)
+        {
+            SetBitrate(int.Parse(str));
+        }
+
         public void UpdateBandwidth()
         {
-            if (!IsServerRunning)
+            int encodedBytes;
+
+            if (IsServerRunning)
+            {
+                encodedBytes = serverSession.Encoder.TotalBytes;
+            } else if (IsClientRunning)
+            {
+                encodedBytes = clientSession.Decoder.TotalBytesDecoded;
+            }
+            else
             {
                 return;
             }
-
-            int encodedBytes = serverSession.Encoder.TotalBytes;
+            
             int delta = (encodedBytes - lastEncodedBytes);
             int bytesPerSecond = delta * (1000 / bandwidthTimer.Interval);
             int KBps = (bytesPerSecond / 1024);
@@ -483,6 +529,19 @@ namespace GRemote
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowAboutDialog();
+        }
+
+        private void bitrateItemCustom_Click(object sender, EventArgs e)
+        {
+            CustomBitrateForm bitrateForm = new CustomBitrateForm();
+
+            bitrateForm.ShowDialog(this);
+            SetBitrate(bitrateForm.KilobitsPerSecond);
+        }
+
+        private void bitrateItem_Click(object sender, EventArgs e)
+        {
+            SetBitrate((sender as ToolStripMenuItem).Tag as String);
         }
     }
 }

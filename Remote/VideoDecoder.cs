@@ -27,6 +27,7 @@ namespace GRemote
         Rectangle lockBounds;
         Bitmap decodeBuffer;
         int totalBytesDecoded = 0;
+        VideoPreview videoPreview;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
         {
@@ -35,6 +36,18 @@ namespace GRemote
             this.height = height;
             this.lockBounds = new Rectangle(0, 0, width, height);
             this.decodeBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+        }
+
+        public VideoPreview VideoPreview
+        {
+            get
+            {
+                return videoPreview;
+            }
+            set
+            {
+                videoPreview = value;
+            }
         }
 
         public int TotalBytesDecoded
@@ -99,7 +112,7 @@ namespace GRemote
         {
             String args = "";
 
-            args += " -f avi ";
+            args += " -f mpegts ";
             args += " -i - ";
             args += " -f rawvideo ";
             args += " -c:v rawvideo ";
@@ -125,6 +138,10 @@ namespace GRemote
 
         }
 
+        /// <summary>
+        /// Stops the decoding process. If the decoder is not running
+        /// this does nothing.
+        /// </summary>
         public void StopDecoding()
         {
             if (!IsDecoding)
@@ -171,7 +188,7 @@ namespace GRemote
         }
 
         /// <summary>
-        /// Reads encoded data buffers from FFMpeg
+        /// Reads decoded data buffers from FFMpeg
         /// </summary>
         public void readThreadMain()
         {
@@ -195,7 +212,6 @@ namespace GRemote
                     break;
                 }
 
-                totalBytesDecoded += bytesRead;
                 pos += bytesRead;
 
                 if (pos >= frameSize)
@@ -207,14 +223,20 @@ namespace GRemote
                         decodeBuffer.UnlockBits(data);
                     }
 
-                    readBuffer = new byte[frameSize];
+                    if (videoPreview != null)
+                    {
+
+                        videoPreview.RenderDirect(decodeBuffer);
+                    }
+
+                    //readBuffer = new byte[frameSize];
                     pos = 0;
                 }
             }
         }
 
         /// <summary>
-        /// Writes raw bitmap buffer data to FFMpeg
+        /// Writes encoded buffers to FFMpeg
         /// </summary>
         public void writeThreadMain()
         {
@@ -229,6 +251,8 @@ namespace GRemote
                 {
                     continue;
                 }
+
+                totalBytesDecoded += nextBuffer.Length;
 
                 try
                 {
