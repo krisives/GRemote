@@ -48,11 +48,12 @@ namespace GRemote
 
         VideoPreview videoPreview;
 
-        EncoderSettings encoderSettings = new EncoderSettings();
+        EncoderSettings encoderSettings;// = new EncoderSettings();
 
-        public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, String address, int port)
+        public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, String address, int port, EncoderSettings encoderSettings)
         {
             this.ffmpeg = ffmpeg;
+            this.encoderSettings = encoderSettings;
             this.videoCapture = videoCapture;
             this.address = address;
             this.port = port;
@@ -60,6 +61,14 @@ namespace GRemote
             headerBuffer = new byte[1024];
             headerStream = new MemoryStream(headerBuffer, 0, 1024);
             headerBinary = new BinaryWriter(headerStream);
+        }
+
+        public EncoderSettings EncoderSettings
+        {
+            get
+            {
+                return encoderSettings;
+            }
         }
 
         public VideoPreview Preview

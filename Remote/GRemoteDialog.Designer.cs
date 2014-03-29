@@ -39,16 +39,22 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.codecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.codecItem = new System.Windows.Forms.ToolStripMenuItem();
             this.x264Item = new System.Windows.Forms.ToolStripMenuItem();
             this.xvidItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wmv1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wmv2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.theoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resolutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.bitrateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.kToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.kbps75KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.kbps35KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.previewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uncompressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,12 +74,6 @@
             this.bandwidthLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
             this.videoPreview = new GRemote.VideoPreview();
-            this.wmv1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.wmv2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.theoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.kbps75KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.kbps35KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -148,7 +148,7 @@
             // videoToolStripMenuItem
             // 
             this.videoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.codecToolStripMenuItem,
+            this.codecItem,
             this.resolutionToolStripMenuItem,
             this.bitrateToolStripMenuItem,
             this.previewToolStripMenuItem,
@@ -158,17 +158,17 @@
             this.videoToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.videoToolStripMenuItem.Text = "Record";
             // 
-            // codecToolStripMenuItem
+            // codecItem
             // 
-            this.codecToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.codecItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.x264Item,
             this.xvidItem,
             this.wmv1ToolStripMenuItem,
             this.wmv2ToolStripMenuItem,
             this.theoraToolStripMenuItem});
-            this.codecToolStripMenuItem.Name = "codecToolStripMenuItem";
-            this.codecToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.codecToolStripMenuItem.Text = "Codec";
+            this.codecItem.Name = "codecItem";
+            this.codecItem.Size = new System.Drawing.Size(152, 22);
+            this.codecItem.Text = "Codec";
             // 
             // x264Item
             // 
@@ -176,15 +176,41 @@
             this.x264Item.CheckState = System.Windows.Forms.CheckState.Checked;
             this.x264Item.Name = "x264Item";
             this.x264Item.Size = new System.Drawing.Size(152, 22);
+            this.x264Item.Tag = "libx264";
             this.x264Item.Text = "x264";
-            this.x264Item.Click += new System.EventHandler(this.x264Item_Click);
+            this.x264Item.Click += new System.EventHandler(this.codecItem_Click);
             // 
             // xvidItem
             // 
             this.xvidItem.Name = "xvidItem";
             this.xvidItem.Size = new System.Drawing.Size(152, 22);
+            this.xvidItem.Tag = "libxvid";
             this.xvidItem.Text = "xvid";
-            this.xvidItem.Click += new System.EventHandler(this.xvidItem_Click);
+            this.xvidItem.Click += new System.EventHandler(this.codecItem_Click);
+            // 
+            // wmv1ToolStripMenuItem
+            // 
+            this.wmv1ToolStripMenuItem.Name = "wmv1ToolStripMenuItem";
+            this.wmv1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv1ToolStripMenuItem.Tag = "wmv1";
+            this.wmv1ToolStripMenuItem.Text = "wmv1";
+            this.wmv1ToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
+            // 
+            // wmv2ToolStripMenuItem
+            // 
+            this.wmv2ToolStripMenuItem.Name = "wmv2ToolStripMenuItem";
+            this.wmv2ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv2ToolStripMenuItem.Tag = "wmv2";
+            this.wmv2ToolStripMenuItem.Text = "wmv2";
+            this.wmv2ToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
+            // 
+            // theoraToolStripMenuItem
+            // 
+            this.theoraToolStripMenuItem.Name = "theoraToolStripMenuItem";
+            this.theoraToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.theoraToolStripMenuItem.Tag = "theora";
+            this.theoraToolStripMenuItem.Text = "theora";
+            this.theoraToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
             // 
             // resolutionToolStripMenuItem
             // 
@@ -202,7 +228,7 @@
             this.pToolStripMenuItem.Checked = true;
             this.pToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pToolStripMenuItem.Name = "pToolStripMenuItem";
-            this.pToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
             this.pToolStripMenuItem.Text = "None";
             this.pToolStripMenuItem.Click += new System.EventHandler(this.pToolStripMenuItem_Click);
             // 
@@ -210,21 +236,21 @@
             // 
             this.toolStripMenuItem2.Enabled = false;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(99, 22);
             this.toolStripMenuItem2.Text = "480";
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Enabled = false;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(99, 22);
             this.toolStripMenuItem3.Text = "720";
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Enabled = false;
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(99, 22);
             this.toolStripMenuItem4.Text = "1080";
             // 
             // bitrateToolStripMenuItem
@@ -238,6 +264,12 @@
             this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.bitrateToolStripMenuItem.Text = "Bitrate";
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
+            this.toolStripMenuItem1.Text = "1.2 Mbps (150 KB/s)";
+            // 
             // kToolStripMenuItem
             // 
             this.kToolStripMenuItem.Checked = true;
@@ -245,6 +277,18 @@
             this.kToolStripMenuItem.Name = "kToolStripMenuItem";
             this.kToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.kToolStripMenuItem.Text = "900 Kbps (112 KB/s)";
+            // 
+            // kbps75KBsToolStripMenuItem
+            // 
+            this.kbps75KBsToolStripMenuItem.Name = "kbps75KBsToolStripMenuItem";
+            this.kbps75KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.kbps75KBsToolStripMenuItem.Text = "600 Kbps (75 KB/s)";
+            // 
+            // kbps35KBsToolStripMenuItem
+            // 
+            this.kbps35KBsToolStripMenuItem.Name = "kbps35KBsToolStripMenuItem";
+            this.kbps35KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.kbps35KBsToolStripMenuItem.Text = "300 Kbps (38 KB/s)";
             // 
             // previewToolStripMenuItem
             // 
@@ -260,7 +304,7 @@
             // uncompressedToolStripMenuItem
             // 
             this.uncompressedToolStripMenuItem.Name = "uncompressedToolStripMenuItem";
-            this.uncompressedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.uncompressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.uncompressedToolStripMenuItem.Text = "Uncompressed";
             this.uncompressedToolStripMenuItem.Click += new System.EventHandler(this.uncompressedToolStripMenuItem_Click);
             // 
@@ -269,21 +313,21 @@
             this.compressedToolStripMenuItem.Checked = true;
             this.compressedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.compressedToolStripMenuItem.Name = "compressedToolStripMenuItem";
-            this.compressedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.compressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.compressedToolStripMenuItem.Text = "Compressed";
             this.compressedToolStripMenuItem.Click += new System.EventHandler(this.compressedToolStripMenuItem_Click);
             // 
             // splitViewToolStripMenuItem
             // 
             this.splitViewToolStripMenuItem.Name = "splitViewToolStripMenuItem";
-            this.splitViewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.splitViewToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.splitViewToolStripMenuItem.Text = "Split View";
             this.splitViewToolStripMenuItem.Click += new System.EventHandler(this.splitViewToolStripMenuItem_Click);
             // 
             // noneToolStripMenuItem
             // 
             this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.noneToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.noneToolStripMenuItem.Text = "None";
             this.noneToolStripMenuItem.Click += new System.EventHandler(this.noneToolStripMenuItem_Click);
             // 
@@ -387,42 +431,6 @@
             this.videoPreview.Size = new System.Drawing.Size(792, 521);
             this.videoPreview.TabIndex = 7;
             // 
-            // wmv1ToolStripMenuItem
-            // 
-            this.wmv1ToolStripMenuItem.Name = "wmv1ToolStripMenuItem";
-            this.wmv1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.wmv1ToolStripMenuItem.Text = "wmv1";
-            // 
-            // wmv2ToolStripMenuItem
-            // 
-            this.wmv2ToolStripMenuItem.Name = "wmv2ToolStripMenuItem";
-            this.wmv2ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.wmv2ToolStripMenuItem.Text = "wmv2";
-            // 
-            // theoraToolStripMenuItem
-            // 
-            this.theoraToolStripMenuItem.Name = "theoraToolStripMenuItem";
-            this.theoraToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.theoraToolStripMenuItem.Text = "theora";
-            // 
-            // kbps75KBsToolStripMenuItem
-            // 
-            this.kbps75KBsToolStripMenuItem.Name = "kbps75KBsToolStripMenuItem";
-            this.kbps75KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.kbps75KBsToolStripMenuItem.Text = "600 Kbps (75 KB/s)";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
-            this.toolStripMenuItem1.Text = "1.2 Mbps (150 KB/s)";
-            // 
-            // kbps35KBsToolStripMenuItem
-            // 
-            this.kbps35KBsToolStripMenuItem.Name = "kbps35KBsToolStripMenuItem";
-            this.kbps35KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.kbps35KBsToolStripMenuItem.Text = "300 Kbps (38 KB/s)";
-            // 
             // GRemoteDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -454,7 +462,7 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem videoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem codecToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem codecItem;
         private System.Windows.Forms.ToolStripMenuItem xvidItem;
         private System.Windows.Forms.ToolStripMenuItem resolutionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pToolStripMenuItem;

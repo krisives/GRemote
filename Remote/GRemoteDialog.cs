@@ -40,6 +40,8 @@ namespace GRemote
         ServerSession serverSession;
         ClientSession clientSession;
         UpdateChecker updateChecker;
+        EncoderSettings encoderSettings = new EncoderSettings();
+
         int lastEncodedBytes = 0;
         int lastKBps = 0;
 
@@ -111,7 +113,7 @@ namespace GRemote
             }
 
             videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
-            serverSession = new ServerSession(FFmpeg, videoCapture, sessionDialog.addressBox.Text, portNumber);
+            serverSession = new ServerSession(FFmpeg, videoCapture, sessionDialog.addressBox.Text, portNumber, encoderSettings);
             serverSession.Preview = videoPreview;
             serverSession.StartServer();
             statusLabel.Text = "Recording...";
@@ -366,9 +368,37 @@ namespace GRemote
             });
         }
 
-        private void x264Item_Click(object sender, EventArgs e)
+        public void SetVideoCodec(String codec)
         {
-            SetVideoCodec("libx264");
+
+            Console.WriteLine("Codec changed: {0}", codec);
+
+            if (serverSession != null)
+            {
+                serverSession.SetVideoCodec(codec);
+            }
+            else
+            {
+                encoderSettings.codec = codec;
+            }
+
+            foreach (ToolStripMenuItem item in codecItem.DropDownItems)
+            {
+                item.Checked = encoderSettings.codec.Equals(item.Tag);
+            }
+        }
+
+        private void codecItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item;
+
+            if (!(sender is ToolStripMenuItem))
+            {
+                return;
+            }
+
+            item = (ToolStripMenuItem)sender;
+            SetVideoCodec(item.Tag as string);
         }
 
         private void xvidItem_Click(object sender, EventArgs e)
@@ -376,12 +406,21 @@ namespace GRemote
             SetVideoCodec("libxvid");
         }
 
-        public void SetVideoCodec(String codec)
+        private void wmv1ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (serverSession != null)
-            {
-                serverSession.SetVideoCodec(codec);
-            }
+            SetVideoCodec("wmv1");
         }
+
+        private void wmv2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetVideoCodec("wmv2");
+        }
+
+        private void theoraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetVideoCodec("theora");
+        }
+
+
     }
 }
