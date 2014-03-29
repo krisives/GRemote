@@ -1,5 +1,4 @@
 
-
 ## What is GRemote?
 
 GRemote is a tool for recording and viewing a gaming
@@ -57,7 +56,7 @@ to file a bug. Don't forget to mention:
 ## License
 
 Released under a MIT license. See 
-[LICENSE.md](https://github.com/krisives/GRemote/LICENSE.md)
+[LICENSE.md](https://github.com/krisives/GRemote/blob/master/LICENSE.md)
 if you wish.
 
 This project **does not** modify, redistribute, or even
