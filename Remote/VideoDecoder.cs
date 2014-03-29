@@ -26,6 +26,7 @@ namespace GRemote
         int width, height;
         Rectangle lockBounds;
         Bitmap decodeBuffer;
+        int totalBytesDecoded = 0;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
         {
@@ -34,6 +35,14 @@ namespace GRemote
             this.height = height;
             this.lockBounds = new Rectangle(0, 0, width, height);
             this.decodeBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+        }
+
+        public int TotalBytesDecoded
+        {
+            get
+            {
+                return totalBytesDecoded;
+            }
         }
 
         public bool IsDecoding
@@ -60,6 +69,7 @@ namespace GRemote
             }
 
             buffers.Clear();
+            totalBytesDecoded = 0;
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments();
@@ -185,6 +195,7 @@ namespace GRemote
                     break;
                 }
 
+                totalBytesDecoded += bytesRead;
                 pos += bytesRead;
 
                 if (pos >= frameSize)

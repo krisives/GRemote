@@ -40,12 +40,12 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.innerPanel = new System.Windows.Forms.Panel();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.moveWindowBox = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.refreshButton = new System.Windows.Forms.Button();
             this.processComboBox = new System.Windows.Forms.ComboBox();
             this.crosshair = new System.Windows.Forms.Label();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.opacityBar)).BeginInit();
             this.panel1.SuspendLayout();
             this.innerPanel.SuspendLayout();
@@ -178,7 +178,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.innerPanel.BackColor = System.Drawing.SystemColors.Control;
             this.innerPanel.Controls.Add(this.radioButton3);
-            this.innerPanel.Controls.Add(this.radioButton2);
+            this.innerPanel.Controls.Add(this.moveWindowBox);
             this.innerPanel.Controls.Add(this.radioButton1);
             this.innerPanel.Controls.Add(this.refreshButton);
             this.innerPanel.Controls.Add(this.processComboBox);
@@ -195,6 +195,44 @@
             this.innerPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseDown);
             this.innerPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseMove);
             this.innerPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseUp);
+            // 
+            // radioButton3
+            // 
+            this.radioButton3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioButton3.Location = new System.Drawing.Point(228, 408);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(97, 17);
+            this.radioButton3.TabIndex = 12;
+            this.radioButton3.Text = "Follow Window";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            // 
+            // moveWindowBox
+            // 
+            this.moveWindowBox.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.moveWindowBox.AutoSize = true;
+            this.moveWindowBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.moveWindowBox.Location = new System.Drawing.Point(228, 385);
+            this.moveWindowBox.Name = "moveWindowBox";
+            this.moveWindowBox.Size = new System.Drawing.Size(120, 17);
+            this.moveWindowBox.TabIndex = 11;
+            this.moveWindowBox.Text = "Move Window Here";
+            this.moveWindowBox.UseVisualStyleBackColor = true;
+            // 
+            // radioButton1
+            // 
+            this.radioButton1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioButton1.Location = new System.Drawing.Point(228, 362);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(78, 17);
+            this.radioButton1.TabIndex = 10;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Dont Move";
+            this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // refreshButton
             // 
@@ -229,44 +267,6 @@
             this.crosshair.Size = new System.Drawing.Size(13, 13);
             this.crosshair.TabIndex = 6;
             this.crosshair.Text = "+";
-            // 
-            // radioButton1
-            // 
-            this.radioButton1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Checked = true;
-            this.radioButton1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioButton1.Location = new System.Drawing.Point(228, 362);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(78, 17);
-            this.radioButton1.TabIndex = 10;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "Dont Move";
-            this.radioButton1.UseVisualStyleBackColor = true;
-            // 
-            // radioButton2
-            // 
-            this.radioButton2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioButton2.Location = new System.Drawing.Point(228, 385);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(120, 17);
-            this.radioButton2.TabIndex = 11;
-            this.radioButton2.Text = "Move Window Here";
-            this.radioButton2.UseVisualStyleBackColor = true;
-            // 
-            // radioButton3
-            // 
-            this.radioButton3.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioButton3.Location = new System.Drawing.Point(228, 408);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(97, 17);
-            this.radioButton3.TabIndex = 12;
-            this.radioButton3.Text = "Follow Window";
-            this.radioButton3.UseVisualStyleBackColor = true;
             // 
             // CaptureArea
             // 
@@ -317,7 +317,7 @@
         private System.Windows.Forms.ComboBox processComboBox;
         private System.Windows.Forms.Button refreshButton;
         private System.Windows.Forms.RadioButton radioButton3;
-        private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.RadioButton moveWindowBox;
         private System.Windows.Forms.RadioButton radioButton1;
     }
 }

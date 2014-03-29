@@ -417,7 +417,7 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.videoPreview.BackColor = System.Drawing.Color.Black;
-            this.videoPreview.Location = new System.Drawing.Point(12, 27);
+            this.videoPreview.Location = new System.Drawing.Point(0, 27);
             this.videoPreview.Name = "videoPreview";
             this.videoPreview.PreviewMode = GRemote.PreviewMode.COMPRESSED;
             this.videoPreview.Size = new System.Drawing.Size(792, 521);

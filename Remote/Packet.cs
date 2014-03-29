@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace GRemote
 {
@@ -20,6 +21,9 @@ namespace GRemote
             this.data = data;
         }
 
+        /// <summary>
+        /// Get a number that describes what kind of packet this is
+        /// </summary>
         public PacketType Type
         {
             get
@@ -28,6 +32,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Get the packet data as a byte array
+        /// </summary>
         public byte[] Buffer
         {
             get
@@ -36,19 +43,35 @@ namespace GRemote
             }
         }
 
-
-
+        /// <summary>
+        /// Writes a 16-bit short integer from a byte buffer.
+        /// </summary>
+        /// <param name="value">Value to write</param>
+        /// <param name="buffer">Byte buffer to write to</param>
+        /// <param name="offset">Where in the buffer to write</param>
         public static void WriteInt16(short value, byte[] buffer, int offset)
         {
             buffer[offset + 0] = (byte)value;
             buffer[offset + 1] = (byte)(value >> 8);
         }
 
+        /// <summary>
+        /// Reads a 16-bit short integer from a byte buffer.
+        /// </summary>
+        /// <param name="buffer">Buffer to read from</param>
+        /// <param name="offset">Offset to read at</param>
+        /// <returns>16-bit short integer read</returns>
         public static short ReadInt16(byte[] buffer, int offset)
         {
             return (short)((buffer[offset + 0]) | (buffer[offset + 1] << 8));
         }
 
+        /// <summary>
+        /// Writes a 32-bit integer to a byte buffer
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
         public static void WriteInt32(int value, byte[] buffer, int offset)
         {
             buffer[offset + 0] = (byte)value;
@@ -57,12 +80,22 @@ namespace GRemote
             buffer[offset + 3] = (byte)(value >> 0x18);
         }
 
+        /// <summary>
+        /// Reads a 32-bit integer from a byte buffer
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         public static int ReadInt32(byte[] buffer, int offset)
         {
             return (buffer[offset + 0]) | (buffer[offset + 1] << 8) | (buffer[offset + 2] << 0x10) | (buffer[offset + 3] << 0x18);
         }
     }
 
+    /// <summary>
+    /// Each packet has an 8-bit number used to identify it in
+    /// the network protocol.
+    /// </summary>
     public enum PacketType : byte
     {
         CONNECT_REQUEST = 0x01,
@@ -74,6 +107,24 @@ namespace GRemote
         VIDEO_END = 0x13,
 
         KEYBOARD = 0x20
+    }
+
+    public class ConnectRequestPacket : Packet
+    {
+        public ConnectRequestPacket()
+            : base(PacketType.CONNECT_REQUEST, 1)
+        {
+
+        }
+    }
+
+    public class ConnectResponsePacket : Packet
+    {
+        public ConnectResponsePacket()
+            : base(PacketType.CONNECT_RESPONSE, 1)
+        {
+
+        }
     }
 
     public class VideoStartPacket : Packet
@@ -91,6 +142,40 @@ namespace GRemote
             : base(PacketType.VIDEO_UPDATE, 5)
         {
             WriteInt32(size, data, 1);
+        }
+
+        public int VideoDataLength
+        {
+            get
+            {
+                return ReadInt32(data, 1);
+            }
+        }
+    }
+
+    public class KeyboardPacket : Packet
+    {
+        public KeyboardPacket(byte scancode, bool set)
+            : base(PacketType.KEYBOARD, 2)
+        {
+            data[1] = scancode;
+            data[2] = set ? (byte)0x01 : (byte)0x00;
+        }
+
+        public byte Scancode
+        {
+            get
+            {
+                return data[1];
+            }
+        }
+
+        public bool KeyDown
+        {
+            get
+            {
+                return data[2] != 0;
+            }
         }
     }
 }

@@ -41,8 +41,6 @@ namespace GRemote
         ServerSession serverSession;
         ClientSession clientSession;
         UpdateChecker updateChecker;
-        //EncoderSettings encoderSettings = new EncoderSettings();
-
         int lastEncodedBytes = 0;
         int lastKBps = 0;
 
