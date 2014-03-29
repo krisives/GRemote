@@ -40,7 +40,8 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.codecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.xVidToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x264Item = new System.Windows.Forms.ToolStripMenuItem();
+            this.xvidItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resolutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,7 +57,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.selectAreaButton = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkUpdatesItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bandwidthTimer = new System.Windows.Forms.Timer(this.components);
@@ -65,8 +66,14 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.connectedLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.bandwidthLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.videoPreview = new GRemote.VideoPreview();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
+            this.videoPreview = new GRemote.VideoPreview();
+            this.wmv1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wmv2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.theoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.kbps75KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.kbps35KBsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -103,38 +110,38 @@
             // hostMenuItem
             // 
             this.hostMenuItem.Name = "hostMenuItem";
-            this.hostMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.hostMenuItem.Size = new System.Drawing.Size(132, 22);
             this.hostMenuItem.Text = "Host";
             this.hostMenuItem.Click += new System.EventHandler(this.hostMenuItem_Click);
             // 
             // joinMenuItem
             // 
             this.joinMenuItem.Name = "joinMenuItem";
-            this.joinMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.joinMenuItem.Size = new System.Drawing.Size(132, 22);
             this.joinMenuItem.Text = "Connect";
             this.joinMenuItem.Click += new System.EventHandler(this.joinMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(129, 6);
             // 
             // preferencesToolStripMenuItem
             // 
             this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.preferencesToolStripMenuItem.Text = "Preferences";
             this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(129, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -154,18 +161,30 @@
             // codecToolStripMenuItem
             // 
             this.codecToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.xVidToolStripMenuItem});
+            this.x264Item,
+            this.xvidItem,
+            this.wmv1ToolStripMenuItem,
+            this.wmv2ToolStripMenuItem,
+            this.theoraToolStripMenuItem});
             this.codecToolStripMenuItem.Name = "codecToolStripMenuItem";
-            this.codecToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.codecToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.codecToolStripMenuItem.Text = "Codec";
             // 
-            // xVidToolStripMenuItem
+            // x264Item
             // 
-            this.xVidToolStripMenuItem.Checked = true;
-            this.xVidToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.xVidToolStripMenuItem.Name = "xVidToolStripMenuItem";
-            this.xVidToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
-            this.xVidToolStripMenuItem.Text = "XVid";
+            this.x264Item.Checked = true;
+            this.x264Item.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.x264Item.Name = "x264Item";
+            this.x264Item.Size = new System.Drawing.Size(152, 22);
+            this.x264Item.Text = "x264";
+            this.x264Item.Click += new System.EventHandler(this.x264Item_Click);
+            // 
+            // xvidItem
+            // 
+            this.xvidItem.Name = "xvidItem";
+            this.xvidItem.Size = new System.Drawing.Size(152, 22);
+            this.xvidItem.Text = "xvid";
+            this.xvidItem.Click += new System.EventHandler(this.xvidItem_Click);
             // 
             // resolutionToolStripMenuItem
             // 
@@ -175,7 +194,7 @@
             this.toolStripMenuItem3,
             this.toolStripMenuItem4});
             this.resolutionToolStripMenuItem.Name = "resolutionToolStripMenuItem";
-            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.resolutionToolStripMenuItem.Text = "Downscale";
             // 
             // pToolStripMenuItem
@@ -183,7 +202,7 @@
             this.pToolStripMenuItem.Checked = true;
             this.pToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pToolStripMenuItem.Name = "pToolStripMenuItem";
-            this.pToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+            this.pToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.pToolStripMenuItem.Text = "None";
             this.pToolStripMenuItem.Click += new System.EventHandler(this.pToolStripMenuItem_Click);
             // 
@@ -191,29 +210,32 @@
             // 
             this.toolStripMenuItem2.Enabled = false;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(99, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem2.Text = "480";
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Enabled = false;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(99, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem3.Text = "720";
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Enabled = false;
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(99, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem4.Text = "1080";
             // 
             // bitrateToolStripMenuItem
             // 
             this.bitrateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.kToolStripMenuItem});
+            this.toolStripMenuItem1,
+            this.kToolStripMenuItem,
+            this.kbps75KBsToolStripMenuItem,
+            this.kbps35KBsToolStripMenuItem});
             this.bitrateToolStripMenuItem.Name = "bitrateToolStripMenuItem";
-            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.bitrateToolStripMenuItem.Text = "Bitrate";
             // 
             // kToolStripMenuItem
@@ -221,8 +243,8 @@
             this.kToolStripMenuItem.Checked = true;
             this.kToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.kToolStripMenuItem.Name = "kToolStripMenuItem";
-            this.kToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
-            this.kToolStripMenuItem.Text = "900Kbps";
+            this.kToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.kToolStripMenuItem.Text = "900 Kbps (112 KB/s)";
             // 
             // previewToolStripMenuItem
             // 
@@ -232,13 +254,13 @@
             this.splitViewToolStripMenuItem,
             this.noneToolStripMenuItem});
             this.previewToolStripMenuItem.Name = "previewToolStripMenuItem";
-            this.previewToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.previewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.previewToolStripMenuItem.Text = "Preview";
             // 
             // uncompressedToolStripMenuItem
             // 
             this.uncompressedToolStripMenuItem.Name = "uncompressedToolStripMenuItem";
-            this.uncompressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.uncompressedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.uncompressedToolStripMenuItem.Text = "Uncompressed";
             this.uncompressedToolStripMenuItem.Click += new System.EventHandler(this.uncompressedToolStripMenuItem_Click);
             // 
@@ -247,51 +269,52 @@
             this.compressedToolStripMenuItem.Checked = true;
             this.compressedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.compressedToolStripMenuItem.Name = "compressedToolStripMenuItem";
-            this.compressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.compressedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.compressedToolStripMenuItem.Text = "Compressed";
             this.compressedToolStripMenuItem.Click += new System.EventHandler(this.compressedToolStripMenuItem_Click);
             // 
             // splitViewToolStripMenuItem
             // 
             this.splitViewToolStripMenuItem.Name = "splitViewToolStripMenuItem";
-            this.splitViewToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.splitViewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.splitViewToolStripMenuItem.Text = "Split View";
             this.splitViewToolStripMenuItem.Click += new System.EventHandler(this.splitViewToolStripMenuItem_Click);
             // 
             // noneToolStripMenuItem
             // 
             this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.noneToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.noneToolStripMenuItem.Text = "None";
             this.noneToolStripMenuItem.Click += new System.EventHandler(this.noneToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(126, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // selectAreaButton
             // 
             this.selectAreaButton.Name = "selectAreaButton";
-            this.selectAreaButton.Size = new System.Drawing.Size(129, 22);
+            this.selectAreaButton.Size = new System.Drawing.Size(152, 22);
             this.selectAreaButton.Text = "Select Area";
             this.selectAreaButton.Click += new System.EventHandler(this.selectAreaButton_Click);
             // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem5,
+            this.checkUpdatesItem,
             this.toolStripSeparator3,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
-            // toolStripMenuItem5
+            // checkUpdatesItem
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(163, 22);
-            this.toolStripMenuItem5.Text = "Check for Updates";
+            this.checkUpdatesItem.Name = "checkUpdatesItem";
+            this.checkUpdatesItem.Size = new System.Drawing.Size(163, 22);
+            this.checkUpdatesItem.Text = "Check for Updates";
+            this.checkUpdatesItem.Click += new System.EventHandler(this.checkUpdatesItem_Click);
             // 
             // toolStripSeparator3
             // 
@@ -348,6 +371,10 @@
             this.bandwidthLabel.Size = new System.Drawing.Size(37, 17);
             this.bandwidthLabel.Text = "0 KB/s";
             // 
+            // playbackTimer
+            // 
+            this.playbackTimer.Interval = 33;
+            // 
             // videoPreview
             // 
             this.videoPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -360,9 +387,41 @@
             this.videoPreview.Size = new System.Drawing.Size(792, 521);
             this.videoPreview.TabIndex = 7;
             // 
-            // playbackTimer
+            // wmv1ToolStripMenuItem
             // 
-            this.playbackTimer.Interval = 33;
+            this.wmv1ToolStripMenuItem.Name = "wmv1ToolStripMenuItem";
+            this.wmv1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv1ToolStripMenuItem.Text = "wmv1";
+            // 
+            // wmv2ToolStripMenuItem
+            // 
+            this.wmv2ToolStripMenuItem.Name = "wmv2ToolStripMenuItem";
+            this.wmv2ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv2ToolStripMenuItem.Text = "wmv2";
+            // 
+            // theoraToolStripMenuItem
+            // 
+            this.theoraToolStripMenuItem.Name = "theoraToolStripMenuItem";
+            this.theoraToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.theoraToolStripMenuItem.Text = "theora";
+            // 
+            // kbps75KBsToolStripMenuItem
+            // 
+            this.kbps75KBsToolStripMenuItem.Name = "kbps75KBsToolStripMenuItem";
+            this.kbps75KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.kbps75KBsToolStripMenuItem.Text = "600 Kbps (75 KB/s)";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
+            this.toolStripMenuItem1.Text = "1.2 Mbps (150 KB/s)";
+            // 
+            // kbps35KBsToolStripMenuItem
+            // 
+            this.kbps35KBsToolStripMenuItem.Name = "kbps35KBsToolStripMenuItem";
+            this.kbps35KBsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.kbps35KBsToolStripMenuItem.Text = "300 Kbps (38 KB/s)";
             // 
             // GRemoteDialog
             // 
@@ -396,7 +455,7 @@
         private System.Windows.Forms.ToolStripMenuItem videoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem codecToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem xVidToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem xvidItem;
         private System.Windows.Forms.ToolStripMenuItem resolutionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
@@ -417,7 +476,7 @@
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel bandwidthLabel;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem checkUpdatesItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem hostMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
@@ -425,6 +484,13 @@
         private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel connectedLabel;
         private System.Windows.Forms.Timer playbackTimer;
+        private System.Windows.Forms.ToolStripMenuItem x264Item;
+        private System.Windows.Forms.ToolStripMenuItem wmv1ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem wmv2ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem theoraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem kbps75KBsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem kbps35KBsToolStripMenuItem;
     }
 }
 

@@ -82,6 +82,7 @@
     <Compile Include="GRemoteDialog.Designer.cs">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Packet.cs" />
     <Compile Include="SessionDialog.cs">
       <SubType>Form</SubType>
     </Compile>

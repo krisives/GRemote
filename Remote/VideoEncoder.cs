@@ -82,7 +82,7 @@ namespace GRemote
             }
         }
 
-        public void StartEncoding()
+        public void StartEncoding(EncoderSettings settings)
         {
             if (started)
             {
@@ -94,7 +94,7 @@ namespace GRemote
             buffers.Clear();
 
             process = new Process();
-            process.StartInfo.Arguments = GetFFMpegArguments();
+            process.StartInfo.Arguments = GetFFMpegArguments(settings);
             process.StartInfo.FileName = ffmpeg.Path;
             process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -120,7 +120,7 @@ namespace GRemote
             }
         }
 
-        public string GetFFMpegArguments()
+        public string GetFFMpegArguments(EncoderSettings settings)
         {
             String args = "";
 
@@ -134,7 +134,7 @@ namespace GRemote
             args += " -vframes 99999 ";
             args += " -vb 900K ";
             //args += " -c:v libxvid ";
-            args += " -c:v libx264 ";
+            args += " -c:v " + settings.codec;
             args += "  -tune zerolatency ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
             args += " -f avi ";
@@ -273,12 +273,13 @@ namespace GRemote
             {
                 try
                 {
+                    // Read encoded output of FFMpeg
                     readCount = stream.Read(readBuffer, pos, readBuffer.Length - pos);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    continue;
+                    break;
                 }
 
                 if (readCount <= 0)
@@ -290,6 +291,7 @@ namespace GRemote
 
                 if (pos < readBuffer.Length)
                 {
+                    // Process 16K data at a time from FFMpeg
                     continue;
                 }
 
@@ -313,6 +315,11 @@ namespace GRemote
                 }
             }
         }
+    }
+
+    public class EncoderSettings
+    {
+        public String codec = "libx264";
     }
 
 }

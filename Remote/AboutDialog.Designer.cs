@@ -107,8 +107,8 @@
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(240, 148);
             this.richTextBox1.TabIndex = 6;
-            this.richTextBox1.Text = "Thanks to the creators of:\n\n* FFMpeg\n* XVid\n* C# and Visual Studio\n\nAuthors:\n\n* K" +
-                "ristopher Ives\n* Mikhail Medvedev";
+            this.richTextBox1.Text = "Thanks to the creators of:\n\n* FFMpeg\n* libx264 and libxvid\n* C# and Visual Studio" +
+                "\n\nAuthors:\n\n* Kristopher Ives\n* Mikhail Medvedev";
             // 
             // AboutDialog
             // 

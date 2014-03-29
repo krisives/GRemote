@@ -39,6 +39,7 @@ namespace GRemote
         AboutDialog aboutDialog;
         ServerSession serverSession;
         ClientSession clientSession;
+        UpdateChecker updateChecker;
         int lastEncodedBytes = 0;
         int lastKBps = 0;
 
@@ -251,7 +252,7 @@ namespace GRemote
 
         public void ShowPreferences()
         {
-            prefsDialog.Show();
+            prefsDialog.ShowDialog(this);
         }
 
         private void hostMenuItem_Click(object sender, EventArgs e)
@@ -343,6 +344,43 @@ namespace GRemote
             if (videoCapture != null)
             {
                 videoCapture.SetCapturePos(x, y);
+            }
+        }
+
+        private void checkUpdatesItem_Click(object sender, EventArgs e)
+        {
+            if (updateChecker == null)
+            {
+                updateChecker = new UpdateChecker();
+            }
+
+            updateChecker.Check(delegate(bool hasUpdate) {
+                if (hasUpdate)
+                {
+                    MessageBox.Show("New version is available");
+                }
+                else
+                {
+                    MessageBox.Show("Already up to date");
+                }
+            });
+        }
+
+        private void x264Item_Click(object sender, EventArgs e)
+        {
+            SetVideoCodec("libx264");
+        }
+
+        private void xvidItem_Click(object sender, EventArgs e)
+        {
+            SetVideoCodec("libxvid");
+        }
+
+        public void SetVideoCodec(String codec)
+        {
+            if (serverSession != null)
+            {
+                serverSession.SetVideoCodec(codec);
             }
         }
     }

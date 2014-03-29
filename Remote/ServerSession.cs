@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace GRemote
 {
@@ -46,6 +47,8 @@ namespace GRemote
         BinaryWriter headerBinary;
 
         VideoPreview videoPreview;
+
+        EncoderSettings encoderSettings = new EncoderSettings();
 
         public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, String address, int port)
         {
@@ -90,7 +93,7 @@ namespace GRemote
             videoCapture.Listener = Snapshot;
 
             videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-            videoEncoder.StartEncoding();
+            videoEncoder.StartEncoding(encoderSettings);
 
            // videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
            // videoDecoder.StartDecoding();
@@ -108,17 +111,26 @@ namespace GRemote
             videoCapture.StartCapturing();
         }
 
-        protected void RestartStream()
-        {
-            // TODO add "restart stream" packet
-            
+        public delegate void Callback();
 
+        public void RestartStream(Callback f)
+        {
             videoEncoder.StopEncoding();
-           // videoDecoder.StopDecoding();
             outputBuffers.Clear();
 
-            videoEncoder.StartEncoding();
-            //videoDecoder.StartDecoding();
+            if (f != null)
+            {
+                f();
+            }
+
+            
+            
+            videoEncoder.StartEncoding(encoderSettings);
+        }
+
+        public void RestartStream()
+        {
+            RestartStream(null);
         }
 
         protected void Snapshot()
@@ -199,9 +211,19 @@ namespace GRemote
         protected void listenThreadMain()
         {
             Socket clientSocket;
+            IPAddress hostIP;
+            IPEndPoint ep;
 
-            IPAddress hostIP = (Dns.Resolve(address)).AddressList[0];
-            IPEndPoint ep = new IPEndPoint(hostIP, port);
+            if (address == "" || address == "0.0.0.0" || address == "localhost")
+            {
+                hostIP = IPAddress.Any;
+            }
+            else
+            {
+                hostIP = Dns.GetHostEntry(address).AddressList[0];
+            }
+
+            ep = new IPEndPoint(hostIP, port);
 
             socket.Bind(ep);
             socket.Listen(20);
@@ -223,20 +245,21 @@ namespace GRemote
                     continue;
                 }
 
-                videoEncoder.StopEncoding();
-                outputBuffers.Clear();
-
                 ConnectedClient client = new ConnectedClient();
 
                 client.socket = clientSocket;
                 client.stream = new NetworkStream(clientSocket);
                 client.writer = new BinaryWriter(client.stream);
 
-                clients.Add(client);
-
-                videoEncoder.StartEncoding();
-                
+                RestartStream(delegate() {
+                    clients.Add(client);
+                });
             }
+        }
+
+        protected void AddPacket(Packet packet)
+        {
+            outputBuffers.Add(packet.Buffer);
         }
 
         protected void AddVideoBuffer(byte[] buffer)
@@ -250,15 +273,15 @@ namespace GRemote
                 return;
             }
 
+            // Create the 5 byte header
             byte[] packetBuffer = new byte[1 + 4];
-
             headerBinary.Seek(0, SeekOrigin.Begin);
             headerBinary.Write((byte)PacketType.VIDEO_UPDATE);
             headerBinary.Write((int)buffer.Length);
             headerBinary.Flush();
 
+            // Copy and add the header/video data to the output buffer pool
             Array.Copy(headerBuffer, packetBuffer, packetBuffer.Length);
-
             outputBuffers.Add(packetBuffer);
             outputBuffers.Add(buffer);
         }
@@ -322,18 +345,14 @@ namespace GRemote
             public NetworkStream stream;
             public BinaryWriter writer;
         }
+
+        public void SetVideoCodec(string codec)
+        {
+            encoderSettings.codec = codec;
+            RestartStream();
+
+        }
     }
 
-    public enum PacketType : byte
-    {
-        CONNECT_REQUEST = 0x01,
-        CONNECT_RESPONSE = 0x02,
-
-        VIDEO_REQUEST = 0x10,
-        VIDEO_START = 0x11,
-        VIDEO_UPDATE = 0x12,
-        VIDEO_END = 0x13,
-
-        KEYBOARD = 0x20
-    }
+ 
 }
