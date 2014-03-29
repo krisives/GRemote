@@ -38,7 +38,7 @@ namespace GRemote
         // Capture, encoder and decoder for processing video data
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
-        VideoDecoder videoDecoder;
+       // VideoDecoder videoDecoder;
 
         // 1K buffer for constructing header packets
         byte[] headerBuffer;
@@ -92,8 +92,8 @@ namespace GRemote
             videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
             videoEncoder.StartEncoding();
 
-            videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-            videoDecoder.StartDecoding();
+           // videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
+           // videoDecoder.StartDecoding();
 
             // Create networking threads
             listenThread = new Thread(listenThreadMain);
@@ -111,13 +111,14 @@ namespace GRemote
         protected void RestartStream()
         {
             // TODO add "restart stream" packet
-            outputBuffers.Clear();
+            
 
             videoEncoder.StopEncoding();
-            videoDecoder.StopDecoding();
+           // videoDecoder.StopDecoding();
+            outputBuffers.Clear();
 
             videoEncoder.StartEncoding();
-            videoDecoder.StartDecoding();
+            //videoDecoder.StartDecoding();
         }
 
         protected void Snapshot()
@@ -133,10 +134,10 @@ namespace GRemote
 
             while ((encodedVideoBuffer = videoEncoder.Read()) != null)
             {
-                if (videoDecoder != null)
-                {
-                    videoDecoder.Decode(encodedVideoBuffer);
-                }
+                //if (videoDecoder != null)
+                //{
+                //    videoDecoder.Decode(encodedVideoBuffer);
+                //}
 
                 AddVideoBuffer(encodedVideoBuffer);
             }
@@ -173,11 +174,11 @@ namespace GRemote
                 videoEncoder = null;
             }
 
-            if (videoDecoder != null)
-            {
-                videoDecoder.StopDecoding();
-                videoDecoder = null;
-            }
+           // if (videoDecoder != null)
+            //{
+           //     videoDecoder.StopDecoding();
+            //    videoDecoder = null;
+           // }
 
             if (videoCapture != null)
             {
@@ -222,15 +223,18 @@ namespace GRemote
                     continue;
                 }
 
-                ConnectedClient client = new ConnectedClient();
+                videoEncoder.StopEncoding();
+                outputBuffers.Clear();
 
-                RestartStream();
+                ConnectedClient client = new ConnectedClient();
 
                 client.socket = clientSocket;
                 client.stream = new NetworkStream(clientSocket);
                 client.writer = new BinaryWriter(client.stream);
 
                 clients.Add(client);
+
+                videoEncoder.StartEncoding();
                 
             }
         }

@@ -143,7 +143,14 @@ namespace GRemote
 
             while (IsCapturing())
             {
-                captureGraphics.CopyFromScreen(x, y, 0, 0, size);
+                try
+                {
+                    captureGraphics.CopyFromScreen(x, y, 0, 0, size);
+                }
+                catch (Exception e)
+                {
+
+                }
 
                 if (listener != null)
                 {

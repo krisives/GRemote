@@ -30,12 +30,12 @@ namespace GRemote
         }
 
         VideoCapture videoCapture;
-        CaptureArea boundsForm = new CaptureArea();
+        CaptureArea boundsForm;
         FFMpeg ffmpeg;
         VirtualInput virtualInput;
         IntPtr targetWindowPtr;
-        SessionDialog sessionDialog = new SessionDialog();
-        PreferencesDialog prefsDialog = new PreferencesDialog();
+        SessionDialog sessionDialog;
+        PreferencesDialog prefsDialog;
         AboutDialog aboutDialog;
         ServerSession serverSession;
         ClientSession clientSession;
@@ -45,6 +45,10 @@ namespace GRemote
         public GRemoteDialog()
         {
             ffmpeg = new FFMpeg();
+            boundsForm = new CaptureArea(this);
+            sessionDialog = new SessionDialog();
+            prefsDialog = new PreferencesDialog();
+
             InitializeComponent();
         }
 
@@ -102,6 +106,7 @@ namespace GRemote
             if (videoCapture == null)
             {
                 videoCapture = new VideoCapture(boundsForm.Width, boundsForm.Height);
+                videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
             }
 
             videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
@@ -330,6 +335,14 @@ namespace GRemote
             get
             {
                 return videoPreview;
+            }
+        }
+
+        public void SetCapturePos(int x, int y)
+        {
+            if (videoCapture != null)
+            {
+                videoCapture.SetCapturePos(x, y);
             }
         }
     }

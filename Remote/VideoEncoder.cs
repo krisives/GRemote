@@ -133,7 +133,8 @@ namespace GRemote
             args += " -i - ";
             args += " -vframes 99999 ";
             args += " -vb 900K ";
-            args += " -c:v libxvid ";
+            //args += " -c:v libxvid ";
+            args += " -c:v libx264 ";
             args += "  -tune zerolatency ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
             args += " -f avi ";
@@ -178,7 +179,6 @@ namespace GRemote
             }
 
             started = false;
-            buffers.Clear();
             process.StandardInput.Close();
             process.StandardError.Close();
             process.StandardOutput.Close();
@@ -192,6 +192,12 @@ namespace GRemote
            // }
 
             process = null;
+
+            buffers.Clear();
+            buffers = new BufferPool();
+
+            encodedBuffers.Clear();
+            encodedBuffers = new BufferPool();
         }
 
         public byte[] Read()
@@ -260,13 +266,14 @@ namespace GRemote
             // Encoded data is read from FFMPeg in 16K chunks
             byte[] readBuffer = new byte[1024 * 16];
             int readCount;
+            int pos = 0;
             Stream stream = new BufferedStream(process.StandardOutput.BaseStream);
 
             while (started)
             {
                 try
                 {
-                    readCount = stream.Read(readBuffer, 0, readBuffer.Length);
+                    readCount = stream.Read(readBuffer, pos, readBuffer.Length - pos);
                 }
                 catch (Exception e)
                 {
@@ -278,6 +285,16 @@ namespace GRemote
                 {
                     continue;
                 }
+
+                pos += readCount;
+
+                if (pos < readBuffer.Length)
+                {
+                    continue;
+                }
+
+                readCount = pos;
+                pos = 0;
 
                 if (enableFileRecording)
                 {

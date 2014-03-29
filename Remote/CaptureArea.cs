@@ -12,8 +12,11 @@ namespace GRemote
 {
     public partial class CaptureArea : Form
     {
-        public CaptureArea()
+        GRemoteDialog gRemote;
+
+        public CaptureArea(GRemoteDialog gRemote)
         {
+            this.gRemote = gRemote;
             InitializeComponent();
         }
 
@@ -184,6 +187,8 @@ namespace GRemote
 
             xBox.Text = Left.ToString();
             yBox.Text = Top.ToString();
+
+            gRemote.SetCapturePos(Left, Top);
         }
 
         public IntPtr TargetWindow

@@ -146,10 +146,6 @@ namespace GRemote
 
                 if (pos >= frameSize)
                 {
-                   // decodedBuffers.Add(readBuffer);
-                    Console.WriteLine("BUFFER");
-
-                    //Console.WriteLine("--- {0} ----", buffer.Length);
                     lock (decodeBuffer)
                     {
                         BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
