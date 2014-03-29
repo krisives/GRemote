@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace GRemote
 {
@@ -18,6 +19,7 @@ namespace GRemote
         {
             this.gRemote = gRemote;
             InitializeComponent();
+            
         }
 
         private void BoundsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -45,6 +47,7 @@ namespace GRemote
         private void BoundsForm_Shown(object sender, EventArgs e)
         {
             updateBoxes();
+            RefreshProcessList();
         }
 
         private void opacityBar_ValueChanged(object sender, EventArgs e)
@@ -230,6 +233,45 @@ namespace GRemote
             {
                 return new POINT(p.X, p.Y);
             }
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            RefreshProcessList();
+        }
+
+        public void RefreshProcessList()
+        {
+            Process[] all = Process.GetProcesses();
+            
+            Array.Sort(all, delegate(Process a, Process b)
+            {
+                return a.ProcessName.CompareTo(b.ProcessName);
+            });
+
+            processComboBox.Items.Clear();
+
+            foreach (Process p in all)
+            {
+                if (p.MainWindowHandle == IntPtr.Zero)
+                {
+                    continue;
+                }
+
+                processComboBox.Items.Add(p);
+            }
+        }
+
+        private void innerPanel_Click(object sender, EventArgs e)
+        {
+            // Removes focus from the control so that the keyboard
+            // can be used to nudge it around
+            ActiveControl = null;
+        }
+
+        private void processComboBox_Format(object sender, ListControlConvertEventArgs e)
+        {
+            e.Value = (e.ListItem as Process).ProcessName;
         }
     }
 }

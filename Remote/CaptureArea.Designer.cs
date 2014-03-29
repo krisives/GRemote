@@ -40,7 +40,12 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.innerPanel = new System.Windows.Forms.Panel();
+            this.refreshButton = new System.Windows.Forms.Button();
+            this.processComboBox = new System.Windows.Forms.ComboBox();
             this.crosshair = new System.Windows.Forms.Label();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.opacityBar)).BeginInit();
             this.panel1.SuspendLayout();
             this.innerPanel.SuspendLayout();
@@ -48,6 +53,7 @@
             // 
             // widthBox
             // 
+            this.widthBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.widthBox.Location = new System.Drawing.Point(56, 33);
             this.widthBox.Name = "widthBox";
             this.widthBox.Size = new System.Drawing.Size(100, 20);
@@ -55,6 +61,7 @@
             // 
             // heightBox
             // 
+            this.heightBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.heightBox.Location = new System.Drawing.Point(209, 33);
             this.heightBox.Name = "heightBox";
             this.heightBox.Size = new System.Drawing.Size(100, 20);
@@ -111,6 +118,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.Cursor = System.Windows.Forms.Cursors.Default;
             this.label4.Location = new System.Drawing.Point(12, 36);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(38, 13);
@@ -120,6 +128,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.Cursor = System.Windows.Forms.Cursors.Default;
             this.label1.Location = new System.Drawing.Point(162, 36);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 13);
@@ -128,6 +137,7 @@
             // 
             // yBox
             // 
+            this.yBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.yBox.Location = new System.Drawing.Point(209, 6);
             this.yBox.Name = "yBox";
             this.yBox.Size = new System.Drawing.Size(100, 20);
@@ -135,6 +145,7 @@
             // 
             // xBox
             // 
+            this.xBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.xBox.Location = new System.Drawing.Point(56, 6);
             this.xBox.Name = "xBox";
             this.xBox.Size = new System.Drawing.Size(100, 20);
@@ -143,6 +154,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.Cursor = System.Windows.Forms.Cursors.Default;
             this.label3.Location = new System.Drawing.Point(186, 9);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(17, 13);
@@ -152,6 +164,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.Cursor = System.Windows.Forms.Cursors.Default;
             this.label2.Location = new System.Drawing.Point(33, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(17, 13);
@@ -164,6 +177,11 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.innerPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.innerPanel.Controls.Add(this.radioButton3);
+            this.innerPanel.Controls.Add(this.radioButton2);
+            this.innerPanel.Controls.Add(this.radioButton1);
+            this.innerPanel.Controls.Add(this.refreshButton);
+            this.innerPanel.Controls.Add(this.processComboBox);
             this.innerPanel.Controls.Add(this.crosshair);
             this.innerPanel.Controls.Add(this.panel1);
             this.innerPanel.Controls.Add(this.opacityBar);
@@ -173,9 +191,34 @@
             this.innerPanel.Name = "innerPanel";
             this.innerPanel.Size = new System.Drawing.Size(776, 576);
             this.innerPanel.TabIndex = 6;
+            this.innerPanel.Click += new System.EventHandler(this.innerPanel_Click);
             this.innerPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseDown);
             this.innerPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseMove);
             this.innerPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseUp);
+            // 
+            // refreshButton
+            // 
+            this.refreshButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.refreshButton.Cursor = System.Windows.Forms.Cursors.Default;
+            this.refreshButton.Location = new System.Drawing.Point(474, 333);
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new System.Drawing.Size(75, 23);
+            this.refreshButton.TabIndex = 8;
+            this.refreshButton.Text = "Refresh";
+            this.refreshButton.UseVisualStyleBackColor = true;
+            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+            // 
+            // processComboBox
+            // 
+            this.processComboBox.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.processComboBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.processComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.processComboBox.FormattingEnabled = true;
+            this.processComboBox.Location = new System.Drawing.Point(228, 335);
+            this.processComboBox.Name = "processComboBox";
+            this.processComboBox.Size = new System.Drawing.Size(240, 21);
+            this.processComboBox.TabIndex = 7;
+            this.processComboBox.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.processComboBox_Format);
             // 
             // crosshair
             // 
@@ -187,7 +230,45 @@
             this.crosshair.TabIndex = 6;
             this.crosshair.Text = "+";
             // 
-            // BoundsForm
+            // radioButton1
+            // 
+            this.radioButton1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioButton1.Location = new System.Drawing.Point(228, 362);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(78, 17);
+            this.radioButton1.TabIndex = 10;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Dont Move";
+            this.radioButton1.UseVisualStyleBackColor = true;
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioButton2.Location = new System.Drawing.Point(228, 385);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(120, 17);
+            this.radioButton2.TabIndex = 11;
+            this.radioButton2.Text = "Move Window Here";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            // 
+            // radioButton3
+            // 
+            this.radioButton3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioButton3.Location = new System.Drawing.Point(228, 408);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(97, 17);
+            this.radioButton3.TabIndex = 12;
+            this.radioButton3.Text = "Follow Window";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            // 
+            // CaptureArea
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -195,7 +276,7 @@
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Controls.Add(this.innerPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "BoundsForm";
+            this.Name = "CaptureArea";
             this.Opacity = 0.75D;
             this.Text = "Recording Bounds";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BoundsForm_FormClosing);
@@ -233,5 +314,10 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label crosshair;
+        private System.Windows.Forms.ComboBox processComboBox;
+        private System.Windows.Forms.Button refreshButton;
+        private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.RadioButton radioButton1;
     }
 }
