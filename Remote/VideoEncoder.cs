@@ -56,10 +56,6 @@ namespace GRemote
             {
                 return enableFileRecording;
             }
-            set
-            {
-                enableFileRecording = value;
-            }
         }
 
         public String FileRecordingPath
@@ -68,10 +64,18 @@ namespace GRemote
             {
                 return fileOutputPath;
             }
-            set
-            {
-                fileOutputPath = value;
-            }
+        }
+
+        public void EnableFileOutput(String path)
+        {
+            enableFileRecording = true;
+            fileOutputPath = path;
+        }
+
+        public void DisableFileOutput()
+        {
+            enableFileRecording = false;
+            fileOutputPath = null;
         }
 
         public int TotalBytes
@@ -106,6 +110,11 @@ namespace GRemote
 
             bufferedStream = new BufferedStream(process.StandardInput.BaseStream);
 
+            if (enableFileRecording)
+            {
+                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
+            }
+
             readThread = new Thread(new ThreadStart(readThreadMain));
             writeThread = new Thread(new ThreadStart(writeThreadMain));
             errorThread = new Thread(new ThreadStart(errorThreadMain));
@@ -113,11 +122,6 @@ namespace GRemote
             errorThread.Start();
             readThread.Start();
             writeThread.Start();
-
-            if (enableFileRecording)
-            {
-                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
-            }
         }
 
         public string GetFFMpegArguments(EncoderSettings settings)
@@ -125,13 +129,13 @@ namespace GRemote
             String args = "";
 
             args += " -y ";
-            args += " -t 01:00:00 ";
+            //args += " -t 01:00:00 ";
             args += " -f rawvideo ";
             args += " -pixel_format bgr24 ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
             args += " -framerate 30 ";
             args += " -i - ";
-            args += " -vframes 99999 ";
+            //args += " -vframes 99999 ";
             args += " -vb 900K ";
             //args += " -c:v libxvid ";
             args += " -c:v " + settings.codec;
@@ -183,15 +187,9 @@ namespace GRemote
             process.StandardError.Close();
             process.StandardOutput.Close();
             process.Close();
+           // process = null;
 
-          //  Thread.Sleep(1000);
-
-            //if (process != null) //&& !process.HasExited)
-           // {
-           //     process.Kill();
-           // }
-
-            process = null;
+           
 
             buffers.Clear();
             buffers = new BufferPool();
@@ -268,6 +266,7 @@ namespace GRemote
             int readCount;
             int pos = 0;
             Stream stream = new BufferedStream(process.StandardOutput.BaseStream);
+            BufferPool encodedBufers = this.encodedBuffers;
 
             while (started)
             {
@@ -298,21 +297,28 @@ namespace GRemote
                 readCount = pos;
                 pos = 0;
 
-                if (enableFileRecording)
-                {
-                    fout.Write(readBuffer, 0, readCount);
-                }
-
                 byte[] resized = new byte[readCount];
                 Array.Copy(readBuffer, resized, readCount);
 
+                if (enableFileRecording)
+                {
+                    fout.Write(resized, 0, resized.Length);
+                }
+
                 encodedBuffers.Add(resized);
                 totalBytes += readCount;
-                
+
                 foreach (Stream s in listenerStreams)
                 {
-                    s.Write(resized, 0, readCount);
+                    s.Write(resized, 0, resized.Length);
                 }
+            }
+
+            if (fout != null)
+            {
+                fout.Flush();
+                fout.Close();
+                fout = null;
             }
         }
     }

@@ -25,7 +25,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.5";
+                return "0.0.6";
             }
         }
 
@@ -37,10 +37,11 @@ namespace GRemote
         SessionDialog sessionDialog;
         PreferencesDialog prefsDialog;
         AboutDialog aboutDialog;
+        ServerSettings serverSettings = new ServerSettings();
         ServerSession serverSession;
         ClientSession clientSession;
         UpdateChecker updateChecker;
-        EncoderSettings encoderSettings = new EncoderSettings();
+        //EncoderSettings encoderSettings = new EncoderSettings();
 
         int lastEncodedBytes = 0;
         int lastKBps = 0;
@@ -55,6 +56,9 @@ namespace GRemote
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Checks if the server has been created and is running.
+        /// </summary>
         public bool IsServerRunning
         {
             get
@@ -63,6 +67,10 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// If the server is running, it will be stopped, otherwise StartServer()
+        /// will be called.
+        /// </summary>
         public void ToggleServer()
         {
             if (IsServerRunning)
@@ -74,14 +82,19 @@ namespace GRemote
             }
             else
             {
-                StartServer();
-                hostMenuItem.Text = "Stop Server";
-                hostMenuItem.Enabled = true;
-                joinMenuItem.Enabled = false;
+                if (StartServer())
+                {
+                    hostMenuItem.Text = "Stop Server";
+                    hostMenuItem.Enabled = true;
+                    joinMenuItem.Enabled = false;
+                }
             }
         }
 
-        public void StartServer()
+        /// <summary>
+        /// Starts the recording and server.
+        /// </summary>
+        public bool StartServer()
         {
             sessionDialog.addressBox.Text = "0.0.0.0";
             sessionDialog.portBox.Text = "9999";
@@ -92,18 +105,7 @@ namespace GRemote
                 case DialogResult.OK:
                     break;
                 default:
-                    return;
-            }
-
-            int portNumber;
-
-            try
-            {
-                portNumber = int.Parse(sessionDialog.portBox.Text);
-            }
-            catch (Exception e)
-            {
-                portNumber = 9999;
+                    return false;
             }
 
             if (videoCapture == null)
@@ -113,12 +115,21 @@ namespace GRemote
             }
 
             videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
-            serverSession = new ServerSession(FFmpeg, videoCapture, sessionDialog.addressBox.Text, portNumber, encoderSettings);
+
+            serverSettings.Address = sessionDialog.addressBox.Text;
+            serverSettings.PortString = sessionDialog.portBox.Text;
+            
+            serverSession = new ServerSession(FFmpeg, videoCapture, serverSettings);
             serverSession.Preview = videoPreview;
             serverSession.StartServer();
             statusLabel.Text = "Recording...";
+
+            return true;
         }
 
+        /// <summary>
+        /// Stops the ServerSession and any recording.
+        /// </summary>
         public void StopServer()
         {
             if (serverSession != null)
@@ -126,10 +137,20 @@ namespace GRemote
                 serverSession.StopServer();
             }
 
+            if (videoCapture != null)
+            {
+                videoCapture.StopCapturing();
+                videoCapture = null;
+            }
+
             statusLabel.Text = "Not Recording";
             videoPreview.Refresh();
         }
 
+        /// <summary>
+        /// Shows a dialog and connects a ClientSession to begin
+        /// playback.
+        /// </summary>
         public void StartClient()
         {
             if (clientSession != null)
@@ -138,7 +159,7 @@ namespace GRemote
                 clientSession = null;
             }
 
-            sessionDialog.addressBox.Text = "";
+            sessionDialog.addressBox.Text = "localhost";
             sessionDialog.portBox.Text = "9999";
             sessionDialog.finishButton.Text = "Connect";
 
@@ -164,16 +185,26 @@ namespace GRemote
             videoPreview.SetSize(800, 600);
             clientSession = new ClientSession(this, sessionDialog.addressBox.Text, portNumber);
             clientSession.StartClient();
+            statusLabel.Text = "Connecting...";
         }
 
+        /// <summary>
+        /// Stops the current ClientSession and it's playback. If there is
+        /// no connected session this does nothing.
+        /// </summary>
         public void StopClient()
         {
             if (clientSession != null)
             {
                 clientSession.StopClient();
             }
+
+            Refresh();
         }
 
+        /// <summary>
+        /// Stops any recording, playback, server, client, etc.
+        /// </summary>
         public void Stop()
         {
             if (videoCapture != null)
@@ -185,6 +216,9 @@ namespace GRemote
             StopClient();
         }
 
+        /// <summary>
+        /// Information about where FFMpeg is
+        /// </summary>
         public FFMpeg FFmpeg
         {
             get
@@ -193,45 +227,9 @@ namespace GRemote
             }
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-
-
-        private void bandwidthTimer_Tick(object sender, EventArgs e)
-        {
-            /*
-            if (IsServerRunning)
-            {
-                
-            }
-
-            int encodedBytes = videoEncoder.TotalBytes;
-            int delta = (encodedBytes - lastEncodedBytes);
-            int bytesPerSecond = delta * (1000 / bandwidthTimer.Interval);
-            int KBps = (bytesPerSecond / 1024);
-            int adjustedKBps = ((KBps + lastKBps) / 2);
-
-
-            bandwidthLabel.Text = adjustedKBps + " KB/s";
-
-            lastKBps = KBps;
-            lastEncodedBytes = encodedBytes;
-            */
-        }
-
-        private void selectAreaButton_Click(object sender, EventArgs e)
-        {
-            boundsForm.Show();
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ShowAboutDialog();
-        }
-
+        /// <summary>
+        /// Shows the about dialog
+        /// </summary>
         public void ShowAboutDialog()
         {
             if (aboutDialog == null)
@@ -242,29 +240,21 @@ namespace GRemote
             aboutDialog.ShowDialog(this);
         }
 
-        private void pToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ShowPreferences();
-        }
-
+        /// <summary>
+        /// Shows the preferences dialog.
+        /// </summary>
         public void ShowPreferences()
         {
             prefsDialog.ShowDialog(this);
-        }
 
-        private void hostMenuItem_Click(object sender, EventArgs e)
-        {
-            ToggleServer();
-        }
-
-        private void joinMenuItem_Click(object sender, EventArgs e)
-        {
-            StartClient();
+            if (prefsDialog.FileOutputEnabled)
+            {
+                serverSettings.SetFileOutput(prefsDialog.FileOutputPath);
+            }
+            else
+            {
+                serverSettings.DisableFileOutput();
+            }
         }
 
         public void SetPreviewMode(PreviewMode mode)
@@ -303,6 +293,107 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the VideoPreview control used to display playback
+        /// or recording.
+        /// </summary>
+        public VideoPreview VideoPreview
+        {
+            get
+            {
+                return videoPreview;
+            }
+        }
+
+        /// <summary>
+        /// Updates the capture position if recording is enabled.
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void SetCapturePos(int x, int y)
+        {
+            if (videoCapture != null)
+            {
+                videoCapture.SetCapturePos(x, y);
+            }
+        }
+
+        /// <summary>
+        /// Changes the video codec used when recording. If the server is already running
+        /// the codec is changed using SetVideoCodec(), otherwise the EncoderSettings are
+        /// modified so that the next time recording begins it will use this codec.
+        /// 
+        /// This method also updates menu items.
+        /// </summary>
+        /// <param name="codec">Codec being used (like EncoderSettings.codec)</param>
+        public void SetVideoCodec(String codec)
+        {
+
+            if (serverSession != null)
+            {
+                serverSession.SetVideoCodec(codec);
+            }
+            else
+            {
+                serverSettings.EncoderSettings.codec = codec;
+            }
+
+            foreach (ToolStripMenuItem item in codecItem.DropDownItems)
+            {
+                item.Checked = serverSettings.EncoderSettings.codec.Equals(item.Tag);
+            }
+        }
+
+        public void UpdateBandwidth()
+        {
+            if (!IsServerRunning)
+            {
+                return;
+            }
+
+            int encodedBytes = serverSession.Encoder.TotalBytes;
+            int delta = (encodedBytes - lastEncodedBytes);
+            int bytesPerSecond = delta * (1000 / bandwidthTimer.Interval);
+            int KBps = (bytesPerSecond / 1024);
+            int adjustedKBps = ((KBps + lastKBps) / 2);
+
+            bandwidthLabel.Text = adjustedKBps + " KB/s";
+
+            lastKBps = KBps;
+            lastEncodedBytes = encodedBytes;
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void bandwidthTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateBandwidth();
+        }
+
+        private void pToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowPreferences();
+        }
+
+        private void hostMenuItem_Click(object sender, EventArgs e)
+        {
+            ToggleServer();
+        }
+
+        private void joinMenuItem_Click(object sender, EventArgs e)
+        {
+            StartClient();
+        }
+
         private void uncompressedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetPreviewMode(PreviewMode.UNCOMPRESSED);
@@ -333,22 +424,6 @@ namespace GRemote
             Stop();
         }
 
-        public VideoPreview VideoPreview
-        {
-            get
-            {
-                return videoPreview;
-            }
-        }
-
-        public void SetCapturePos(int x, int y)
-        {
-            if (videoCapture != null)
-            {
-                videoCapture.SetCapturePos(x, y);
-            }
-        }
-
         private void checkUpdatesItem_Click(object sender, EventArgs e)
         {
             if (updateChecker == null)
@@ -356,7 +431,8 @@ namespace GRemote
                 updateChecker = new UpdateChecker();
             }
 
-            updateChecker.Check(delegate(bool hasUpdate) {
+            updateChecker.Check(delegate(bool hasUpdate)
+            {
                 if (hasUpdate)
                 {
                     MessageBox.Show("New version is available");
@@ -366,26 +442,6 @@ namespace GRemote
                     MessageBox.Show("Already up to date");
                 }
             });
-        }
-
-        public void SetVideoCodec(String codec)
-        {
-
-            Console.WriteLine("Codec changed: {0}", codec);
-
-            if (serverSession != null)
-            {
-                serverSession.SetVideoCodec(codec);
-            }
-            else
-            {
-                encoderSettings.codec = codec;
-            }
-
-            foreach (ToolStripMenuItem item in codecItem.DropDownItems)
-            {
-                item.Checked = encoderSettings.codec.Equals(item.Tag);
-            }
         }
 
         private void codecItem_Click(object sender, EventArgs e)
@@ -421,6 +477,14 @@ namespace GRemote
             SetVideoCodec("theora");
         }
 
+        private void selectAreaButton_Click(object sender, EventArgs e)
+        {
+            boundsForm.Show();
+        }
 
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowAboutDialog();
+        }
     }
 }

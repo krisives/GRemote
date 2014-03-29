@@ -70,7 +70,6 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.connectedLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.bandwidthLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
             this.videoPreview = new GRemote.VideoPreview();
@@ -167,7 +166,7 @@
             this.wmv2ToolStripMenuItem,
             this.theoraToolStripMenuItem});
             this.codecItem.Name = "codecItem";
-            this.codecItem.Size = new System.Drawing.Size(152, 22);
+            this.codecItem.Size = new System.Drawing.Size(129, 22);
             this.codecItem.Text = "Codec";
             // 
             // x264Item
@@ -175,7 +174,7 @@
             this.x264Item.Checked = true;
             this.x264Item.CheckState = System.Windows.Forms.CheckState.Checked;
             this.x264Item.Name = "x264Item";
-            this.x264Item.Size = new System.Drawing.Size(152, 22);
+            this.x264Item.Size = new System.Drawing.Size(106, 22);
             this.x264Item.Tag = "libx264";
             this.x264Item.Text = "x264";
             this.x264Item.Click += new System.EventHandler(this.codecItem_Click);
@@ -183,7 +182,7 @@
             // xvidItem
             // 
             this.xvidItem.Name = "xvidItem";
-            this.xvidItem.Size = new System.Drawing.Size(152, 22);
+            this.xvidItem.Size = new System.Drawing.Size(106, 22);
             this.xvidItem.Tag = "libxvid";
             this.xvidItem.Text = "xvid";
             this.xvidItem.Click += new System.EventHandler(this.codecItem_Click);
@@ -191,7 +190,7 @@
             // wmv1ToolStripMenuItem
             // 
             this.wmv1ToolStripMenuItem.Name = "wmv1ToolStripMenuItem";
-            this.wmv1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv1ToolStripMenuItem.Size = new System.Drawing.Size(106, 22);
             this.wmv1ToolStripMenuItem.Tag = "wmv1";
             this.wmv1ToolStripMenuItem.Text = "wmv1";
             this.wmv1ToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
@@ -199,7 +198,7 @@
             // wmv2ToolStripMenuItem
             // 
             this.wmv2ToolStripMenuItem.Name = "wmv2ToolStripMenuItem";
-            this.wmv2ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.wmv2ToolStripMenuItem.Size = new System.Drawing.Size(106, 22);
             this.wmv2ToolStripMenuItem.Tag = "wmv2";
             this.wmv2ToolStripMenuItem.Text = "wmv2";
             this.wmv2ToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
@@ -207,7 +206,7 @@
             // theoraToolStripMenuItem
             // 
             this.theoraToolStripMenuItem.Name = "theoraToolStripMenuItem";
-            this.theoraToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.theoraToolStripMenuItem.Size = new System.Drawing.Size(106, 22);
             this.theoraToolStripMenuItem.Tag = "theora";
             this.theoraToolStripMenuItem.Text = "theora";
             this.theoraToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
@@ -220,7 +219,7 @@
             this.toolStripMenuItem3,
             this.toolStripMenuItem4});
             this.resolutionToolStripMenuItem.Name = "resolutionToolStripMenuItem";
-            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.resolutionToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.resolutionToolStripMenuItem.Text = "Downscale";
             // 
             // pToolStripMenuItem
@@ -261,7 +260,7 @@
             this.kbps75KBsToolStripMenuItem,
             this.kbps35KBsToolStripMenuItem});
             this.bitrateToolStripMenuItem.Name = "bitrateToolStripMenuItem";
-            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bitrateToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.bitrateToolStripMenuItem.Text = "Bitrate";
             // 
             // toolStripMenuItem1
@@ -298,7 +297,7 @@
             this.splitViewToolStripMenuItem,
             this.noneToolStripMenuItem});
             this.previewToolStripMenuItem.Name = "previewToolStripMenuItem";
-            this.previewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.previewToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
             this.previewToolStripMenuItem.Text = "Preview";
             // 
             // uncompressedToolStripMenuItem
@@ -334,12 +333,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(126, 6);
             // 
             // selectAreaButton
             // 
             this.selectAreaButton.Name = "selectAreaButton";
-            this.selectAreaButton.Size = new System.Drawing.Size(152, 22);
+            this.selectAreaButton.Size = new System.Drawing.Size(129, 22);
             this.selectAreaButton.Text = "Select Area";
             this.selectAreaButton.Click += new System.EventHandler(this.selectAreaButton_Click);
             // 
@@ -374,6 +373,7 @@
             // 
             // bandwidthTimer
             // 
+            this.bandwidthTimer.Enabled = true;
             this.bandwidthTimer.Interval = 1000;
             this.bandwidthTimer.Tick += new System.EventHandler(this.bandwidthTimer_Tick);
             // 
@@ -382,7 +382,6 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel,
             this.toolStripStatusLabel1,
-            this.connectedLabel,
             this.bandwidthLabel});
             this.statusStrip1.Location = new System.Drawing.Point(0, 551);
             this.statusStrip1.Name = "statusStrip1";
@@ -399,15 +398,8 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(586, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(665, 17);
             this.toolStripStatusLabel1.Spring = true;
-            // 
-            // connectedLabel
-            // 
-            this.connectedLabel.Name = "connectedLabel";
-            this.connectedLabel.Size = new System.Drawing.Size(79, 17);
-            this.connectedLabel.Text = "Not Connected";
-            this.connectedLabel.Click += new System.EventHandler(this.toolStripStatusLabel2_Click);
             // 
             // bandwidthLabel
             // 
@@ -425,7 +417,7 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.videoPreview.BackColor = System.Drawing.Color.Black;
-            this.videoPreview.Location = new System.Drawing.Point(0, 27);
+            this.videoPreview.Location = new System.Drawing.Point(12, 27);
             this.videoPreview.Name = "videoPreview";
             this.videoPreview.PreviewMode = GRemote.PreviewMode.COMPRESSED;
             this.videoPreview.Size = new System.Drawing.Size(792, 521);
@@ -490,7 +482,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private VideoPreview videoPreview;
         private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
-        private System.Windows.Forms.ToolStripStatusLabel connectedLabel;
         private System.Windows.Forms.Timer playbackTimer;
         private System.Windows.Forms.ToolStripMenuItem x264Item;
         private System.Windows.Forms.ToolStripMenuItem wmv1ToolStripMenuItem;

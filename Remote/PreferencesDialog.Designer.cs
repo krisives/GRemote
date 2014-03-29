@@ -55,7 +55,6 @@
             // enableSave
             // 
             this.enableSave.AutoSize = true;
-            this.enableSave.Enabled = false;
             this.enableSave.Location = new System.Drawing.Point(11, 37);
             this.enableSave.Name = "enableSave";
             this.enableSave.Size = new System.Drawing.Size(84, 17);

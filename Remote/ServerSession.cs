@@ -21,8 +21,8 @@ namespace GRemote
         bool running;
 
         // Address to listen on
-        int port;
-        String address;
+        //int port;
+       // String address;
 
         // Threads used to accept and process network data
         Thread listenThread;
@@ -48,15 +48,18 @@ namespace GRemote
 
         VideoPreview videoPreview;
 
-        EncoderSettings encoderSettings;// = new EncoderSettings();
+        ServerSettings settings;
+        //EncoderSettings encoderSettings;// = new EncoderSettings();
 
-        public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, String address, int port, EncoderSettings encoderSettings)
+        public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, ServerSettings settings)
         {
             this.ffmpeg = ffmpeg;
-            this.encoderSettings = encoderSettings;
+            
+            //this.encoderSettings = encoderSettings;
             this.videoCapture = videoCapture;
-            this.address = address;
-            this.port = port;
+            this.settings = settings;
+            //this.address = address;
+            //this.port = port;
 
             headerBuffer = new byte[1024];
             headerStream = new MemoryStream(headerBuffer, 0, 1024);
@@ -67,7 +70,15 @@ namespace GRemote
         {
             get
             {
-                return encoderSettings;
+                return settings.EncoderSettings;
+            }
+        }
+
+        public VideoEncoder Encoder
+        {
+            get
+            {
+                return videoEncoder;
             }
         }
 
@@ -102,7 +113,13 @@ namespace GRemote
             videoCapture.Listener = Snapshot;
 
             videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-            videoEncoder.StartEncoding(encoderSettings);
+
+            if (settings.FileOutputEnabled)
+            {
+                videoEncoder.EnableFileOutput(settings.FileOutputPath);
+            }
+
+            videoEncoder.StartEncoding(settings.EncoderSettings);
 
            // videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
            // videoDecoder.StartDecoding();
@@ -124,6 +141,7 @@ namespace GRemote
 
         public void RestartStream(Callback f)
         {
+            VideoStartPacket packet = new VideoStartPacket();
             videoEncoder.StopEncoding();
             outputBuffers.Clear();
 
@@ -132,9 +150,9 @@ namespace GRemote
                 f();
             }
 
-            
-            
-            videoEncoder.StartEncoding(encoderSettings);
+            AddPacket(packet);
+
+            videoEncoder.StartEncoding(settings.EncoderSettings);
         }
 
         public void RestartStream()
@@ -195,18 +213,6 @@ namespace GRemote
                 videoEncoder = null;
             }
 
-           // if (videoDecoder != null)
-            //{
-           //     videoDecoder.StopDecoding();
-            //    videoDecoder = null;
-           // }
-
-            if (videoCapture != null)
-            {
-                videoCapture.StopCapturing();
-                videoCapture = null;
-            }
-
             socket.Close();
             outputBuffers.Clear();
 
@@ -220,19 +226,7 @@ namespace GRemote
         protected void listenThreadMain()
         {
             Socket clientSocket;
-            IPAddress hostIP;
-            IPEndPoint ep;
-
-            if (address == "" || address == "0.0.0.0" || address == "localhost")
-            {
-                hostIP = IPAddress.Any;
-            }
-            else
-            {
-                hostIP = Dns.GetHostEntry(address).AddressList[0];
-            }
-
-            ep = new IPEndPoint(hostIP, port);
+            IPEndPoint ep = new IPEndPoint(settings.IPAddress, settings.Port);
 
             socket.Bind(ep);
             socket.Listen(20);
@@ -357,7 +351,7 @@ namespace GRemote
 
         public void SetVideoCodec(string codec)
         {
-            encoderSettings.codec = codec;
+            settings.EncoderSettings.codec = codec;
             RestartStream();
 
         }

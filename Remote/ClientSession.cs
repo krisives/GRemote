@@ -79,11 +79,20 @@ namespace GRemote
 
                 switch ((PacketType)packetType)
                 {
+                    case PacketType.VIDEO_START:
+                        readVideoStart();
+                        break;
                     case PacketType.VIDEO_UPDATE:
                         readVideoPacket();
                         break;
                 }
             }
+        }
+
+        protected void readVideoStart()
+        {
+            videoDecoder.StopDecoding();
+            videoDecoder.StartDecoding();
         }
 
         protected void readVideoPacket()

@@ -16,6 +16,22 @@ namespace GRemote
             InitializeComponent();
         }
 
+        public bool FileOutputEnabled
+        {
+            get
+            {
+                return enableSave.Checked;
+            }
+        }
+
+        public String FileOutputPath
+        {
+            get
+            {
+                return saveFilename.Text;
+            }
+        }
+
         private void PreferencesDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             Hide();

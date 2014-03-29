@@ -36,14 +36,29 @@ namespace GRemote
             this.decodeBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
         }
 
+        public bool IsDecoding
+        {
+            get
+            {
+                lock (this)
+                {
+                    return started;
+                }
+            }
+        }
+
         public void StartDecoding()
         {
-            if (started)
+            if (IsDecoding)
             {
                 return;
             }
 
-            started = true;
+            lock (this)
+            {
+                started = true;
+            }
+
             buffers.Clear();
 
             process = new Process();
@@ -102,44 +117,72 @@ namespace GRemote
 
         public void StopDecoding()
         {
-            if (!started)
+            if (!IsDecoding)
             {
                 return;
             }
 
-            started = false;
+            lock (this)
+            {
+                started = false;
+            }
+
             buffers.Clear();
+            decodedBuffers.Clear();
 
-            process.StandardError.Close();
-            process.StandardInput.Close();
-            process.StandardOutput.Close();
-            process.Close();
+            if (bufferedInputStream != null)
+            {
+                bufferedInputStream.Close();
+                bufferedInputStream = null;
+            }
 
-           // Thread.Sleep(1000);
+            if (bufferedOutputStream != null)
+            {
+                bufferedOutputStream.Close();
+                bufferedOutputStream = null;
+            }
 
-            //if (!process.HasExited)
-           // {
-             //   process.Kill();
-           // }
+            try
+            {
+                process.StandardError.Close();
+                process.StandardInput.Close();
+                process.StandardOutput.Close();
+                process.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             process = null;
+
+            buffers = new BufferPool();
+            decodedBuffers = new BufferPool();
         }
 
+        /// <summary>
+        /// Reads encoded data buffers from FFMpeg
+        /// </summary>
         public void readThreadMain()
         {
             int frameSize = width * height * 3;
             byte[] readBuffer = new byte[frameSize];
             int pos = 0;
             int bytesRead;
-           // int remaining;
+            BufferedStream bufferedInputStream = this.bufferedInputStream;
 
-            while (started)
+            while (IsDecoding)
             {
                 bytesRead = bufferedInputStream.Read(readBuffer, pos, readBuffer.Length - pos);
 
                 if (bytesRead <= 0)
                 {
                     continue;
+                }
+
+                if (!IsDecoding)
+                {
+                    break;
                 }
 
                 pos += bytesRead;
@@ -159,6 +202,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Writes raw bitmap buffer data to FFMpeg
+        /// </summary>
         public void writeThreadMain()
         {
             byte[] nextBuffer = null;
@@ -185,7 +231,10 @@ namespace GRemote
             }
         }
 
-        public void errorThreadMain()
+        /// <summary>
+        /// Reads FFMpeg diagnostics output
+        /// </summary>
+        protected void errorThreadMain()
         {
             while (started)
             {
