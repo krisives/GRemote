@@ -37,6 +37,8 @@ namespace GRemote
                 throw new Exception("Capture dimensions must be even (divisible by two)");
             }
 
+            Console.WriteLine("Capturing buffer {0}x{1}", width, height);
+
             this.width = width;
             this.height = height;
             this.size = new Size(width, height);

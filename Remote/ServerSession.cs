@@ -35,7 +35,6 @@ namespace GRemote
         // Capture, encoder and decoder for processing video data
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
-        //VideoDecoder videoDecoder;
 
         // 1K buffer for constructing header packets
         byte[] headerBuffer;
@@ -119,9 +118,6 @@ namespace GRemote
 
             videoEncoder.StartEncoding(settings.EncoderSettings);
 
-           // videoDecoder = new VideoDecoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-           // videoDecoder.StartDecoding();
-
             // Create networking threads
             listenThread = new ServerListenThread(this, clients, socket);
             readThread = new ServerReadThread(this);
@@ -139,7 +135,7 @@ namespace GRemote
 
         public void RestartStream(Callback f)
         {
-            VideoStartPacket packet = new VideoStartPacket();
+            VideoStartPacket packet = new VideoStartPacket(videoCapture.Width, videoCapture.Height);
             videoEncoder.StopEncoding();
             outputBuffers.Clear();
 
@@ -160,6 +156,18 @@ namespace GRemote
 
         protected void Snapshot()
         {
+            try
+            {
+                SnapshotReal();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+        protected void SnapshotReal()
+        {
             byte[] encodedVideoBuffer;
 
             if (!IsRunning)
@@ -171,11 +179,6 @@ namespace GRemote
 
             while ((encodedVideoBuffer = videoEncoder.Read()) != null)
             {
-                //if (videoDecoder != null)
-                //{
-                //    videoDecoder.Decode(encodedVideoBuffer);
-                //}
-
                 AddVideoBuffer(encodedVideoBuffer);
             }
 
@@ -213,10 +216,16 @@ namespace GRemote
                 videoEncoder = null;
             }
 
-            socket.Close();
-            socket = null;
+            if (socket != null)
+            {
+                socket.Close();
+                socket = null;
+            }
 
-            outputBuffers.Clear();
+            if (outputBuffers != null)
+            {
+                outputBuffers.Clear();
+            }
 
             if (readThread != null)
             {
@@ -384,10 +393,9 @@ namespace GRemote
         protected override void RunThread()
         {
              byte[] nextBuffer;
-
-             //outputBuffers.Wait();
+             
              nextBuffer = outputBuffers.Remove();
-
+             
              if (nextBuffer == null)
              {
                  KillClients();

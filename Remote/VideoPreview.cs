@@ -41,6 +41,8 @@ namespace GRemote
             rightHalf.Y = 0;
             rightHalf.Width = leftHalf.Width;
             rightHalf.Height = height;
+
+            Console.WriteLine("Preview set to {0}x{1}", width, height);
         }
 
 

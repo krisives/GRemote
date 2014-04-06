@@ -32,6 +32,8 @@ namespace GRemote
                 throw new Exception("Capture dimensions must be even (divisible by two)");
             }
 
+            Console.WriteLine("Decoding buffer {0}x{1}", width, height);
+
             this.ffmpeg = ffmpeg;
             this.width = width;
             this.height = height;

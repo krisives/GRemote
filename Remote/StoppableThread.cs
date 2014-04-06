@@ -17,7 +17,7 @@ namespace GRemote
             handle = new Thread(new ThreadStart(Run));
         }
 
-        public void Start()
+        public virtual void Start()
         {
             lock (this)
             {
@@ -37,7 +37,7 @@ namespace GRemote
             handle.Start();
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             lock (this)
             {

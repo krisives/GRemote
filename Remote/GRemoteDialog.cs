@@ -407,14 +407,14 @@ namespace GRemote
 
         public void UpdateBandwidth()
         {
-            int encodedBytes;
+            int encodedBytes = 0;
 
             if (IsServerRunning)
             {
                 encodedBytes = serverSession.Encoder.TotalBytes;
             } else if (IsClientRunning)
             {
-                encodedBytes = clientSession.Decoder.TotalBytesDecoded;
+               // encodedBytes = clientSession.Decoder.TotalBytesDecoded;
             }
             else
             {

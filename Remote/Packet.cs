@@ -129,10 +129,33 @@ namespace GRemote
 
     public class VideoStartPacket : Packet
     {
-        public VideoStartPacket()
-            : base(PacketType.VIDEO_START, 1)
+        public VideoStartPacket(int width, int height)
+            : base(PacketType.VIDEO_START, 9)
+        {
+            WriteInt32(width,  this.Buffer, 1);
+            WriteInt32(height, this.Buffer, 5);
+        }
+
+        public VideoStartPacket(byte[] buffer)
+            : base(buffer)
         {
 
+        }
+
+        public int VideoWidth
+        {
+            get
+            {
+                return ReadInt32(this.Buffer, 1);
+            }
+        }
+
+        public int VideoHeight
+        {
+            get
+            {
+                return ReadInt32(this.Buffer, 5);
+            }
         }
     }
 

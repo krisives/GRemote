@@ -20,7 +20,7 @@ namespace GRemote
         String address;
         int port;
         bool running;
-        VideoDecoder videoDecoder;
+        //VideoDecoder videoDecoder;
         VideoPreview videoPreview;
 
         public ClientSession(GRemoteDialog gRemote, String address, int port)
@@ -47,6 +47,22 @@ namespace GRemote
             }
         }
 
+        public FFMpeg FFMpeg
+        {
+            get
+            {
+                return gRemote.FFmpeg;
+            }
+        }
+
+        public VideoPreview Preview
+        {
+            get
+            {
+                return videoPreview;
+            }
+        }
+
         public bool IsRunning
         {
             get
@@ -58,13 +74,13 @@ namespace GRemote
             }
         }
 
-        public VideoDecoder Decoder
-        {
-            get
-            {
-                return videoDecoder;
-            }
-        }
+       // public VideoDecoder Decoder
+       // {
+       //     get
+        //    {
+        //        return videoDecoder;
+         //   }
+        //}
 
         public void StartClient()
         {
@@ -78,9 +94,9 @@ namespace GRemote
                 running = true;
             }
 
-            videoDecoder = new VideoDecoder(gRemote.FFmpeg, 800, 600);
-            videoDecoder.VideoPreview = gRemote.VideoPreview;
-            videoDecoder.StartDecoding();
+            //videoDecoder = new VideoDecoder(gRemote.FFmpeg, 800, 600);
+            //videoDecoder.VideoPreview = gRemote.VideoPreview;
+            //videoDecoder.StartDecoding();
 
             readThread = new ClientReadThread(this);
             writeThread = new ClientWriteThread();
@@ -98,11 +114,11 @@ namespace GRemote
 
             running = false;
 
-            if (videoDecoder != null)
-            {
-                videoDecoder.StopDecoding();
-                videoDecoder = null;
-            }
+            //if (videoDecoder != null)
+            //{
+           //     videoDecoder.StopDecoding();
+            //    videoDecoder = null;
+            //}
 
             if (writeThread != null)
             {
@@ -117,10 +133,10 @@ namespace GRemote
             }
         }
 
-        public void SetDecoder(VideoDecoder videoDecoder)
-        {
-            this.videoDecoder = videoDecoder;
-        }
+        //public void SetDecoder(VideoDecoder videoDecoder)
+        //{
+        //    this.videoDecoder = videoDecoder;
+        //}
     }
 
     public class ClientWriteThread : StoppableThread
@@ -138,6 +154,8 @@ namespace GRemote
 
     public class ClientReadThread : StoppableThread
     {
+        FFMpeg ffmpeg;
+        VideoPreview preview;
         ClientSession client;
         Socket socket;
         NetworkStream networkStream;
@@ -147,7 +165,9 @@ namespace GRemote
         public ClientReadThread(ClientSession client)
         {
             this.client = client;
-            this.decoder = client.Decoder;
+            this.ffmpeg = client.FFMpeg;
+            this.preview = client.Preview;
+            this.decoder = null;// client.Decoder;
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
             IPAddress hostIP = (Dns.Resolve(client.Address)).AddressList[0];
@@ -157,6 +177,17 @@ namespace GRemote
             
             this.networkStream = new NetworkStream(socket);
             this.binaryReader = new BinaryReader(networkStream);
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+
+            if (decoder != null)
+            {
+                decoder.StopDecoding();
+                decoder = null;
+            }
         }
 
         protected override void RunThread()
@@ -178,7 +209,20 @@ namespace GRemote
 
         protected void readVideoStart()
         {
-            decoder.StopDecoding();
+            if (decoder != null)
+            {
+                decoder.StopDecoding();
+                decoder = null;
+            }
+
+            byte[] buffer = new byte[9];
+            buffer[0] = (byte)PacketType.VIDEO_START;
+            binaryReader.Read(buffer, 1, 8);
+            VideoStartPacket packet = new VideoStartPacket(buffer);
+
+            decoder = new VideoDecoder(ffmpeg, packet.VideoWidth, packet.VideoHeight);
+            preview.SetSize(packet.VideoWidth, packet.VideoHeight);
+            decoder.VideoPreview = preview;
             decoder.StartDecoding();
         }
 
@@ -186,7 +230,12 @@ namespace GRemote
         {
             int packetLength = binaryReader.ReadInt32();
             byte[] buffer = binaryReader.ReadBytes(packetLength);
-            decoder.Decode(buffer);
+
+            if (decoder != null)
+            {
+                decoder.Decode(buffer);
+            }
+
             //videoPreview.RenderDirect(videoDecoder.Buffer);
         }
     }

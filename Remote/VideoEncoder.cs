@@ -44,6 +44,8 @@ namespace GRemote
                 throw new Exception("Capture dimensions must be even (divisible by two)");
             }
 
+            Console.WriteLine("Encoding buffer {0}x{1}", width, height);
+
             this.width = width;
             this.height = height;
             this.lockBounds = new Rectangle(0, 0, width, height);
