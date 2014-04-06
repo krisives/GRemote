@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace GRemote
 {
-    class ServerSession
+    public class ServerSession
     {
         FFMpeg ffmpeg;
 
@@ -20,14 +20,10 @@ namespace GRemote
         // True if server is running
         bool running;
 
-        // Address to listen on
-        //int port;
-       // String address;
-
         // Threads used to accept and process network data
-        Thread listenThread;
-        Thread writeThread;
-        Thread readThread;
+        StoppableThread listenThread;
+        StoppableThread writeThread;
+        StoppableThread readThread;
 
         // List of clients that are connected
         List<ConnectedClient> clients = new List<ConnectedClient>();
@@ -39,31 +35,33 @@ namespace GRemote
         // Capture, encoder and decoder for processing video data
         VideoCapture videoCapture;
         VideoEncoder videoEncoder;
-       // VideoDecoder videoDecoder;
+        //VideoDecoder videoDecoder;
 
         // 1K buffer for constructing header packets
         byte[] headerBuffer;
         MemoryStream headerStream;
         BinaryWriter headerBinary;
-
         VideoPreview videoPreview;
-
         ServerSettings settings;
-        //EncoderSettings encoderSettings;// = new EncoderSettings();
+        List<ConnectedClient> killList = new List<ConnectedClient>();
 
         public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, ServerSettings settings)
         {
             this.ffmpeg = ffmpeg;
-            
-            //this.encoderSettings = encoderSettings;
             this.videoCapture = videoCapture;
             this.settings = settings;
-            //this.address = address;
-            //this.port = port;
 
             headerBuffer = new byte[1024];
             headerStream = new MemoryStream(headerBuffer, 0, 1024);
             headerBinary = new BinaryWriter(headerStream);
+        }
+
+        public ServerSettings Settings
+        {
+            get
+            {
+                return settings;
+            }
         }
 
         public EncoderSettings EncoderSettings
@@ -125,9 +123,9 @@ namespace GRemote
            // videoDecoder.StartDecoding();
 
             // Create networking threads
-            listenThread = new Thread(listenThreadMain);
-            readThread = new Thread(readThreadMain);
-            writeThread = new Thread(writeThreadMain);
+            listenThread = new ServerListenThread(this, clients, socket);
+            readThread = new ServerReadThread(this);
+            writeThread = new ServerWriteThread(this, outputBuffers, clients, killList);
 
             // Start networking threads
             listenThread.Start();
@@ -216,50 +214,29 @@ namespace GRemote
             }
 
             socket.Close();
+            socket = null;
+
             outputBuffers.Clear();
 
-            readThread = null;
-            writeThread = null;
-            listenThread = null;
-            socket = null;
-            outputBuffers = new BufferPool();
-        }
-
-        protected void listenThreadMain()
-        {
-            Socket clientSocket;
-            IPEndPoint ep = new IPEndPoint(settings.IPAddress, settings.Port);
-
-            socket.Bind(ep);
-            socket.Listen(20);
-
-            while (running)
+            if (readThread != null)
             {
-                try
-                {
-                    clientSocket = socket.Accept();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    continue;
-                }
-
-                if (clientSocket == null)
-                {
-                    continue;
-                }
-
-                ConnectedClient client = new ConnectedClient();
-
-                client.socket = clientSocket;
-                client.stream = new NetworkStream(clientSocket);
-                client.writer = new BinaryWriter(client.stream);
-
-                RestartStream(delegate() {
-                    clients.Add(client);
-                });
+                readThread.Stop();
+                readThread = null;
             }
+
+            if (writeThread != null)
+            {
+                writeThread.Stop();
+                writeThread = null;
+            }
+
+            if (listenThread != null)
+            {
+                listenThread.Stop();
+                listenThread = null;
+            }
+
+            outputBuffers = new BufferPool();
         }
 
         protected void AddPacket(Packet packet)
@@ -291,43 +268,6 @@ namespace GRemote
             outputBuffers.Add(buffer);
         }
 
-        List<ConnectedClient> killList = new List<ConnectedClient>();
-
-        protected void writeThreadMain()
-        {
-            byte[] nextBuffer;
-            
-
-            while (running)
-            {
-                outputBuffers.Wait();
-                nextBuffer = outputBuffers.Remove();
-
-                if (nextBuffer == null)
-                {
-                    continue;
-                }
-
-                foreach (ConnectedClient client in clients) {
-                    try
-                    {
-                        client.writer.Write(nextBuffer);
-                    }
-                    catch (Exception e)
-                    {
-                        KillClient(client);
-                    }
-                }
-
-                foreach (ConnectedClient client in killList)
-                {
-                    clients.Remove(client);
-                }
-
-                killList.Clear();
-            }
-        }
-
         public void KillClient(ConnectedClient client)
         {
             client.writer.Close();
@@ -336,19 +276,8 @@ namespace GRemote
             lock (killList)
             {
                 killList.Add(client);
+                outputBuffers.Pulse();
             }
-        }
-
-        protected void readThreadMain()
-        {
-
-        }
-
-        public class ConnectedClient
-        {
-            public Socket socket;
-            public NetworkStream stream;
-            public BinaryWriter writer;
         }
 
         public void SetVideoCodec(string codec)
@@ -365,5 +294,132 @@ namespace GRemote
         }
     }
 
- 
+    public class ConnectedClient
+    {
+        public Socket socket;
+        public NetworkStream stream;
+        public BinaryWriter writer;
+    }
+
+
+    public class ServerListenThread : StoppableThread
+    {
+        ServerSession server;
+        Socket socket;
+        ServerSettings settings;
+        List<ConnectedClient> clients;
+
+        public ServerListenThread(ServerSession server, List<ConnectedClient> clients, Socket socket)
+        {
+            this.server = server;
+            this.settings = server.Settings;
+            this.clients = clients;
+            this.socket = socket;
+
+            socket.Bind(new IPEndPoint(settings.IPAddress, settings.Port));
+            socket.Listen(20);
+        }
+
+        protected override void RunThread()
+        {
+            Socket clientSocket;
+            IPEndPoint ep = new IPEndPoint(settings.IPAddress, settings.Port);
+
+            try
+            {
+                clientSocket = socket.Accept();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return;
+            }
+
+            if (clientSocket == null)
+            {
+                return;
+            }
+
+            ConnectedClient client = new ConnectedClient();
+
+            client.socket = clientSocket;
+            client.stream = new NetworkStream(clientSocket);
+            client.writer = new BinaryWriter(client.stream);
+
+            server.RestartStream(delegate()
+            {
+                clients.Add(client);
+            });
+        }
+    }
+
+    public class ServerReadThread : StoppableThread
+    {
+        public ServerReadThread(ServerSession server)
+        {
+
+        }
+
+        protected override void RunThread()
+        {
+            Stop();
+        }
+    }
+
+    public class ServerWriteThread : StoppableThread
+    {
+        ServerSession server;
+        BufferPool outputBuffers;
+        List<ConnectedClient> killList;
+        List<ConnectedClient> clients;
+
+        public ServerWriteThread(ServerSession server, BufferPool outputBuffers, List<ConnectedClient> clients, List<ConnectedClient> killList)
+        {
+            this.server = server;
+            this.outputBuffers = outputBuffers;
+            this.clients = clients;
+            this.killList = killList;
+        }
+
+        protected override void RunThread()
+        {
+             byte[] nextBuffer;
+
+             //outputBuffers.Wait();
+             nextBuffer = outputBuffers.Remove();
+
+             if (nextBuffer == null)
+             {
+                 KillClients();
+                 return;
+             }
+             
+             foreach (ConnectedClient client in clients)
+             {
+                 try
+                 {
+                     client.writer.Write(nextBuffer);
+                 }
+                 catch (Exception e)
+                 {
+                     server.KillClient(client);
+                 }
+             }
+             
+             KillClients();
+        }
+
+        protected void KillClients()
+        {
+            lock (killList)
+            {
+                foreach (ConnectedClient client in killList)
+                {
+                    clients.Remove(client);
+                }
+
+                killList.Clear();
+            }
+        }
+    }
 }

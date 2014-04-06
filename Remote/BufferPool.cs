@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace GRemote
 {
-    class BufferPool
+    public class BufferPool
     {
         List<byte[]> buffers = new List<byte[]>();
         int totalSize;

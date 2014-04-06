@@ -11,20 +11,19 @@ using System.IO;
 
 namespace GRemote
 {
-    class VideoEncoder
+    public class VideoEncoder
     {
         FFMpeg ffmpeg;
         int width;
         int height;
         Rectangle lockBounds;
         volatile bool started = false;
-        BufferPool buffers = new BufferPool();
+        BufferPool frameBuffers = new BufferPool();
         BufferPool encodedBuffers = new BufferPool();
         Process process;
-        Thread errorThread;
-        Thread writeThread;
-        Thread readThread;
-        BufferedStream bufferedStream;
+        StoppableThread errorThread;
+        StoppableThread writeThread;
+        StoppableThread readThread;
         List<Stream> listenerStreams = new List<Stream>();
         volatile int totalBytes = 0;
         Stream fout;
@@ -110,12 +109,16 @@ namespace GRemote
             }
 
             totalBytes = 0;
-            buffers.Clear();
+            frameBuffers.Clear();
 
             if (enableFileRecording)
             {
                 fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
             }
+
+            // Create new buffer pools in case threads are still doing things
+            frameBuffers = new BufferPool();
+            encodedBuffers = new BufferPool();
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments(settings);
@@ -128,11 +131,9 @@ namespace GRemote
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.Start();
 
-            bufferedStream = new BufferedStream(process.StandardInput.BaseStream);
-
-            readThread = new Thread(new ThreadStart(readThreadMain));
-            writeThread = new Thread(new ThreadStart(writeThreadMain));
-            errorThread = new Thread(new ThreadStart(errorThreadMain));
+            readThread = new VideoEncoderReadThread(this, process, encodedBuffers);//new Thread(new ThreadStart(readThreadMain));
+            writeThread = new VideoEncoderWriteThread(this, process, frameBuffers);//new Thread(new ThreadStart(writeThreadMain));
+            errorThread = new VideoEncoderErrorThread(this, process);//new Thread(new ThreadStart(errorThreadMain));
 
             errorThread.Start();
             readThread.Start();
@@ -185,7 +186,7 @@ namespace GRemote
             }
 
             // Add the buffer to the pool to write to FFMpeg
-            buffers.Add(buffer);
+            frameBuffers.Add(buffer);
         }
 
         public void StopEncoding()
@@ -200,149 +201,44 @@ namespace GRemote
                 started = false;
             }
 
-            process.StandardInput.Close();
-            process.StandardError.Close();
-            process.WaitForExit();
-            //process.StandardOutput.Close();
-            //process.Close();
-            //process = null;
-
-            buffers.Pulse();
+            frameBuffers.Pulse();
             encodedBuffers.Pulse();
 
-            //buffers.Clear();
-            //buffers = new BufferPool();
+            try
+            {
+                process.StandardInput.Close();
+                process.StandardError.Close();
+                process.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-            //encodedBuffers.Clear();
-            //encodedBuffers = new BufferPool();
+            process = null;
+
+            if (readThread != null)
+            {
+                readThread.Stop();
+                readThread = null;
+            }
+
+            if (writeThread != null)
+            {
+                writeThread.Stop();
+                writeThread = null;
+            }
+
+            if (errorThread != null)
+            {
+                errorThread.Stop();
+                errorThread = null;
+            }
         }
 
         public byte[] Read()
         {
             return encodedBuffers.Remove();
-        }
-
-        
-        public void errorThreadMain()
-        {
-            while (started)
-            {
-                try
-                {
-                    readError();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    continue;
-                }
-            }
-        }
-
-        protected void readError()
-        {
-            String str = process.StandardError.ReadLine();
-
-            if (str != null && str.Length > 0)
-            {
-               // Console.WriteLine("[ENCODE] {0}", str);
-            }
-        }
-
-        public void writeThreadMain()
-        {
-            while (started)
-            {
-                try
-                {
-                    buffers.Wait();
-                    writeBuffer();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    continue;
-                }
-            }
-        }
-
-        protected void writeBuffer()
-        {
-            byte[] nextBuffer = buffers.Remove();
-
-            if (nextBuffer == null)
-            {
-                return;
-            }
-
-            bufferedStream.Write(nextBuffer, 0, nextBuffer.Length);
-        }
-
-        /// <summary>
-        /// Reads the encoded output of FFMpeg.
-        /// </summary>
-        public void readThreadMain()
-        {
-            // Encoded data is read from FFMPeg in 16K chunks
-            byte[] readBuffer = new byte[1024 * 16];
-            int readCount;
-            //int pos = 0;
-            Stream stream = new BufferedStream(process.StandardOutput.BaseStream);
-            BufferPool encodedBufers = this.encodedBuffers;
-            Stream fout = this.fout;
-
-            while (IsEncoding)
-            {
-                try
-                {
-                    // Read encoded output of FFMpeg
-                    readCount = stream.Read(readBuffer, 0, readBuffer.Length);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    break;
-                }
-
-                if (readCount <= 0)
-                {
-                    continue;
-                }
-
-                //pos += readCount;
-
-                //if (pos < readBuffer.Length)
-                //{
-                //    // Process 16K data at a time from FFMpeg
-                //    continue;
-                //}
-
-                //readCount = pos;
-                //pos = 0;
-
-                byte[] resized = new byte[readCount];
-                Array.Copy(readBuffer, resized, readCount);
-
-                if (enableFileRecording)
-                {
-                    fout.Write(resized, 0, resized.Length);
-                }
-
-                encodedBuffers.Add(resized);
-                totalBytes += readCount;
-
-                foreach (Stream s in listenerStreams)
-                {
-                    s.Write(resized, 0, resized.Length);
-                }
-            }
-
-            if (fout != null)
-            {
-                fout.Flush();
-                fout.Close();
-                fout = null;
-            }
         }
     }
 
@@ -353,4 +249,87 @@ namespace GRemote
         public int framerate = 30;
     }
 
+    public class VideoEncoderWriteThread : StoppableThread
+    {
+        VideoEncoder encoder;
+        Stream stream;
+        BufferPool frameBuffers;
+
+        public VideoEncoderWriteThread(VideoEncoder encoder, Process process, BufferPool frameBuffers)
+        {
+            this.encoder = encoder;
+            this.frameBuffers = frameBuffers;
+            this.stream = process.StandardInput.BaseStream;// new BufferedStream(process.StandardInput.BaseStream);
+        }
+
+        protected override void RunThread()
+        {
+            byte[] nextBuffer = frameBuffers.Remove();
+
+            if (nextBuffer == null)
+            {
+                return;
+            }
+
+            stream.Write(nextBuffer, 0, nextBuffer.Length);
+        }
+    }
+
+    public class VideoEncoderErrorThread : StoppableThread
+    {
+        StreamReader reader;
+
+        public VideoEncoderErrorThread(VideoEncoder encoder, Process process)
+        {
+            this.reader = process.StandardError;
+        }
+
+        protected override void RunThread()
+        {
+            String str = reader.ReadLine();
+        }
+    }
+
+    public class VideoEncoderReadThread : StoppableThread
+    {
+        // Encoded data is read from FFMPeg in 16K chunks
+        byte[] readBuffer;
+        Stream stream;
+        Process process;
+        VideoEncoder encoder;
+        BufferPool encodedBuffers;
+        Stream fout;
+
+        public VideoEncoderReadThread(VideoEncoder encoder, Process process, BufferPool encodedBuffers)
+        {
+            this.encoder = encoder;
+            this.process = process;
+            this.encodedBuffers = encodedBuffers;
+            this.readBuffer = new byte[1024 * 16];
+            this.stream = process.StandardOutput.BaseStream;// new BufferedStream(process.StandardOutput.BaseStream);
+        }
+
+        protected override void RunThread()
+        {
+            int readCount;
+
+            // Read encoded output of FFMpeg
+            readCount = stream.Read(readBuffer, 0, readBuffer.Length);
+               
+            if (readCount <= 0)
+            {
+                return;
+            }
+
+            byte[] resized = new byte[readCount];
+            Array.Copy(readBuffer, resized, readCount);
+
+            if (encoder.FileRecordingEnabled)
+            {
+                fout.Write(resized, 0, resized.Length);
+            }
+
+            encodedBuffers.Add(resized);
+        }
+    }
 }

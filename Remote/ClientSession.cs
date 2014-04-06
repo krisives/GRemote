@@ -9,13 +9,14 @@ using System.Net;
 
 namespace GRemote
 {
-    class ClientSession
+    public class ClientSession
     {
         GRemoteDialog gRemote;
         Socket socket;
         NetworkStream networkStream;
         BinaryReader binaryReader;
-        Thread readThread;
+        StoppableThread writeThread;
+        StoppableThread readThread;
         String address;
         int port;
         bool running;
@@ -28,6 +29,22 @@ namespace GRemote
             this.address = address;
             this.port = port;
             this.videoPreview = gRemote.VideoPreview;
+        }
+
+        public String Address
+        {
+            get
+            {
+                return address;
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return port;
+            }
         }
 
         public bool IsRunning
@@ -65,51 +82,11 @@ namespace GRemote
             videoDecoder.VideoPreview = gRemote.VideoPreview;
             videoDecoder.StartDecoding();
 
-            readThread = new Thread(new ThreadStart(readThreadMain));
+            readThread = new ClientReadThread(this);
+            writeThread = new ClientWriteThread();
+
             readThread.Start();
-        }
-
-        protected void readThreadMain()
-        {
-            
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPAddress hostIP = (Dns.Resolve(address)).AddressList[0];
-            IPEndPoint ep = new IPEndPoint(hostIP, port);
-
-            socket.Connect(ep);
-            networkStream = new NetworkStream(socket);
-            binaryReader = new BinaryReader(networkStream);
-
-            byte packetType;
-
-            while (running)
-            {
-                packetType = binaryReader.ReadByte();
-
-                switch ((PacketType)packetType)
-                {
-                    case PacketType.VIDEO_START:
-                        readVideoStart();
-                        break;
-                    case PacketType.VIDEO_UPDATE:
-                        readVideoPacket();
-                        break;
-                }
-            }
-        }
-
-        protected void readVideoStart()
-        {
-            videoDecoder.StopDecoding();
-            videoDecoder.StartDecoding();
-        }
-
-        protected void readVideoPacket()
-        {
-            int packetLength = binaryReader.ReadInt32();
-            byte[] buffer = binaryReader.ReadBytes(packetLength);
-            videoDecoder.Decode(buffer);
-            //videoPreview.RenderDirect(videoDecoder.Buffer);
+            writeThread.Start();
         }
 
         public void StopClient()
@@ -120,11 +97,97 @@ namespace GRemote
             }
 
             running = false;
+
+            if (videoDecoder != null)
+            {
+                videoDecoder.StopDecoding();
+                videoDecoder = null;
+            }
+
+            if (writeThread != null)
+            {
+                writeThread.Stop();
+                writeThread = null;
+            }
+
+            if (readThread != null)
+            {
+                readThread.Stop();
+                readThread = null;
+            }
         }
 
         public void SetDecoder(VideoDecoder videoDecoder)
         {
             this.videoDecoder = videoDecoder;
+        }
+    }
+
+    public class ClientWriteThread : StoppableThread
+    {
+        public ClientWriteThread()
+        {
+
+        }
+
+        protected override void RunThread()
+        {
+            Stop();
+        }
+    }
+
+    public class ClientReadThread : StoppableThread
+    {
+        ClientSession client;
+        Socket socket;
+        NetworkStream networkStream;
+        BinaryReader binaryReader;
+        VideoDecoder decoder;
+
+        public ClientReadThread(ClientSession client)
+        {
+            this.client = client;
+            this.decoder = client.Decoder;
+            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
+            IPAddress hostIP = (Dns.Resolve(client.Address)).AddressList[0];
+            IPEndPoint ep = new IPEndPoint(hostIP, client.Port);
+
+            socket.Connect(ep);
+            
+            this.networkStream = new NetworkStream(socket);
+            this.binaryReader = new BinaryReader(networkStream);
+        }
+
+        protected override void RunThread()
+        {
+            byte packetType;
+
+            packetType = binaryReader.ReadByte();
+
+            switch ((PacketType)packetType)
+            {
+                case PacketType.VIDEO_START:
+                    readVideoStart();
+                    break;
+                case PacketType.VIDEO_UPDATE:
+                    readVideoPacket();
+                    break;
+            }
+        }
+
+        protected void readVideoStart()
+        {
+            decoder.StopDecoding();
+            decoder.StartDecoding();
+        }
+
+        protected void readVideoPacket()
+        {
+            int packetLength = binaryReader.ReadInt32();
+            byte[] buffer = binaryReader.ReadBytes(packetLength);
+            decoder.Decode(buffer);
+            //videoPreview.RenderDirect(videoDecoder.Buffer);
         }
     }
 }

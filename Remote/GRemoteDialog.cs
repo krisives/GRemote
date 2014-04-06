@@ -25,7 +25,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.8";
+                return "0.0.9";
             }
         }
 
@@ -100,6 +100,28 @@ namespace GRemote
             }
         }
 
+        public void ToggleClient()
+        {
+            if (IsServerRunning)
+            {
+                MessageBox.Show("Server is running");
+                return;
+            }
+
+            if (IsClientRunning)
+            {
+                StopClient();
+                joinMenuItem.Text = "Connect";
+            }
+            else
+            {
+                if (StartClient())
+                {
+                    joinMenuItem.Text = "Disconnect";
+                }
+            }
+        }
+
         /// <summary>
         /// Starts the recording and server.
         /// </summary>
@@ -160,7 +182,7 @@ namespace GRemote
         /// Shows a dialog and connects a ClientSession to begin
         /// playback.
         /// </summary>
-        public void StartClient()
+        public bool StartClient()
         {
             if (clientSession != null)
             {
@@ -177,7 +199,7 @@ namespace GRemote
                 case DialogResult.OK:
                     break;
                 default:
-                    return;
+                    return false;
             }
 
             int portNumber;
@@ -198,6 +220,8 @@ namespace GRemote
             recordItem.Enabled = false;
             joinMenuItem.Text = "Disconnect";
             Refresh();
+
+            return true;
         }
 
         /// <summary>
@@ -435,7 +459,7 @@ namespace GRemote
 
         private void joinMenuItem_Click(object sender, EventArgs e)
         {
-            StartClient();
+            ToggleClient();
         }
 
         private void uncompressedToolStripMenuItem_Click(object sender, EventArgs e)

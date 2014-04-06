@@ -11,7 +11,7 @@ using System.IO;
 
 namespace GRemote
 {
-    class VideoCapture
+    public class VideoCapture
     {
         bool capturing;
         int x, y;

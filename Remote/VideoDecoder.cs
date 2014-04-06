@@ -11,31 +11,46 @@ using System.Runtime.InteropServices;
 
 namespace GRemote
 {
-    class VideoDecoder
+    public class VideoDecoder
     {
         volatile bool started;
         FFMpeg ffmpeg;
         Process process;
-        Thread readThread;
-        Thread writeThread;
-        Thread errorThread;
-        BufferPool buffers = new BufferPool();
+        StoppableThread readThread;
+        StoppableThread writeThread;
+        StoppableThread errorThread;
+        BufferPool encodedBuffers = new BufferPool();
         BufferPool decodedBuffers = new BufferPool();
-        BufferedStream bufferedOutputStream;
-        BufferedStream bufferedInputStream;
         int width, height;
-        Rectangle lockBounds;
-        Bitmap decodeBuffer;
         int totalBytesDecoded = 0;
         VideoPreview videoPreview;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
         {
+            if ((width % 2) != 0 || (height % 2) != 0)
+            {
+                throw new Exception("Capture dimensions must be even (divisible by two)");
+            }
+
             this.ffmpeg = ffmpeg;
             this.width = width;
             this.height = height;
-            this.lockBounds = new Rectangle(0, 0, width, height);
-            this.decodeBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+        }
+
+        public int VideoWidth
+        {
+            get
+            {
+                return width;
+            }
+        }
+
+        public int VideoHeight
+        {
+            get
+            {
+                return height;
+            }
         }
 
         public VideoPreview VideoPreview
@@ -81,8 +96,11 @@ namespace GRemote
                 started = true;
             }
 
-            buffers.Clear();
             totalBytesDecoded = 0;
+
+            // Create new buffer pools in case old threads are still doing things
+            encodedBuffers = new BufferPool();
+            decodedBuffers = new BufferPool();
 
             process = new Process();
             process.StartInfo.Arguments = GetFFMpegArguments();
@@ -95,12 +113,9 @@ namespace GRemote
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.Start();
 
-            bufferedOutputStream = new BufferedStream(process.StandardInput.BaseStream);
-            bufferedInputStream = new BufferedStream(process.StandardOutput.BaseStream);
-
-            readThread = new Thread(new ThreadStart(readThreadMain));
-            writeThread = new Thread(new ThreadStart(writeThreadMain));
-            errorThread = new Thread(new ThreadStart(errorThreadMain));
+            readThread = new VideoDecoderReadThread(this, process, decodedBuffers);
+            writeThread = new VideoDecoderWriteThread(this, process, encodedBuffers);
+            errorThread = new VideoDecoderErrorThread(this, process);
 
             errorThread.Start();
             readThread.Start();
@@ -126,16 +141,7 @@ namespace GRemote
 
         public void Decode(byte[] buffer)
         {
-            buffers.Add(buffer);
-        }
-
-        public Bitmap Buffer
-        {
-            get
-            {
-                return decodeBuffer;
-            }
-
+            encodedBuffers.Add(buffer);
         }
 
         /// <summary>
@@ -154,20 +160,9 @@ namespace GRemote
                 started = false;
             }
 
-            buffers.Clear();
+            // Give any currently running threads a chance to break
+            encodedBuffers.Clear();
             decodedBuffers.Clear();
-
-            if (bufferedInputStream != null)
-            {
-                bufferedInputStream.Close();
-                bufferedInputStream = null;
-            }
-
-            if (bufferedOutputStream != null)
-            {
-                bufferedOutputStream.Close();
-                bufferedOutputStream = null;
-            }
 
             try
             {
@@ -183,118 +178,126 @@ namespace GRemote
 
             process = null;
 
-            buffers = new BufferPool();
-            decodedBuffers = new BufferPool();
+            if (readThread != null)
+            {
+                readThread.Stop();
+                readThread = null;
+            }
+
+            if (writeThread != null)
+            {
+                writeThread.Stop();
+                writeThread = null;
+            }
+
+            if (errorThread != null)
+            {
+                errorThread.Stop();
+                errorThread = null;
+            }
+        }
+    }
+
+    public class VideoDecoderErrorThread : StoppableThread
+    {
+        StreamReader reader;
+
+        public VideoDecoderErrorThread(VideoDecoder decoder, Process process)
+        {
+            reader = process.StandardError;
         }
 
-        /// <summary>
-        /// Reads decoded data buffers from FFMpeg
-        /// </summary>
-        public void readThreadMain()
+        protected override void RunThread()
         {
-            int frameSize = width * height * 3;
-            byte[] readBuffer = new byte[frameSize];
-            int pos = 0;
+            String msg = reader.ReadLine();
+        }
+    }
+
+    public class VideoDecoderReadThread : StoppableThread
+    {
+        VideoDecoder decoder;
+        BufferPool decodedBuffers;
+        Stream stream;
+        int frameSize;
+        byte[] readBuffer;
+        int pos;
+        VideoPreview preview;
+        Bitmap decodeBuffer;
+        Rectangle lockBounds;
+
+        public VideoDecoderReadThread(VideoDecoder decoder, Process process, BufferPool decodedBuffers)
+        {
+            this.decoder = decoder;
+            this.preview = decoder.VideoPreview;
+            this.decodedBuffers = decodedBuffers;
+            this.lockBounds = new Rectangle(0, 0, decoder.VideoWidth, decoder.VideoWidth);
+            this.decodeBuffer = new Bitmap(decoder.VideoWidth, decoder.VideoWidth, PixelFormat.Format24bppRgb);
+            this.stream = process.StandardOutput.BaseStream;// new BufferedStream(process.StandardOutput.BaseStream);
+            this.frameSize = decoder.VideoWidth * decoder.VideoHeight * 3;
+            this.readBuffer = new byte[frameSize];
+            this.pos = 0;
+        }
+
+        protected override void RunThread()
+        {
             int bytesRead;
-            BufferedStream bufferedInputStream = this.bufferedInputStream;
+            
+            bytesRead = stream.Read(readBuffer, pos, readBuffer.Length - pos);
 
-            while (IsDecoding)
-            {
-                bytesRead = bufferedInputStream.Read(readBuffer, pos, readBuffer.Length - pos);
-
-                if (bytesRead <= 0)
-                {
-                    continue;
-                }
-
-                if (!IsDecoding)
-                {
-                    break;
-                }
-
-                pos += bytesRead;
-
-                if (pos >= frameSize)
-                {
-                    lock (decodeBuffer)
-                    {
-                        BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                        Marshal.Copy(readBuffer, 0, data.Scan0, readBuffer.Length);
-                        decodeBuffer.UnlockBits(data);
-                    }
-
-                    if (videoPreview != null)
-                    {
-
-                        videoPreview.RenderDirect(decodeBuffer);
-                    }
-
-                    //readBuffer = new byte[frameSize];
-                    pos = 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Writes encoded buffers to FFMpeg
-        /// </summary>
-        public void writeThreadMain()
-        {
-            byte[] nextBuffer = null;
-
-            while (IsDecoding)
-            {
-                buffers.Wait();
-                nextBuffer = buffers.Remove();
-
-                if (nextBuffer == null)
-                {
-                    continue;
-                }
-
-                totalBytesDecoded += nextBuffer.Length;
-
-                try
-                {
-                    bufferedOutputStream.Write(nextBuffer, 0, nextBuffer.Length);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Reads FFMpeg diagnostics output
-        /// </summary>
-        protected void errorThreadMain()
-        {
-            while (IsDecoding)
-            {
-                try
-                {
-                    readError();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    break;
-                }
-            }
-        }
-
-        public void readError()
-        {
-            String msg = process.StandardError.ReadLine();
-
-            if (msg == null || msg.Length <= 0)
+            if (bytesRead <= 0)
             {
                 return;
             }
 
-           // Console.WriteLine("[DECODE] {0}", msg);
+            pos += bytesRead;
+
+            if (pos >= frameSize)
+            {
+                //lock (decodeBuffer)
+                //{
+                    BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                    Marshal.Copy(readBuffer, 0, data.Scan0, readBuffer.Length);
+                    decodeBuffer.UnlockBits(data);
+                //}
+
+                if (preview != null)
+                {
+                    preview.RenderDirect(decodeBuffer);
+                }
+
+                //readBuffer = new byte[frameSize];
+                pos = 0;
+            }
         }
     }
+
+    public class VideoDecoderWriteThread : StoppableThread
+    {
+        VideoDecoder decoder;
+        BufferPool encodedBuffers;
+        Stream stream;
+
+        public VideoDecoderWriteThread(VideoDecoder decoder, Process process, BufferPool encodedBuffers)
+        {
+            this.decoder = decoder;
+            this.encodedBuffers = encodedBuffers;
+            this.stream = process.StandardInput.BaseStream;// new BufferedStream(process.StandardInput.BaseStream);
+        }
+
+        protected override void RunThread()
+        {
+            byte[] nextBuffer;
+
+            nextBuffer = encodedBuffers.Remove();
+
+            if (nextBuffer == null)
+            {
+                return;
+            }
+
+            stream.Write(nextBuffer, 0, nextBuffer.Length);
+        }
+    }
+
+    
 }
