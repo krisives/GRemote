@@ -242,7 +242,7 @@ namespace GRemote
         {
             byte[] nextBuffer = null;
 
-            while (started)
+            while (IsDecoding)
             {
                 buffers.Wait();
                 nextBuffer = buffers.Remove();
@@ -271,7 +271,7 @@ namespace GRemote
         /// </summary>
         protected void errorThreadMain()
         {
-            while (started)
+            while (IsDecoding)
             {
                 try
                 {

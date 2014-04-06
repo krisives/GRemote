@@ -188,6 +188,18 @@ namespace GRemote
                 return;
             }
 
+            if ((Width % 2) == 1)
+            {
+                Width++;
+                return;
+            }
+
+            if ((Height % 2) == 1)
+            {
+                Height++;
+                return;
+            }
+
             xBox.Text = Left.ToString();
             yBox.Text = Top.ToString();
 
@@ -392,6 +404,18 @@ namespace GRemote
 
             Width = rect.Right - rect.Left;
             Height = rect.Bottom - rect.Top;
+
+            if ((Width % 2) == 1)
+            {
+                Width++;
+                
+            }
+
+            if ((Height % 2) == 1)
+            {
+                Height++;
+               
+            }
         }
 
         private void moveButton_Click(object sender, EventArgs e)
