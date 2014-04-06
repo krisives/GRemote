@@ -40,12 +40,14 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.innerPanel = new System.Windows.Forms.Panel();
+            this.resizeButton = new System.Windows.Forms.Button();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.moveWindowBox = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.refreshButton = new System.Windows.Forms.Button();
             this.processComboBox = new System.Windows.Forms.ComboBox();
             this.crosshair = new System.Windows.Forms.Label();
+            this.moveButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.opacityBar)).BeginInit();
             this.panel1.SuspendLayout();
             this.innerPanel.SuspendLayout();
@@ -177,6 +179,8 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.innerPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.innerPanel.Controls.Add(this.moveButton);
+            this.innerPanel.Controls.Add(this.resizeButton);
             this.innerPanel.Controls.Add(this.radioButton3);
             this.innerPanel.Controls.Add(this.moveWindowBox);
             this.innerPanel.Controls.Add(this.radioButton1);
@@ -195,6 +199,17 @@
             this.innerPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseDown);
             this.innerPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseMove);
             this.innerPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.innerPanel_MouseUp);
+            // 
+            // resizeButton
+            // 
+            this.resizeButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.resizeButton.Location = new System.Drawing.Point(390, 431);
+            this.resizeButton.Name = "resizeButton";
+            this.resizeButton.Size = new System.Drawing.Size(128, 23);
+            this.resizeButton.TabIndex = 13;
+            this.resizeButton.Text = "Resize To Window";
+            this.resizeButton.UseVisualStyleBackColor = true;
+            this.resizeButton.Click += new System.EventHandler(this.resizeButton_Click);
             // 
             // radioButton3
             // 
@@ -268,6 +283,17 @@
             this.crosshair.TabIndex = 6;
             this.crosshair.Text = "+";
             // 
+            // moveButton
+            // 
+            this.moveButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.moveButton.Location = new System.Drawing.Point(264, 431);
+            this.moveButton.Name = "moveButton";
+            this.moveButton.Size = new System.Drawing.Size(120, 23);
+            this.moveButton.TabIndex = 14;
+            this.moveButton.Text = "Move To Window";
+            this.moveButton.UseVisualStyleBackColor = true;
+            this.moveButton.Click += new System.EventHandler(this.moveButton_Click);
+            // 
             // CaptureArea
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -319,5 +345,7 @@
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.RadioButton moveWindowBox;
         private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.Button resizeButton;
+        private System.Windows.Forms.Button moveButton;
     }
 }

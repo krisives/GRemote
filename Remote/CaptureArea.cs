@@ -356,5 +356,69 @@ namespace GRemote
         {
             e.Value = (e.ListItem as Process).ProcessName;
         }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left, Top, Right, Bottom;
+        }
+
+        private void resizeButton_Click(object sender, EventArgs e)
+        {
+            if (processComboBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            if (processComboBox.SelectedItem.GetType() != typeof(Process))
+            {
+                return;
+            }
+
+            Process p = processComboBox.SelectedItem as Process;
+
+            if (p.MainWindowHandle == IntPtr.Zero)
+            {
+                return;
+            }
+            
+            RECT rect;
+
+            GetWindowRect(p.MainWindowHandle, out rect);
+
+            Width = rect.Right - rect.Left;
+            Height = rect.Bottom - rect.Top;
+        }
+
+        private void moveButton_Click(object sender, EventArgs e)
+        {
+            if (processComboBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            if (processComboBox.SelectedItem.GetType() != typeof(Process))
+            {
+                return;
+            }
+
+            Process p = processComboBox.SelectedItem as Process;
+
+            if (p.MainWindowHandle == IntPtr.Zero)
+            {
+                return;
+            }
+
+            RECT rect;
+
+            GetWindowRect(p.MainWindowHandle, out rect);
+
+            Top = rect.Top;
+            Left = rect.Left;
+        }
     }
 }
