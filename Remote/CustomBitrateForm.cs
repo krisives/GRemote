@@ -19,6 +19,7 @@ namespace GRemote
 
         private void closeButton_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.OK;
             Close();
         }
 

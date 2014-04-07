@@ -184,13 +184,25 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// A method that is invoked within a loop as long as it's started and
+        /// not stopped.
+        /// </summary>
         protected abstract void RunThread();
 
+        /// <summary>
+        /// Optional method to override that will be invoked when the thread
+        /// begins running.
+        /// </summary>
         protected virtual void OnThreadStart()
         {
 
         }
 
+        /// <summary>
+        /// Optional method to override that will be invoked when thread is
+        /// finishing / before exit.
+        /// </summary>
         protected virtual void OnThreadFinish()
         {
 

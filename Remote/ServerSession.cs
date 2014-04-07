@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Interceptor;
+using System.Drawing;
 
 namespace GRemote
 {
@@ -25,13 +26,9 @@ namespace GRemote
         private BufferPool outputBuffers = new BufferPool();
         private VideoCapture videoCapture;
         private VideoEncoder videoEncoder;
-        private byte[] headerBuffer;
-        private MemoryStream headerStream;
-        private BinaryWriter headerBinary;
         private VideoPreview videoPreview;
         private ServerSettings settings;
         private List<ConnectedClient> killList = new List<ConnectedClient>();
-        private IntPtr targetWindow = IntPtr.Zero;
         private InputPlayback inputPlayback;
 
         public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, ServerSettings settings)
@@ -39,12 +36,11 @@ namespace GRemote
             this.ffmpeg = ffmpeg;
             this.videoCapture = videoCapture;
             this.settings = settings;
-
-            headerBuffer = new byte[1024];
-            headerStream = new MemoryStream(headerBuffer, 0, 1024);
-            headerBinary = new BinaryWriter(headerStream);
         }
 
+        /// <summary>
+        /// Gets the current settings for this server
+        /// </summary>
         public ServerSettings Settings
         {
             get
@@ -53,6 +49,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the current encoding settings for this server
+        /// </summary>
         public EncoderSettings EncoderSettings
         {
             get
@@ -61,6 +60,22 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the video capture being used currently or null if no video capturing
+        /// is happening.
+        /// </summary>
+        public VideoCapture VideoCapture
+        {
+            get
+            {
+                return videoCapture;
+            }
+        }
+
+        /// <summary>
+        /// Gets a video encoder being used currently or null if no encoder is
+        /// being used currently.
+        /// </summary>
         public VideoEncoder Encoder
         {
             get
@@ -69,6 +84,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the video preview control used to preview the video capture.
+        /// </summary>
         public VideoPreview Preview
         {
             set
@@ -81,18 +99,10 @@ namespace GRemote
             }
         }
 
-        public IntPtr TargetWindow
-        {
-            get
-            {
-                return targetWindow;
-            }
-            set
-            {
-                targetWindow = value;
-            }
-        }
-
+        /// <summary>
+        /// Starts the server. This begins the video capture, encoding, and network
+        /// processes. It's safe to start a server more than once.
+        /// </summary>
         public void StartServer()
         {
             if (IsRunning)
@@ -113,7 +123,7 @@ namespace GRemote
             inputPlayback = new InputPlayback();
 
             videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-            
+
             if (settings.FileOutputEnabled)
             {
                 videoEncoder.EnableFileOutput(settings.FileOutputPath);
@@ -135,8 +145,17 @@ namespace GRemote
             inputPlayback.StartPlayback();
         }
 
+        /// <summary>
+        /// A simple callback type accepts no types and returns nothing
+        /// </summary>
         public delegate void Callback();
 
+        /// <summary>
+        /// Restarts the video encoding stream. This clears the output buffers
+        /// to stop encoded video data from going out. If the callback is provided
+        /// it will be called before the next packet is added the the queue.
+        /// </summary>
+        /// <param name="f"></param>
         public void RestartStream(Callback f)
         {
             VideoStartPacket packet = new VideoStartPacket(videoCapture.Width, videoCapture.Height);
@@ -153,16 +172,37 @@ namespace GRemote
             videoEncoder.StartEncoding(settings.EncoderSettings);
         }
 
+        /// <summary>
+        /// Restart the video stream. This clears the output buffers to stop
+        /// encoded video data from going out.
+        /// </summary>
         public void RestartStream()
         {
             RestartStream(null);
         }
 
-        protected void Snapshot()
+        /// <summary>
+        /// Invoked when the video capture frame is ready. This passes data off to
+        /// the video encoder
+        /// </summary>
+        /// <param name="buffer"></param>
+        protected void Snapshot(Bitmap buffer)
         {
+            byte[] encodedVideoBuffer;
+
             try
             {
-                SnapshotReal();
+                videoEncoder.Encode(buffer);
+
+                while ((encodedVideoBuffer = videoEncoder.Read()) != null)
+                {
+                    AddVideoBuffer(encodedVideoBuffer);
+                }
+
+                if (videoPreview != null)
+                {
+                    videoPreview.RenderDirect(buffer);
+                }
             }
             catch (Exception e)
             {
@@ -170,28 +210,9 @@ namespace GRemote
             }
         }
 
-        protected void SnapshotReal()
-        {
-            byte[] encodedVideoBuffer;
-
-            if (!IsRunning)
-            {
-                return;
-            }
-
-            videoEncoder.Encode(videoCapture.Buffer);
-
-            while ((encodedVideoBuffer = videoEncoder.Read()) != null)
-            {
-                AddVideoBuffer(encodedVideoBuffer);
-            }
-
-            if (videoPreview != null)
-            {
-                videoPreview.RenderDirect(videoCapture.Buffer);
-            }
-        }
-
+        /// <summary>
+        /// Checks if this server has been started
+        /// </summary>
         public bool IsRunning
         {
             get {
@@ -202,6 +223,10 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Stops the server from capturing, encoding video, and all network activity. It's
+        /// safe to stop a server more than once.
+        /// </summary>
         public void StopServer()
         {
             if (!IsRunning)
@@ -212,6 +237,12 @@ namespace GRemote
             lock (this)
             {
                 running = false;
+            }
+
+            if (videoCapture != null)
+            {
+                videoCapture.StopCapturing();
+                videoCapture = null;
             }
             
             if (videoEncoder != null)
@@ -258,54 +289,93 @@ namespace GRemote
             outputBuffers = new BufferPool();
         }
 
+        /// <summary>
+        /// Adds the bytes of a packet to the output pool, essentially sending it to all
+        /// connected clients.
+        /// </summary>
+        /// <param name="packet"></param>
         public void AddPacket(Packet packet)
         {
             outputBuffers.Add(packet.Buffer);
         }
 
+        /// <summary>
+        /// Adds a buffer of encrypted video data to the output pool, essentially sending
+        /// it to all connected clients.
+        /// </summary>
+        /// <param name="buffer">A buffer of encrypted video data</param>
         public void AddVideoBuffer(byte[] buffer)
         {
-            if (!IsRunning || clients.Count <= 0) {
-                return;
-            }
-
             if (buffer.Length <= 0)
             {
                 return;
             }
 
-            // Create the 5 byte header
-            byte[] packetBuffer = new byte[1 + 4];
-            headerBinary.Seek(0, SeekOrigin.Begin);
-            headerBinary.Write((byte)PacketType.VIDEO_UPDATE);
-            headerBinary.Write((int)buffer.Length);
-            headerBinary.Flush();
-
-            // Copy and add the header/video data to the output buffer pool
-            Array.Copy(headerBuffer, packetBuffer, packetBuffer.Length);
-            outputBuffers.Add(packetBuffer);
-            outputBuffers.Add(buffer);
+            VideoUpdatePacket packet = new VideoUpdatePacket(buffer.Length);
+            outputBuffers.Add(packet.Buffer, buffer);
         }
 
+        /// <summary>
+        /// Mark a client as killed. The socket and other resources will be
+        /// destroyed soon after. It's okay to kill a client more than once.
+        /// </summary>
+        /// <param name="client"></param>
         public void KillClient(ConnectedClient client)
         {
-            client.writer.Close();
-            client.socket.Close();
-
             lock (killList)
             {
+                if (client.killed)
+                {
+                    return;
+                }
+
                 killList.Add(client);
+                client.killed = true;
                 outputBuffers.Pulse();
             }
         }
 
+        /// <summary>
+        /// Closes any sockets or streams associated with the client. It's safe
+        /// to kill a client more than once.
+        /// </summary>
+        /// <param name="client"></param>
+        public void KillClientFinish(ConnectedClient client)
+        {
+            if (client.socket == null)
+            {
+                return;
+            }
+
+            try
+            {
+                client.socket.Close();
+                client.socket.Dispose();
+            }
+            catch (Exception e)
+            {
+                
+            }
+
+            client.socket = null;
+            client.stream = null;
+        }
+
+        /// <summary>
+        /// Change the current video codec. This will cause the stream to restart.
+        /// </summary>
+        /// <param name="codec"></param>
         public void SetVideoCodec(string codec)
         {
             settings.EncoderSettings.codec = codec;
             RestartStream();
-
         }
 
+        /// <summary>
+        /// Changes the streaming bitrate. This will cause the stream to restart
+        /// for connected clients.
+        /// </summary>
+        /// <param name="kbps"></param>
         public void SetBitrate(int kbps)
         {
             settings.EncoderSettings.videoRate = kbps;
@@ -313,20 +383,25 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A connected client
+    /// </summary>
     public class ConnectedClient
     {
         public Socket socket;
         public NetworkStream stream;
-        public BinaryWriter writer;
+        public bool killed;
     }
 
-
+    /// <summary>
+    /// A thread that listens on a socket and handles incoming connections.
+    /// </summary>
     public class ServerListenThread : StoppableThread
     {
-        ServerSession server;
-        Socket socket;
-        ServerSettings settings;
-        List<ConnectedClient> clients;
+        private ServerSession server;
+        private Socket socket;
+        private ServerSettings settings;
+        private List<ConnectedClient> clients;
 
         public ServerListenThread(ServerSession server, List<ConnectedClient> clients, Socket socket)
         {
@@ -363,7 +438,6 @@ namespace GRemote
 
             client.socket = clientSocket;
             client.stream = new NetworkStream(clientSocket);
-            client.writer = new BinaryWriter(client.stream);
 
             server.RestartStream(delegate()
             {
@@ -372,18 +446,17 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A thread that reads data from the clients
+    /// </summary>
     public class ServerReadThread : StoppableThread
     {
-        ServerSession server;
-        Input input;
+        private ServerSession server;
+        private Input input;
 
         public ServerReadThread(ServerSession server)
         {
             this.server = server;
-            
-            
-
-            
         }
 
         protected override void OnThreadStart()
@@ -415,12 +488,16 @@ namespace GRemote
         static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, int wParam, int lParam);
     }
 
+    /// <summary>
+    /// A thread that writes data to connected clients. It waits on buffers from
+    /// the server session.
+    /// </summary>
     public class ServerWriteThread : StoppableThread
     {
-        ServerSession server;
-        BufferPool outputBuffers;
-        List<ConnectedClient> killList;
-        List<ConnectedClient> clients;
+        private ServerSession server;
+        private BufferPool outputBuffers;
+        private List<ConnectedClient> killList;
+        private List<ConnectedClient> clients;
 
         public ServerWriteThread(ServerSession server, BufferPool outputBuffers, List<ConnectedClient> clients, List<ConnectedClient> killList)
         {
@@ -432,39 +509,67 @@ namespace GRemote
 
         protected override void RunThread()
         {
-             byte[] nextBuffer;
-             
-             nextBuffer = outputBuffers.Remove();
-             
-             if (nextBuffer == null)
-             {
-                 KillClients();
-                 return;
-             }
-             
-             foreach (ConnectedClient client in clients)
-             {
-                 try
-                 {
-                     client.writer.Write(nextBuffer);
-                 }
-                 catch (Exception e)
-                 {
-                     Console.WriteLine(e);
-                     server.KillClient(client);
-                 }
-             }
-             
-             KillClients();
+            byte[] nextBuffer = null;
+
+            outputBuffers.Wait();
+
+            while ((nextBuffer = outputBuffers.Remove()) != null)
+            {
+                HandleBuffer(nextBuffer);
+            }
+
+            RemoveKilledClients();
         }
 
-        protected void KillClients()
+        /// <summary>
+        /// Sends a buffer to all the connected clients that are not killed
+        /// </summary>
+        /// <param name="nextBuffer"></param>
+        protected void HandleBuffer(byte[] nextBuffer)
+        {
+            if (nextBuffer.Length <= 0)
+            {
+                return;
+            }
+
+            foreach (ConnectedClient client in clients)
+            {
+                if (client.killed)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    client.stream.Write(nextBuffer, 0, nextBuffer.Length);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    server.KillClient(client);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes clients that are marked as killed.
+        /// </summary>
+        protected void RemoveKilledClients()
         {
             lock (killList)
             {
                 foreach (ConnectedClient client in killList)
                 {
                     clients.Remove(client);
+
+                    try
+                    {
+                        server.KillClientFinish(client);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
                 }
 
                 killList.Clear();

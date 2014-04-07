@@ -13,24 +13,52 @@ using System.Net.Security;
 
 namespace GRemote
 {
+    /// <summary>
+    /// Checks the project Github page for new versions by downloading VERSION.txt
+    /// and comparing it to GRemoteDialog.Version
+    /// 
+    /// Currently this only tells the user a new version is available.
+    /// </summary>
     public class UpdateChecker
     {
-
         public UpdateChecker()
         {
             
         }
 
+        /// <summary>
+        /// A callback for checking if a new version is available.
+        /// </summary>
+        /// <param name="hasUpdate"></param>
+        /// <param name="msg"></param>
         public delegate void CheckEvent(bool hasUpdate, String msg);
 
+        /// <summary>
+        /// Check if a new version is available. This calls the event callback
+        /// upon completion.
+        /// </summary>
+        /// <param name="checkEvent"></param>
         public void Check(CheckEvent checkEvent)
         {
+            // This uses wget because .NET is not working with Github for some reason
+            // when I test. It gets mad about SSL and even with some extra workarounds
+            // it still never does anything. Wget will also be used for the update
+            // process, so this fits
             Process p = CreateWgetProcess();
-            
+            String version;
+
             p.Start();
             p.WaitForExit();
 
-            String version = File.ReadAllText("UPDATE.txt");
+            try
+            {
+                version = File.ReadAllText("UPDATE.txt");
+            }
+            catch (Exception e)
+            {
+                checkEvent(false, String.Format("Failed to check for updates {0}", e.Message));
+                return;
+            }
 
             if (version == null)
             {
@@ -55,6 +83,13 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Checks if "x.y.z" is greater than "a.b.c" where both strings are
+        /// semantic versions.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public bool IsNewerVersion(String a, String b)
         {
             int[] partsA = new int[3];
@@ -85,6 +120,12 @@ namespace GRemote
             return partsB[2] > partsA[2];
         }
 
+        /// <summary>
+        /// Parse a string like "x.y.z" into an existing array of numbers.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="nums"></param>
+        /// <returns></returns>
         protected bool ParseVersion(String str, int[] nums)
         {
             String[] parts;
@@ -115,13 +156,20 @@ namespace GRemote
             return true;
         }
 
+        /// <summary>
+        /// Creates a process of wget.exe that downloads the most recent VERSION.txt locally
+        /// as UPDATE.txt
+        /// </summary>
+        /// <returns></returns>
         protected Process CreateWgetProcess()
         {
             Process p = new Process();
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            
             p.StartInfo.FileName = "wget.exe";
-            p.StartInfo.Arguments = "--no-check-certificates -O UPDATE.txt 'https://raw.githubusercontent.com/krisives/GRemote/master/VERSION.txt'";
+            p.StartInfo.Arguments = "--no-check-certificate -O \"UPDATE.txt\" \"https://github.com/krisives/GRemote/raw/master/VERSION.txt\"";
 
             return p;
         }

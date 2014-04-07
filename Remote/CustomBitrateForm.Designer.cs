@@ -68,11 +68,11 @@
             // 
             // closeButton
             // 
-            this.closeButton.Location = new System.Drawing.Point(317, 26);
+            this.closeButton.Location = new System.Drawing.Point(305, 22);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(75, 23);
+            this.closeButton.Size = new System.Drawing.Size(87, 32);
             this.closeButton.TabIndex = 2;
-            this.closeButton.Text = "Close";
+            this.closeButton.Text = "Change Bitrate";
             this.closeButton.UseVisualStyleBackColor = true;
             this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
             // 

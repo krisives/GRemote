@@ -163,13 +163,15 @@ namespace GRemote
             return args;
         }
 
+        /// <summary>
+        /// Adds a frame buffer to be encoded. The buffer is converted into a byte[]
+        /// array internally.
+        /// </summary>
+        /// <param name="bmp"></param>
         public void Encode(Bitmap bmp)
         {
             // Allocate a buffer for the raw screen image (it cannot be reused, as it gets passed off)
             byte[] dataBuffer = new byte[width * height * 3];
-
-            // Copy the area of the screen into the capture buffer
-            //captureGraphics.CopyFromScreen(x, y, 0, 0, size);
 
             // Lock the Bitmap, copy the pixels, then unlock
             BitmapData data = bmp.LockBits(lockBounds, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
@@ -180,6 +182,11 @@ namespace GRemote
             Encode(dataBuffer);
         }
 
+        /// <summary>
+        /// Add uncompressed frame data. This data is consumed by a background thread
+        /// that pipes it to FFMpeg
+        /// </summary>
+        /// <param name="buffer"></param>
         public void Encode(byte[] buffer)
         {
             if (!started)
@@ -191,6 +198,10 @@ namespace GRemote
             frameBuffers.Add(buffer);
         }
 
+        /// <summary>
+        /// Stop the encoding process. It's safe to stop the encoder more than
+        /// once.
+        /// </summary>
         public void StopEncoding()
         {
             if (!IsEncoding)
@@ -203,8 +214,8 @@ namespace GRemote
                 started = false;
             }
 
-            frameBuffers.Pulse();
-            encodedBuffers.Pulse();
+            frameBuffers.Clear();
+            encodedBuffers.Clear();
 
             try
             {
@@ -266,14 +277,25 @@ namespace GRemote
 
         protected override void RunThread()
         {
-            byte[] nextBuffer = frameBuffers.Remove();
+            byte[] nextBuffer;
 
-            if (nextBuffer == null)
+            frameBuffers.Wait();
+
+            while ((nextBuffer = frameBuffers.Remove()) != null)
+            {
+                HandleBuffer(nextBuffer);
+            }
+        }
+
+        protected void HandleBuffer(byte[] nextBuffer)
+        {
+            if (nextBuffer.Length <= 0)
             {
                 return;
             }
 
             stream.Write(nextBuffer, 0, nextBuffer.Length);
+            stream.Flush();
         }
     }
 
@@ -294,38 +316,57 @@ namespace GRemote
 
     public class VideoEncoderReadThread : StoppableThread
     {
-        // Encoded data is read from FFMPeg in 16K chunks
         private byte[] readBuffer;
         private Stream stream;
         private Process process;
         private VideoEncoder encoder;
         private BufferPool encodedBuffers;
+        private int pos;
 
         public VideoEncoderReadThread(VideoEncoder encoder, Process process, BufferPool encodedBuffers)
         {
             this.encoder = encoder;
             this.process = process;
             this.encodedBuffers = encodedBuffers;
-            this.readBuffer = new byte[1024 * 16];
             this.stream = process.StandardOutput.BaseStream;
+        }
+
+        protected override void OnThreadStart()
+        {
+            this.readBuffer = new byte[1024 * 3];
+            this.pos = 0;
         }
 
         protected override void RunThread()
         {
+            while (HandleBuffer())
+            {
+                Thread.Yield();
+            }
+        }
+
+        protected bool HandleBuffer()
+        {
             int readCount;
 
             // Read encoded output of FFMpeg
-            readCount = stream.Read(readBuffer, 0, readBuffer.Length);
-               
+            readCount = stream.Read(readBuffer, pos, readBuffer.Length - pos);
+
             if (readCount <= 0)
             {
-                return;
+                return false;
             }
 
-            byte[] resized = new byte[readCount];
-            Array.Copy(readBuffer, resized, readCount);
+            pos += readCount;
 
-            encodedBuffers.Add(resized);
+            if (pos < readBuffer.Length)
+            {
+                return false;
+            }
+
+            pos = 0;
+            encodedBuffers.Add((byte[])readBuffer.Clone());
+            return true;
         }
     }
 }

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GRemoteDialog));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.gRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hostMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,6 +81,10 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.bandwidthLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.noInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.desktopInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.windowInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPreview = new GRemote.VideoPreview();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -467,7 +472,8 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel,
             this.toolStripStatusLabel1,
-            this.bandwidthLabel});
+            this.bandwidthLabel,
+            this.toolStripDropDownButton1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 551);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(792, 22);
@@ -483,7 +489,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(665, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(603, 17);
             this.toolStripStatusLabel1.Spring = true;
             // 
             // bandwidthLabel
@@ -495,6 +501,39 @@
             // playbackTimer
             // 
             this.playbackTimer.Interval = 33;
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.noInputToolStripMenuItem,
+            this.windowInputToolStripMenuItem,
+            this.desktopInputToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(62, 20);
+            this.toolStripDropDownButton1.Text = "No Input";
+            // 
+            // noInputToolStripMenuItem
+            // 
+            this.noInputToolStripMenuItem.Checked = true;
+            this.noInputToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.noInputToolStripMenuItem.Name = "noInputToolStripMenuItem";
+            this.noInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.noInputToolStripMenuItem.Text = "No Input";
+            // 
+            // desktopInputToolStripMenuItem
+            // 
+            this.desktopInputToolStripMenuItem.Name = "desktopInputToolStripMenuItem";
+            this.desktopInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.desktopInputToolStripMenuItem.Text = "Desktop Input";
+            // 
+            // windowInputToolStripMenuItem
+            // 
+            this.windowInputToolStripMenuItem.Name = "windowInputToolStripMenuItem";
+            this.windowInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.windowInputToolStripMenuItem.Text = "Window Input";
             // 
             // videoPreview
             // 
@@ -583,6 +622,10 @@
         private System.Windows.Forms.ToolStripMenuItem codecItem265;
         private System.Windows.Forms.ToolStripMenuItem codecMpeg2;
         private System.Windows.Forms.ToolStripMenuItem codecMSMpeg4;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem noInputToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem windowInputToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem desktopInputToolStripMenuItem;
     }
 }
 

@@ -17,12 +17,9 @@ namespace GRemote
         private int x, y;
         private int width;
         private int height;
-        private Size size;
         private BufferPool buffers = new BufferPool();
-        private Bitmap captureBuffer;
-        private Graphics captureGraphics;
         private Rectangle bounds, lockBounds;
-        private Thread captureThread;
+        private StoppableThread captureThread;
         private SnapshotListener listener;
 
         public VideoCapture(int width, int height)
@@ -41,25 +38,38 @@ namespace GRemote
 
             this.width = width;
             this.height = height;
-            this.size = new Size(width, height);
             this.bounds = new Rectangle(0, 0, width, height);
             this.lockBounds = new Rectangle(0, 0, width, height);
-
-            captureBuffer = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            captureGraphics = Graphics.FromImage(captureBuffer);
         }
 
-        public delegate void SnapshotListener();
+        /// <summary>
+        /// A simple callback that is invoked after a snapshot has taken place.
+        /// </summary>
+        public delegate void SnapshotListener(Bitmap buffer);
 
+        /// <summary>
+        /// Get or set the snapshot listener that will be invoked when a snapshot
+        /// occurs.
+        /// </summary>
         public SnapshotListener Listener
         {
+            get
+            {
+                return listener;
+            }
             set
             {
                 listener = value;
             }
         }
 
-        public void SetCapturePos(int x, int y)
+        /// <summary>
+        /// Changes the position of the video capture. This allows moving of the capture area
+        /// even after capture has started.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void SetPosition(int x, int y)
         {
             if (x < 0 || y < 0)
             {
@@ -72,11 +82,25 @@ namespace GRemote
             this.bounds.Y = y;
         }
 
-        public Bitmap Buffer
+        /// <summary>
+        /// Gets the X position of the capture area
+        /// </summary>
+        public int X
         {
             get
             {
-                return captureBuffer;
+                return x;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Y postiion of the capture area
+        /// </summary>
+        public int Y
+        {
+            get
+            {
+                return y;
             }
         }
 
@@ -98,7 +122,7 @@ namespace GRemote
 
         public void StartCapturing()
         {
-            if (IsCapturing())
+            if (IsCapturing)
             {
                 return;
             }
@@ -108,7 +132,7 @@ namespace GRemote
                 capturing = true;
             }
 
-            captureThread = new Thread(new ThreadStart(captureThreadMain));
+            captureThread = new CaptureThread(this);
             captureThread.Start();
         }
 
@@ -124,57 +148,123 @@ namespace GRemote
                 capturing = false;
             }
 
-            captureThread = null;
-        }
-
-        public bool IsCapturing()
-        {
-            lock (this)
+            if (captureThread != null)
             {
-                return capturing;
+                captureThread.Stop();
+                captureThread = null;
             }
         }
 
-        protected void captureThreadMain()
+        public bool IsCapturing
         {
-            int frameDelay = (10000 / 30);
-            long last = DateTime.Now.Ticks;
+            get
+            {
+                lock (this)
+                {
+                    return capturing;
+                }
+            }
+        }
+    }
+
+    public class CaptureThread : StoppableThread
+    {
+        private VideoCapture videoCapture;
+        private Graphics captureGraphics;
+        private Size size;
+        private int frameDelay = (int)(TimeSpan.TicksPerSecond / 30);
+        private long last = DateTime.Now.Ticks;
+        private int frameIndex = 0;
+        private long lastFrameSample;
+        private Bitmap captureBuffer;
+
+        public CaptureThread(VideoCapture videoCapture)
+        {
+            this.videoCapture = videoCapture;
+            this.size = new Size(videoCapture.Width, videoCapture.Height);
+        }
+
+        protected override void OnThreadStart()
+        {
+            captureBuffer = new Bitmap(videoCapture.Width, videoCapture.Height, PixelFormat.Format24bppRgb);
+            captureGraphics = Graphics.FromImage(captureBuffer);
+
+            last = DateTime.Now.Ticks;
+            lastFrameSample = last;
+
+            Console.WriteLine("{0} ticks per frame", frameDelay);
+        }
+
+        protected override void RunThread()
+        {
             long target;
             long now;
             int distance;
+            int milliseconds;
 
-            while (IsCapturing())
+            // Get the current tick
+            now = DateTime.Now.Ticks;
+
+            // Estimate when the next frame should be
+            target = last + frameDelay;
+
+            if (now >= target)
             {
-                try
-                {
-                    captureGraphics.CopyFromScreen(x, y, 0, 0, size);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                CaptureFrame(now);
+                return;
+            }
 
-                if (listener != null)
-                {
-                    listener();
-                }
+            // Calculate how long until next frame
+            distance = (int)(target - now);
 
-                now = DateTime.Now.Ticks;
-                target = last + frameDelay;
-                distance = (int)(now - target);
-                last = now;
+            if (distance <= 0)
+            {
+                Thread.Yield();
+                return;
+            }
 
-                if (distance > frameDelay)
-                {
-                    distance = frameDelay;
-                }
-                else if (distance <= 0)
-                {
-                    continue;
-                }
+            if (distance > frameDelay)
+            {
+                distance = frameDelay;
+            }
 
-                //Console.WriteLine(distance / 10);
-                Thread.Sleep(distance / 10);
+            milliseconds = (int)(distance / TimeSpan.TicksPerMillisecond);
+
+            if (milliseconds <= 0)
+            {
+                //Thread.Yield();
+                //return;
+                milliseconds = 1;
+            }
+
+            Thread.Sleep(milliseconds);
+        }
+
+        protected void CaptureFrame(long now)
+        {
+            // Save frame that just happened
+            last = now;
+            frameIndex++;
+
+            if ((last - lastFrameSample) > TimeSpan.TicksPerSecond)
+            {
+                Console.WriteLine("{0} capture fps", frameIndex);
+                frameIndex = 0;
+                lastFrameSample = last;
+            }
+
+            try
+            {
+                captureGraphics.CopyFromScreen(videoCapture.X, videoCapture.Y, 0, 0, size);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            if (videoCapture.Listener != null)
+            {
+                videoCapture.Listener(captureBuffer);
             }
         }
     }

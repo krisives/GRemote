@@ -23,7 +23,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.10";
+                return "0.0.11";
             }
         }
 
@@ -140,7 +140,7 @@ namespace GRemote
             if (videoCapture == null)
             {
                 videoCapture = new VideoCapture(areaDialog.Width, areaDialog.Height);
-                videoCapture.SetCapturePos(areaDialog.Left, areaDialog.Top);
+                videoCapture.SetPosition(areaDialog.Left, areaDialog.Top);
             }
 
             videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
@@ -149,7 +149,7 @@ namespace GRemote
             serverSettings.PortString = sessionDialog.portBox.Text;
             
             serverSession = new ServerSession(FFmpeg, videoCapture, serverSettings);
-            serverSession.TargetWindow = areaDialog.TargetWindow;
+            //serverSession.TargetWindow = areaDialog.TargetWindow;
             serverSession.Preview = videoPreview;
             serverSession.StartServer();
             statusLabel.Text = "Recording...";
@@ -367,7 +367,7 @@ namespace GRemote
         {
             if (videoCapture != null)
             {
-                videoCapture.SetCapturePos(x, y);
+                videoCapture.SetPosition(x, y);
             }
         }
 
@@ -399,6 +399,8 @@ namespace GRemote
 
         public void SetBitrate(int kbps)
         {
+            bool isCustom = true;
+
             if (IsServerRunning)
             {
                 serverSession.SetBitrate(kbps);
@@ -410,7 +412,20 @@ namespace GRemote
 
             foreach (ToolStripMenuItem item in bitrateItem.DropDownItems)
             {
-                item.Checked = int.Parse(item.Tag as String) == kbps;
+                if (int.Parse(item.Tag as String) == kbps)
+                {
+                    item.Checked = true;
+                    isCustom = false;
+                } else {
+                    item.Checked = false;
+                }
+            }
+
+            bitrateItemCustom.Checked = isCustom;
+
+            if (isCustom)
+            {
+                bitrateItemCustom.Text = String.Format("Custom ({0} KB/s)", (kbps / 8));
             }
         }
 
@@ -450,7 +465,7 @@ namespace GRemote
         {
             if (serverSession != null)
             {
-                serverSession.TargetWindow = hwnd;
+                //serverSession.TargetWindow = hwnd;
             }
         }
 
@@ -580,8 +595,12 @@ namespace GRemote
         private void bitrateItemCustom_Click(object sender, EventArgs e)
         {
             CustomBitrateForm bitrateForm = new CustomBitrateForm();
+            
+            if (bitrateForm.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
 
-            bitrateForm.ShowDialog(this);
             SetBitrate(bitrateForm.KilobitsPerSecond);
         }
 

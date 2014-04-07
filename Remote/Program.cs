@@ -17,7 +17,7 @@ namespace GRemote
             String d = Directory.GetCurrentDirectory();
             String p = Path.GetFileName(d);
 
-            if (p == "Debug")
+            if (p == "Debug" || p == "Release")
             {
                 Directory.SetCurrentDirectory(d + "\\..\\..\\..\\");
             }

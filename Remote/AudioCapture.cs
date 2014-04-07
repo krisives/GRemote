@@ -5,7 +5,8 @@ using System.Text;
 
 namespace GRemote
 {
-    class AudioCapture
+    public class AudioCapture
     {
+        // No audio capture supported yet
     }
 }

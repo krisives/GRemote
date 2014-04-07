@@ -242,34 +242,46 @@ namespace GRemote
 
         protected override void RunThread()
         {
+            while (HandleBuffer())
+            {
+                Thread.Yield();
+            }
+        }
+
+        protected bool HandleBuffer()
+        {
             int bytesRead;
-            
+
             bytesRead = stream.Read(readBuffer, pos, readBuffer.Length - pos);
 
             if (bytesRead <= 0)
             {
-                return;
+                return false;
             }
 
             pos += bytesRead;
 
             if (pos >= frameSize)
             {
-                //lock (decodeBuffer)
-                //{
-                    BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                    Marshal.Copy(readBuffer, 0, data.Scan0, readBuffer.Length);
-                    decodeBuffer.UnlockBits(data);
-                //}
-
-                if (preview != null)
-                {
-                    preview.RenderDirect(decodeBuffer);
-                }
-
-                //readBuffer = new byte[frameSize];
-                pos = 0;
+                FinishBuffer();
+                return true;
             }
+
+            return false;
+        }
+
+        protected void FinishBuffer()
+        {
+            BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            Marshal.Copy(readBuffer, 0, data.Scan0, readBuffer.Length);
+            decodeBuffer.UnlockBits(data);
+
+            if (preview != null)
+            {
+                preview.RenderDirect(decodeBuffer);
+            }
+
+            pos = 0;
         }
     }
 
@@ -290,14 +302,23 @@ namespace GRemote
         {
             byte[] nextBuffer;
 
-            nextBuffer = encodedBuffers.Remove();
+            encodedBuffers.Wait();
 
-            if (nextBuffer == null)
+            while ((nextBuffer = encodedBuffers.Remove()) != null)
+            {
+                HandleBuffer(nextBuffer);
+            }
+        }
+
+        protected void HandleBuffer(byte[] nextBuffer)
+        {
+            if (nextBuffer.Length <= 0)
             {
                 return;
             }
 
             stream.Write(nextBuffer, 0, nextBuffer.Length);
+            stream.Flush();
         }
     }
 
