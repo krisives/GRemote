@@ -26,6 +26,10 @@ namespace GRemote
                 
                 return path;
             }
+            set
+            {
+                path = value;
+            }
         }
     }
 }

@@ -28,29 +28,29 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.components = new System.ComponentModel.Container();
+            this.saveButton = new System.Windows.Forms.Button();
             this.enableSave = new System.Windows.Forms.CheckBox();
             this.saveFilename = new System.Windows.Forms.TextBox();
             this.browseSaveButton = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.ffmpegBox = new System.Windows.Forms.TextBox();
+            this.browseFFMpeg = new System.Windows.Forms.Button();
+            this.convertFormat = new System.Windows.Forms.CheckBox();
+            this.formatBox = new System.Windows.Forms.ComboBox();
+            this.helpText = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
-            // button1
+            // saveButton
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(360, 107);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Close";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveButton.Location = new System.Drawing.Point(312, 110);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(123, 23);
+            this.saveButton.TabIndex = 0;
+            this.saveButton.Text = "Save Preferences";
+            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.button1_Click);
             // 
             // enableSave
             // 
@@ -85,50 +85,6 @@
             this.browseSaveButton.UseVisualStyleBackColor = true;
             this.browseSaveButton.Click += new System.EventHandler(this.browseSaveButton_Click);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(233, 65);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 13);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Input Mode:";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.Enabled = false;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Simple",
-            "Driver"});
-            this.comboBox1.Location = new System.Drawing.Point(303, 61);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(137, 21);
-            this.comboBox1.TabIndex = 6;
-            // 
-            // comboBox2
-            // 
-            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox2.Enabled = false;
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Items.AddRange(new object[] {
-            "Simple",
-            "DirectShow"});
-            this.comboBox2.Location = new System.Drawing.Point(101, 61);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(121, 21);
-            this.comboBox2.TabIndex = 8;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 65);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 13);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "Capture Mode:";
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -138,43 +94,68 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "FFMpeg:";
             // 
-            // textBox1
+            // ffmpegBox
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.ffmpegBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(101, 9);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(258, 20);
-            this.textBox1.TabIndex = 10;
+            this.ffmpegBox.Location = new System.Drawing.Point(101, 9);
+            this.ffmpegBox.Name = "ffmpegBox";
+            this.ffmpegBox.Size = new System.Drawing.Size(258, 20);
+            this.ffmpegBox.TabIndex = 10;
+            this.helpText.SetToolTip(this.ffmpegBox, "If you have a ffmpeg.exe you want to use other than the stock one");
             // 
-            // button2
+            // browseFFMpeg
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(365, 6);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 11;
-            this.button2.Text = "Browse";
-            this.button2.UseVisualStyleBackColor = true;
+            this.browseFFMpeg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.browseFFMpeg.Location = new System.Drawing.Point(365, 6);
+            this.browseFFMpeg.Name = "browseFFMpeg";
+            this.browseFFMpeg.Size = new System.Drawing.Size(75, 23);
+            this.browseFFMpeg.TabIndex = 11;
+            this.browseFFMpeg.Text = "Browse";
+            this.browseFFMpeg.UseVisualStyleBackColor = true;
+            this.browseFFMpeg.Click += new System.EventHandler(this.browseFFMpeg_Click);
+            // 
+            // convertFormat
+            // 
+            this.convertFormat.AutoSize = true;
+            this.convertFormat.Location = new System.Drawing.Point(101, 61);
+            this.convertFormat.Name = "convertFormat";
+            this.convertFormat.Size = new System.Drawing.Size(120, 17);
+            this.convertFormat.TabIndex = 12;
+            this.convertFormat.Text = "Convert File Format:";
+            this.helpText.SetToolTip(this.convertFormat, "Convert the saved stream afterwards into a different file format. Streams are\r\nma" +
+                    "de in MPEG-TS format but can easily be converted afterwards without re-encoding");
+            this.convertFormat.UseVisualStyleBackColor = true;
+            // 
+            // formatBox
+            // 
+            this.formatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.formatBox.FormattingEnabled = true;
+            this.formatBox.Items.AddRange(new object[] {
+            "MPEG-TS (.ts)",
+            "MPEG-4 (.mp4)",
+            "AVI (.avi)",
+            "MKV (.mkv)",
+            "ASF (.asf)"});
+            this.formatBox.Location = new System.Drawing.Point(227, 59);
+            this.formatBox.Name = "formatBox";
+            this.formatBox.Size = new System.Drawing.Size(132, 21);
+            this.formatBox.TabIndex = 13;
             // 
             // PreferencesDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(447, 142);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.textBox1);
+            this.ClientSize = new System.Drawing.Size(447, 145);
+            this.Controls.Add(this.formatBox);
+            this.Controls.Add(this.convertFormat);
+            this.Controls.Add(this.browseFFMpeg);
+            this.Controls.Add(this.ffmpegBox);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.comboBox2);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.browseSaveButton);
             this.Controls.Add(this.saveFilename);
             this.Controls.Add(this.enableSave);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.saveButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -190,16 +171,15 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.Button browseSaveButton;
         public System.Windows.Forms.CheckBox enableSave;
         public System.Windows.Forms.TextBox saveFilename;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        public System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button button2;
+        public System.Windows.Forms.TextBox ffmpegBox;
+        private System.Windows.Forms.Button browseFFMpeg;
+        private System.Windows.Forms.CheckBox convertFormat;
+        private System.Windows.Forms.ComboBox formatBox;
+        private System.Windows.Forms.ToolTip helpText;
     }
 }

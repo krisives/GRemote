@@ -11,19 +11,32 @@ namespace GRemote
 {
     public partial class VideoPreview : UserControl
     {
-        PreviewMode previewMode = PreviewMode.COMPRESSED;
-        Bitmap uncompressedImage;
-        Bitmap compressedImage;
-        BufferedGraphicsContext bufferContext;
-        BufferedGraphics bg;
-        Graphics g;
-        Rectangle leftHalf = new Rectangle();
-        Rectangle rightHalf = new Rectangle();
+        private GRemoteDialog gRemote; 
+        private PreviewMode previewMode = PreviewMode.COMPRESSED;
+        private Bitmap uncompressedImage;
+        private Bitmap compressedImage;
+        private BufferedGraphicsContext bufferContext;
+        private BufferedGraphics bg;
+        private Graphics g;
+        private Rectangle leftHalf = new Rectangle();
+        private Rectangle rightHalf = new Rectangle();
 
         public VideoPreview()
         {
             bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
+        }
+
+        public GRemoteDialog GRemote
+        {
+            get
+            {
+                return gRemote;
+            }
+            set
+            {
+                gRemote = value;
+            }
         }
 
         public void SetSize(int width, int height)
@@ -45,21 +58,34 @@ namespace GRemote
             {
                 Invoke(new Action(delegate()
                 {
-                    Width = width;
-                    Height = height;
+                    ResizeVideo(width, height);
                 }));
             }
             else
             {
-                Width = width;
-                Height = height;
+                ResizeVideo(width, height);
             }
-
-           
 
             Console.WriteLine("Preview set to {0}x{1}", width, height);
         }
 
+        protected void ResizeVideo(int width, int height)
+        {
+            int dx;
+            int dy;
+
+            if (Width < width || Height < height)
+            {
+                dx = gRemote.Width - Width;
+                dy = gRemote.Height - Height;
+
+                gRemote.Width = width + dx;
+                gRemote.Height = height + dy;
+            }
+
+            Width = width;
+            Height = height;
+        }
 
         public void SetBuffers(Bitmap uncompressedImage, Bitmap compressedImage)
         {
@@ -100,47 +126,6 @@ namespace GRemote
                 g.DrawImage(screen, 0, 0);
                 bg.Render();
             }
-        }
-
-        public void Render()
-        {
-            switch (previewMode)
-            {
-                case PreviewMode.NONE:
-                    break;
-                case PreviewMode.COMPRESSED:
-                    lock (compressedImage)
-                    {
-                        g.DrawImage(compressedImage, 0, 0);
-                    }
-
-                    break;
-                case PreviewMode.UNCOMPRESSED:
-                    lock (uncompressedImage)
-                    {
-                        g.DrawImage(uncompressedImage, 0, 0);
-                    }
-
-                    break;
-                case PreviewMode.SPLIT:
-                    lock (compressedImage)
-                    {
-                        lock (uncompressedImage)
-                        {
-                            g.DrawImage(uncompressedImage, 0, 0);
-                            g.DrawImage(compressedImage, rightHalf.Location.X, rightHalf.Location.Y, rightHalf, GraphicsUnit.Pixel);
-                        }
-                    }
-
-                    
-                    break;
-            }
-
-            //lock (compressedImage) {
-            //    g.DrawImage(compressedImage, 0, 0);
-           // }
-
-            bg.Render();
         }
     }
 

@@ -23,7 +23,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.11";
+                return "0.0.12";
             }
         }
 
@@ -45,10 +45,11 @@ namespace GRemote
             ffmpeg = new FFMpeg();
             areaDialog = new CaptureArea(this);
             sessionDialog = new SessionDialog();
-            prefsDialog = new PreferencesDialog();
+            prefsDialog = new PreferencesDialog(this);
 
             InitializeComponent();
 
+            videoPreview.GRemote = this;
             Text = String.Format("GRemote ({0})", Version);
         }
 
@@ -297,7 +298,10 @@ namespace GRemote
         /// </summary>
         public void ShowPreferences()
         {
-            prefsDialog.ShowDialog(this);
+            if (prefsDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
 
             if (prefsDialog.FileOutputEnabled)
             {
@@ -306,6 +310,11 @@ namespace GRemote
             else
             {
                 serverSettings.DisableFileOutput();
+            }
+
+            if (prefsDialog.ffmpegBox.Text.Length > 0)
+            {
+                ffmpeg.Path = prefsDialog.ffmpegBox.Text;
             }
         }
 
@@ -434,16 +443,23 @@ namespace GRemote
             SetBitrate(int.Parse(str));
         }
 
-        public void UpdateBandwidth()
+        protected void UpdateBandwidth()
         {
             int encodedBytes = 0;
+            VideoDecoder decoder;
 
             if (IsServerRunning)
             {
                 encodedBytes = serverSession.Encoder.TotalBytes;
-            } else if (IsClientRunning)
+            }
+            else if (IsClientRunning)
             {
-               // encodedBytes = clientSession.Decoder.TotalBytesDecoded;
+                decoder = clientSession.Decoder;
+
+                if (decoder != null)
+                {
+                    encodedBytes = decoder.TotalBytes;
+                }
             }
             else
             {

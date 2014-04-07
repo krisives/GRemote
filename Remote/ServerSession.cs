@@ -354,7 +354,7 @@ namespace GRemote
             }
             catch (Exception e)
             {
-                
+                Console.WriteLine(e);
             }
 
             client.socket = null;
@@ -568,7 +568,7 @@ namespace GRemote
                     }
                     catch (Exception e)
                     {
-
+                        Console.WriteLine(e);
                     }
                 }
 

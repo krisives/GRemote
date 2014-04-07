@@ -11,9 +11,15 @@ namespace GRemote
 {
     public partial class PreferencesDialog : Form
     {
-        public PreferencesDialog()
+        GRemoteDialog gRemote;
+
+        public PreferencesDialog(GRemoteDialog gRemote)
         {
+            this.gRemote = gRemote;
             InitializeComponent();
+
+            ffmpegBox.Text = gRemote.FFmpeg.Path;
+            formatBox.SelectedIndex = 0;
         }
 
         public bool FileOutputEnabled
@@ -40,6 +46,7 @@ namespace GRemote
 
         private void button1_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.OK;
             Close();
         }
 
@@ -62,6 +69,17 @@ namespace GRemote
             }
         }
 
-  
+        private void browseFFMpeg_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "ffmpeg.exe|ffmpeg.exe";
+
+            if (fileDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            ffmpegBox.Text = fileDialog.FileName;
+        }
     }
 }

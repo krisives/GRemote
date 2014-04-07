@@ -22,7 +22,7 @@ namespace GRemote
         private BufferPool encodedBuffers = new BufferPool();
         private BufferPool decodedBuffers = new BufferPool();
         private int width, height;
-        private int totalBytesDecoded = 0;
+        private int totalBytes = 0;
         private VideoPreview videoPreview;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
@@ -67,11 +67,11 @@ namespace GRemote
             }
         }
 
-        public int TotalBytesDecoded
+        public int TotalBytes
         {
             get
             {
-                return totalBytesDecoded;
+                return totalBytes;
             }
         }
 
@@ -98,7 +98,7 @@ namespace GRemote
                 started = true;
             }
 
-            totalBytesDecoded = 0;
+            totalBytes = 0;
 
             // Create new buffer pools in case old threads are still doing things
             encodedBuffers = new BufferPool();
@@ -143,6 +143,17 @@ namespace GRemote
 
         public void Decode(byte[] buffer)
         {
+            if (buffer == null)
+            {
+                return;
+            }
+
+            if (buffer.Length <= 0)
+            {
+                return;
+            }
+
+            totalBytes += buffer.Length;
             encodedBuffers.Add(buffer);
         }
 

@@ -150,6 +150,7 @@ namespace GRemote
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 return false;
             }
 

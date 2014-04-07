@@ -12,13 +12,13 @@ namespace GRemote
     public class ClientSession
     {
         private GRemoteDialog gRemote;
-        private StoppableThread writeThread;
-        private StoppableThread readThread;
+        private ClientWriteThread writeThread;
+        private ClientReadThread readThread;
+        private VideoPreview videoPreview;
+        private InputCapture inputCapture;
         private String address;
         private int port;
         private bool running;
-        private VideoPreview videoPreview;
-        private InputCapture inputCapture;
 
         public ClientSession(GRemoteDialog gRemote, String address, int port)
         {
@@ -76,6 +76,14 @@ namespace GRemote
                 {
                     return running;
                 }
+            }
+        }
+
+        public VideoDecoder Decoder
+        {
+            get
+            {
+                return (readThread != null) ? readThread.Decoder : null;
             }
         }
 
@@ -161,12 +169,23 @@ namespace GRemote
             this.preview = client.Preview;
             this.decoder = null;// client.Decoder;
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
+        }
+
+        public VideoDecoder Decoder
+        {
+            get
+            {
+                return decoder;
+            }
+        }
+
+        protected override void OnThreadStart()
+        {
             IPAddress hostIP = (Dns.Resolve(client.Address)).AddressList[0];
             IPEndPoint ep = new IPEndPoint(hostIP, client.Port);
 
             socket.Connect(ep);
-            
+
             this.networkStream = new NetworkStream(socket);
             this.binaryReader = new BinaryReader(networkStream);
         }

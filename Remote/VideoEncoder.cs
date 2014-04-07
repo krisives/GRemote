@@ -251,7 +251,14 @@ namespace GRemote
 
         public byte[] Read()
         {
-            return encodedBuffers.Remove();
+            byte[] buffer = encodedBuffers.Remove();
+
+            if (buffer != null)
+            {
+                totalBytes += buffer.Length;
+            }
+
+            return buffer;
         }
     }
 
