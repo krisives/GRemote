@@ -13,22 +13,22 @@ namespace GRemote
 {
     public class VideoEncoder
     {
-        FFMpeg ffmpeg;
-        int width;
-        int height;
-        Rectangle lockBounds;
-        volatile bool started = false;
-        BufferPool frameBuffers = new BufferPool();
-        BufferPool encodedBuffers = new BufferPool();
-        Process process;
-        StoppableThread errorThread;
-        StoppableThread writeThread;
-        StoppableThread readThread;
-        List<Stream> listenerStreams = new List<Stream>();
-        volatile int totalBytes = 0;
-        Stream fout;
-        String fileOutputPath;
-        bool enableFileRecording = false;
+        private FFMpeg ffmpeg;
+        private int width;
+        private int height;
+        private Rectangle lockBounds;
+        private volatile bool started = false;
+        private BufferPool frameBuffers = new BufferPool();
+        private BufferPool encodedBuffers = new BufferPool();
+        private Process process;
+        private StoppableThread errorThread;
+        private StoppableThread writeThread;
+        private StoppableThread readThread;
+        private List<Stream> listenerStreams = new List<Stream>();
+        private volatile int totalBytes = 0;
+        private Stream fout;
+        private String fileOutputPath;
+        private bool enableFileRecording = false;
 
         public VideoEncoder(FFMpeg ffmpeg, int width, int height)
         {
@@ -253,15 +253,15 @@ namespace GRemote
 
     public class VideoEncoderWriteThread : StoppableThread
     {
-        VideoEncoder encoder;
-        Stream stream;
-        BufferPool frameBuffers;
+        private VideoEncoder encoder;
+        private Stream stream;
+        private BufferPool frameBuffers;
 
         public VideoEncoderWriteThread(VideoEncoder encoder, Process process, BufferPool frameBuffers)
         {
             this.encoder = encoder;
             this.frameBuffers = frameBuffers;
-            this.stream = process.StandardInput.BaseStream;// new BufferedStream(process.StandardInput.BaseStream);
+            this.stream = process.StandardInput.BaseStream;
         }
 
         protected override void RunThread()
@@ -279,7 +279,7 @@ namespace GRemote
 
     public class VideoEncoderErrorThread : StoppableThread
     {
-        StreamReader reader;
+        private StreamReader reader;
 
         public VideoEncoderErrorThread(VideoEncoder encoder, Process process)
         {
@@ -295,12 +295,11 @@ namespace GRemote
     public class VideoEncoderReadThread : StoppableThread
     {
         // Encoded data is read from FFMPeg in 16K chunks
-        byte[] readBuffer;
-        Stream stream;
-        Process process;
-        VideoEncoder encoder;
-        BufferPool encodedBuffers;
-        Stream fout;
+        private byte[] readBuffer;
+        private Stream stream;
+        private Process process;
+        private VideoEncoder encoder;
+        private BufferPool encodedBuffers;
 
         public VideoEncoderReadThread(VideoEncoder encoder, Process process, BufferPool encodedBuffers)
         {
@@ -308,7 +307,7 @@ namespace GRemote
             this.process = process;
             this.encodedBuffers = encodedBuffers;
             this.readBuffer = new byte[1024 * 16];
-            this.stream = process.StandardOutput.BaseStream;// new BufferedStream(process.StandardOutput.BaseStream);
+            this.stream = process.StandardOutput.BaseStream;
         }
 
         protected override void RunThread()
@@ -325,11 +324,6 @@ namespace GRemote
 
             byte[] resized = new byte[readCount];
             Array.Copy(readBuffer, resized, readCount);
-
-            if (encoder.FileRecordingEnabled)
-            {
-                fout.Write(resized, 0, resized.Length);
-            }
 
             encodedBuffers.Add(resized);
         }

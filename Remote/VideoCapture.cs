@@ -13,17 +13,17 @@ namespace GRemote
 {
     public class VideoCapture
     {
-        bool capturing;
-        int x, y;
-        int width;
-        int height;
-        Size size;
-        BufferPool buffers = new BufferPool();
-        Bitmap captureBuffer;
-        Graphics captureGraphics;
-        Rectangle bounds, lockBounds;
-        Thread captureThread;
-        SnapshotListener listener;
+        private bool capturing;
+        private int x, y;
+        private int width;
+        private int height;
+        private Size size;
+        private BufferPool buffers = new BufferPool();
+        private Bitmap captureBuffer;
+        private Graphics captureGraphics;
+        private Rectangle bounds, lockBounds;
+        private Thread captureThread;
+        private SnapshotListener listener;
 
         public VideoCapture(int width, int height)
         {
@@ -151,7 +151,7 @@ namespace GRemote
                 }
                 catch (Exception e)
                 {
-
+                    Console.WriteLine(e);
                 }
 
                 if (listener != null)

@@ -21,37 +21,109 @@ namespace GRemote
             
         }
 
-        public delegate void CheckEvent(bool hasUpdate);
+        public delegate void CheckEvent(bool hasUpdate, String msg);
 
         public void Check(CheckEvent checkEvent)
         {
-            // Respones from GitHub are not working for
-            // some reason right now so this is being
-            // disabled
-            MessageBox.Show("Not working currently :(");
+            Process p = CreateWgetProcess();
+            
+            p.Start();
+            p.WaitForExit();
 
-            Thread thread = new Thread(new ThreadStart(delegate()
+            String version = File.ReadAllText("UPDATE.txt");
+
+            if (version == null)
             {
-                ServicePointManager.ServerCertificateValidationCallback = delegate(
-                    object sender,
-                    X509Certificate cert,
-                    X509Chain chain,
-                    SslPolicyErrors errors
-                )
-                {
-                    return true;
-                };
+                version = "";
+            }
 
-                WebRequest.DefaultWebProxy = null;
-                WebClient client = new WebClient();
-                client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-                client.Proxy = null;
-                client.Headers.Add(HttpRequestHeader.UserAgent, "GRemote");
-                Console.WriteLine("Checking...");
-                Console.WriteLine(client.DownloadString("https://raw.githubusercontent.com/krisives/GRemote/master/VERSION.txt"));
-            }));
+            version = version.Trim();
 
-            thread.Start();
+            if (version == "")
+            {
+                checkEvent(false, "No response from Github");
+                return;
+            }
+
+            if (IsNewerVersion(GRemoteDialog.Version, version))
+            {
+                checkEvent(true, String.Format("Version {0} is available on Github", version));
+            }
+            else
+            {
+                checkEvent(false, "Already up to date");
+            }
+        }
+
+        public bool IsNewerVersion(String a, String b)
+        {
+            int[] partsA = new int[3];
+            int[] partsB = new int[3];
+
+            Console.WriteLine("{0} vs {1}", a, b);
+
+            if (!ParseVersion(a, partsA))
+            {
+                return true;
+            }
+
+            if (!ParseVersion(b, partsB))
+            {
+                return false;
+            }
+
+            if (partsB[0] > partsA[0])
+            {
+                return true;
+            }
+
+            if (partsB[1] > partsA[1])
+            {
+                return true;
+            }
+
+            return partsB[2] > partsA[2];
+        }
+
+        protected bool ParseVersion(String str, int[] nums)
+        {
+            String[] parts;
+
+            if (str == null || str.Length <= 0)
+            {
+                return false;
+            }
+
+            parts = str.Split('.');
+
+            if (parts.Length != 3)
+            {
+                return false;
+            }
+
+            try
+            {
+                nums[0] = int.Parse(parts[0]);
+                nums[1] = int.Parse(parts[1]);
+                nums[2] = int.Parse(parts[2]);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected Process CreateWgetProcess()
+        {
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.FileName = "wget.exe";
+            p.StartInfo.Arguments = "--no-check-certificates -O UPDATE.txt 'https://raw.githubusercontent.com/krisives/GRemote/master/VERSION.txt'";
+
+            return p;
         }
     }
 }

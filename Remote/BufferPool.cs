@@ -8,8 +8,8 @@ namespace GRemote
 {
     public class BufferPool
     {
-        List<byte[]> buffers = new List<byte[]>();
-        int totalSize;
+        private List<byte[]> buffers = new List<byte[]>();
+        private int totalSize = 0;
 
         public BufferPool()
         {
@@ -42,8 +42,6 @@ namespace GRemote
                 buffers.RemoveAt(0);
                 return b;
             }
-
-            return null;
         }
 
         public void Wait()

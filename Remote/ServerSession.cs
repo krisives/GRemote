@@ -7,42 +7,32 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Windows.Forms;
+using Interceptor;
 
 namespace GRemote
 {
     public class ServerSession
     {
-        FFMpeg ffmpeg;
-
-        // Listening socket
-        Socket socket;
-
-        // True if server is running
-        bool running;
-
-        // Threads used to accept and process network data
-        StoppableThread listenThread;
-        StoppableThread writeThread;
-        StoppableThread readThread;
-
-        // List of clients that are connected
-        List<ConnectedClient> clients = new List<ConnectedClient>();
-
-        // When data is broadcast to connected peers it goes
-        // into this pool for the threads to read
-        BufferPool outputBuffers = new BufferPool();
-
-        // Capture, encoder and decoder for processing video data
-        VideoCapture videoCapture;
-        VideoEncoder videoEncoder;
-
-        // 1K buffer for constructing header packets
-        byte[] headerBuffer;
-        MemoryStream headerStream;
-        BinaryWriter headerBinary;
-        VideoPreview videoPreview;
-        ServerSettings settings;
-        List<ConnectedClient> killList = new List<ConnectedClient>();
+        private FFMpeg ffmpeg;
+        private Socket socket;
+        private bool running;
+        private StoppableThread listenThread;
+        private StoppableThread writeThread;
+        private StoppableThread readThread;
+        private List<ConnectedClient> clients = new List<ConnectedClient>();
+        private BufferPool outputBuffers = new BufferPool();
+        private VideoCapture videoCapture;
+        private VideoEncoder videoEncoder;
+        private byte[] headerBuffer;
+        private MemoryStream headerStream;
+        private BinaryWriter headerBinary;
+        private VideoPreview videoPreview;
+        private ServerSettings settings;
+        private List<ConnectedClient> killList = new List<ConnectedClient>();
+        private IntPtr targetWindow = IntPtr.Zero;
+        private InputPlayback inputPlayback;
 
         public ServerSession(FFMpeg ffmpeg, VideoCapture videoCapture, ServerSettings settings)
         {
@@ -91,6 +81,18 @@ namespace GRemote
             }
         }
 
+        public IntPtr TargetWindow
+        {
+            get
+            {
+                return targetWindow;
+            }
+            set
+            {
+                targetWindow = value;
+            }
+        }
+
         public void StartServer()
         {
             if (IsRunning)
@@ -108,9 +110,10 @@ namespace GRemote
 
             // Begin the capture and encoding process
             videoCapture.Listener = Snapshot;
+            inputPlayback = new InputPlayback();
 
             videoEncoder = new VideoEncoder(ffmpeg, videoCapture.Width, videoCapture.Height);
-
+            
             if (settings.FileOutputEnabled)
             {
                 videoEncoder.EnableFileOutput(settings.FileOutputPath);
@@ -129,6 +132,7 @@ namespace GRemote
             writeThread.Start();
 
             videoCapture.StartCapturing();
+            inputPlayback.StartPlayback();
         }
 
         public delegate void Callback();
@@ -245,15 +249,21 @@ namespace GRemote
                 listenThread = null;
             }
 
+            if (inputPlayback != null)
+            {
+                inputPlayback.StopPlayback();
+                inputPlayback = null;
+            }
+
             outputBuffers = new BufferPool();
         }
 
-        protected void AddPacket(Packet packet)
+        public void AddPacket(Packet packet)
         {
             outputBuffers.Add(packet.Buffer);
         }
 
-        protected void AddVideoBuffer(byte[] buffer)
+        public void AddVideoBuffer(byte[] buffer)
         {
             if (!IsRunning || clients.Count <= 0) {
                 return;
@@ -364,15 +374,45 @@ namespace GRemote
 
     public class ServerReadThread : StoppableThread
     {
+        ServerSession server;
+        Input input;
+
         public ServerReadThread(ServerSession server)
         {
+            this.server = server;
+            
+            
 
+            
+        }
+
+        protected override void OnThreadStart()
+        {
+            this.input = new Input();
+
+            // Be sure to set your keyboard filter to be able to capture key presses and simulate key presses
+            // KeyboardFilterMode.All captures all events; 'Down' only captures presses for non-special keys; 'Up' only captures releases for non-special keys; 'E0' and 'E1' capture presses/releases for special keys
+            input.KeyboardFilterMode = KeyboardFilterMode.All;
+            // You can set a MouseFilterMode as well, but you don't need to set a MouseFilterMode to simulate mouse clicks
+
+            // Finally, load the driver
+            input.Load();
         }
 
         protected override void RunThread()
         {
-            Stop();
+            Thread.Sleep(1000);
         }
+
+        [DllImport("user32.dll", SetLastError=true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, int wParam, int lParam);
     }
 
     public class ServerWriteThread : StoppableThread
@@ -410,6 +450,7 @@ namespace GRemote
                  }
                  catch (Exception e)
                  {
+                     Console.WriteLine(e);
                      server.KillClient(client);
                  }
              }

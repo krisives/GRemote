@@ -11,17 +11,14 @@ namespace GRemote
 {
     public class ClientSession
     {
-        GRemoteDialog gRemote;
-        Socket socket;
-        NetworkStream networkStream;
-        BinaryReader binaryReader;
-        StoppableThread writeThread;
-        StoppableThread readThread;
-        String address;
-        int port;
-        bool running;
-        //VideoDecoder videoDecoder;
-        VideoPreview videoPreview;
+        private GRemoteDialog gRemote;
+        private StoppableThread writeThread;
+        private StoppableThread readThread;
+        private String address;
+        private int port;
+        private bool running;
+        private VideoPreview videoPreview;
+        private InputCapture inputCapture;
 
         public ClientSession(GRemoteDialog gRemote, String address, int port)
         {
@@ -29,6 +26,14 @@ namespace GRemote
             this.address = address;
             this.port = port;
             this.videoPreview = gRemote.VideoPreview;
+        }
+
+        public InputCapture InputCapture
+        {
+            get
+            {
+                return inputCapture;
+            }
         }
 
         public String Address
@@ -74,14 +79,6 @@ namespace GRemote
             }
         }
 
-       // public VideoDecoder Decoder
-       // {
-       //     get
-        //    {
-        //        return videoDecoder;
-         //   }
-        //}
-
         public void StartClient()
         {
             if (IsRunning)
@@ -94,15 +91,15 @@ namespace GRemote
                 running = true;
             }
 
-            //videoDecoder = new VideoDecoder(gRemote.FFmpeg, 800, 600);
-            //videoDecoder.VideoPreview = gRemote.VideoPreview;
-            //videoDecoder.StartDecoding();
+            inputCapture = new InputCapture(this);
 
             readThread = new ClientReadThread(this);
             writeThread = new ClientWriteThread();
 
             readThread.Start();
             writeThread.Start();
+
+            inputCapture.StartCapturing();
         }
 
         public void StopClient()
@@ -113,12 +110,6 @@ namespace GRemote
             }
 
             running = false;
-
-            //if (videoDecoder != null)
-            //{
-           //     videoDecoder.StopDecoding();
-            //    videoDecoder = null;
-            //}
 
             if (writeThread != null)
             {
@@ -131,12 +122,13 @@ namespace GRemote
                 readThread.Stop();
                 readThread = null;
             }
-        }
 
-        //public void SetDecoder(VideoDecoder videoDecoder)
-        //{
-        //    this.videoDecoder = videoDecoder;
-        //}
+            if (inputCapture != null)
+            {
+                inputCapture.StopCapturing();
+                inputCapture = null;
+            }
+        }
     }
 
     public class ClientWriteThread : StoppableThread
@@ -154,13 +146,13 @@ namespace GRemote
 
     public class ClientReadThread : StoppableThread
     {
-        FFMpeg ffmpeg;
-        VideoPreview preview;
-        ClientSession client;
-        Socket socket;
-        NetworkStream networkStream;
-        BinaryReader binaryReader;
-        VideoDecoder decoder;
+        private FFMpeg ffmpeg;
+        private VideoPreview preview;
+        private ClientSession client;
+        private Socket socket;
+        private NetworkStream networkStream;
+        private BinaryReader binaryReader;
+        private VideoDecoder decoder;
 
         public ClientReadThread(ClientSession client)
         {
@@ -204,6 +196,9 @@ namespace GRemote
                 case PacketType.VIDEO_UPDATE:
                     readVideoPacket();
                     break;
+                case PacketType.KEYBOARD:
+                    readKeyboardPacket();
+                    break;
             }
         }
 
@@ -237,6 +232,14 @@ namespace GRemote
             }
 
             //videoPreview.RenderDirect(videoDecoder.Buffer);
+        }
+
+        protected void readKeyboardPacket()
+        {
+            byte[] buffer = new byte[6];
+            buffer[0] = (byte)PacketType.KEYBOARD;
+            binaryReader.Read(buffer, 1, 5);
+            KeyboardPacket packet = new KeyboardPacket(buffer);
         }
     }
 }

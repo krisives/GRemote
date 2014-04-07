@@ -19,7 +19,6 @@ namespace GRemote
         Graphics g;
         Rectangle leftHalf = new Rectangle();
         Rectangle rightHalf = new Rectangle();
-        int width, height;
 
         public VideoPreview()
         {

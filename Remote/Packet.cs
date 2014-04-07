@@ -178,18 +178,24 @@ namespace GRemote
 
     public class KeyboardPacket : Packet
     {
-        public KeyboardPacket(byte scancode, bool set)
-            : base(PacketType.KEYBOARD, 2)
+        public KeyboardPacket(int scancode, bool set)
+            : base(PacketType.KEYBOARD, 6)
         {
-            data[1] = scancode;
-            data[2] = set ? (byte)0x01 : (byte)0x00;
+            WriteInt32(scancode, Buffer, 1);
+            data[5] = set ? (byte)0x01 : (byte)0x00;
         }
 
-        public byte Scancode
+        public KeyboardPacket(byte[] buffer)
+            : base(buffer)
+        {
+
+        }
+
+        public int Scancode
         {
             get
             {
-                return data[1];
+                return ReadInt32(Buffer, 1);
             }
         }
 
@@ -197,7 +203,7 @@ namespace GRemote
         {
             get
             {
-                return data[2] != 0;
+                return data[5] != 0;
             }
         }
     }

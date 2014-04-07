@@ -13,13 +13,52 @@ namespace GRemote
 {
     public partial class CaptureArea : Form
     {
-        GRemoteDialog gRemote;
+        private GRemoteDialog gRemote;
+        private bool moving = false;
+        private Point grab;
 
         public CaptureArea(GRemoteDialog gRemote)
         {
             this.gRemote = gRemote;
             InitializeComponent();
-            
+        }
+
+        public IntPtr TargetWindow
+        {
+            get
+            {
+                if (windowByProcess.Checked)
+                {
+                    return GetWindowByProcess();
+                }
+
+                if (windowByTitle.Checked)
+                {
+                    return GetWindowByTitle();
+                }
+
+                return IntPtr.Zero;
+            }
+        }
+
+        public IntPtr GetWindowByProcess()
+        {
+            Process p = null;
+
+            if (processComboBox.SelectedItem != null)
+            {
+                if (processComboBox.SelectedItem.GetType() == typeof(Process))
+                {
+                    p = processComboBox.SelectedItem as Process;
+                }
+            }
+
+            if (p != null)
+            {
+                return p.MainWindowHandle;
+            }
+
+            return IntPtr.Zero;
         }
 
         private void BoundsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -54,9 +93,6 @@ namespace GRemote
         {
             Opacity = (opacityBar.Value / 100.0);
         }
-
-        bool moving = false;
-        Point grab;
 
         private void BoundsForm_MouseDown(object sender, MouseEventArgs e)
         {
@@ -162,7 +198,7 @@ namespace GRemote
             BoundsForm_KeyDown(this, e);
         }
 
-        private void BoundsForm_Move(object sender, EventArgs e)
+        private void OnWindowMoved(object sender, EventArgs e)
         {
             if (Left < 0)
             {
@@ -204,129 +240,20 @@ namespace GRemote
             yBox.Text = Top.ToString();
 
             gRemote.SetCapturePos(Left, Top);
-
-            if (moveWindowBox.Checked && processComboBox.SelectedIndex > 0)
-            {
-                Process p = processComboBox.SelectedItem as Process;
-
-                if (p.MainWindowHandle != IntPtr.Zero)
-                {
-                    SetWindowPos(p.MainWindowHandle, (IntPtr)0, Left, Top, 0, 0, SetWindowPosFlags.DoNotActivate | SetWindowPosFlags.IgnoreResize);
-                }
-            }
+            MoveTargetWindow();
         }
 
-        bool hack = false;
-
-        public IntPtr TargetWindow
+        public void MoveTargetWindow()
         {
-            get
-            {
-                Point screenPos = PointToScreen(Location);
-                POINT p;
-                p.X = screenPos.X;
-                p.Y = screenPos.Y;
-                return WindowFromPoint(p);
+            if (!moveWindowBox.Checked) {
+                return;
             }
-        }
+            
+            IntPtr hwnd = TargetWindow;
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
-        
-        [Flags()]
-        private enum SetWindowPosFlags : uint
-        {
-            /// <summary>If the calling thread and the thread that owns the window are attached to different input queues,
-            /// the system posts the request to the thread that owns the window. This prevents the calling thread from
-            /// blocking its execution while other threads process the request.</summary>
-            /// <remarks>SWP_ASYNCWINDOWPOS</remarks>
-            AsynchronousWindowPosition = 0x4000,
-            /// <summary>Prevents generation of the WM_SYNCPAINT message.</summary>
-            /// <remarks>SWP_DEFERERASE</remarks>
-            DeferErase = 0x2000,
-            /// <summary>Draws a frame (defined in the window's class description) around the window.</summary>
-            /// <remarks>SWP_DRAWFRAME</remarks>
-            DrawFrame = 0x0020,
-            /// <summary>Applies new frame styles set using the SetWindowLong function. Sends a WM_NCCALCSIZE message to
-            /// the window, even if the window's size is not being changed. If this flag is not specified, WM_NCCALCSIZE
-            /// is sent only when the window's size is being changed.</summary>
-            /// <remarks>SWP_FRAMECHANGED</remarks>
-            FrameChanged = 0x0020,
-            /// <summary>Hides the window.</summary>
-            /// <remarks>SWP_HIDEWINDOW</remarks>
-            HideWindow = 0x0080,
-            /// <summary>Does not activate the window. If this flag is not set, the window is activated and moved to the
-            /// top of either the topmost or non-topmost group (depending on the setting of the hWndInsertAfter
-            /// parameter).</summary>
-            /// <remarks>SWP_NOACTIVATE</remarks>
-            DoNotActivate = 0x0010,
-            /// <summary>Discards the entire contents of the client area. If this flag is not specified, the valid
-            /// contents of the client area are saved and copied back into the client area after the window is sized or
-            /// repositioned.</summary>
-            /// <remarks>SWP_NOCOPYBITS</remarks>
-            DoNotCopyBits = 0x0100,
-            /// <summary>Retains the current position (ignores X and Y parameters).</summary>
-            /// <remarks>SWP_NOMOVE</remarks>
-            IgnoreMove = 0x0002,
-            /// <summary>Does not change the owner window's position in the Z order.</summary>
-            /// <remarks>SWP_NOOWNERZORDER</remarks>
-            DoNotChangeOwnerZOrder = 0x0200,
-            /// <summary>Does not redraw changes. If this flag is set, no repainting of any kind occurs. This applies to
-            /// the client area, the nonclient area (including the title bar and scroll bars), and any part of the parent
-            /// window uncovered as a result of the window being moved. When this flag is set, the application must
-            /// explicitly invalidate or redraw any parts of the window and parent window that need redrawing.</summary>
-            /// <remarks>SWP_NOREDRAW</remarks>
-            DoNotRedraw = 0x0008,
-            /// <summary>Same as the SWP_NOOWNERZORDER flag.</summary>
-            /// <remarks>SWP_NOREPOSITION</remarks>
-            DoNotReposition = 0x0200,
-            /// <summary>Prevents the window from receiving the WM_WINDOWPOSCHANGING message.</summary>
-            /// <remarks>SWP_NOSENDCHANGING</remarks>
-            DoNotSendChangingEvent = 0x0400,
-            /// <summary>Retains the current size (ignores the cx and cy parameters).</summary>
-            /// <remarks>SWP_NOSIZE</remarks>
-            IgnoreResize = 0x0001,
-            /// <summary>Retains the current Z order (ignores the hWndInsertAfter parameter).</summary>
-            /// <remarks>SWP_NOZORDER</remarks>
-            IgnoreZOrder = 0x0004,
-            /// <summary>Displays the window.</summary>
-            /// <remarks>SWP_SHOWWINDOW</remarks>
-            ShowWindow = 0x0040,
-        }
-
-        public delegate int HookProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-        //This is the Import for the SetWindowsHookEx function.
-        //Use this function to install a thread-specific hook.
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr WindowFromPoint(POINT Point);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            public int X;
-            public int Y;
-
-            public POINT(int x, int y)
+            if (hwnd != IntPtr.Zero)
             {
-                this.X = x;
-                this.Y = y;
-            }
-
-            public POINT(System.Drawing.Point pt) : this(pt.X, pt.Y) { }
-
-            public static implicit operator System.Drawing.Point(POINT p)
-            {
-                return new System.Drawing.Point(p.X, p.Y);
-            }
-
-            public static implicit operator POINT(System.Drawing.Point p)
-            {
-                return new POINT(p.X, p.Y);
+                SetWindowPos(hwnd, (IntPtr)0, Left, Top, 0, 0, SetWindowPosFlags.DoNotActivate | SetWindowPosFlags.IgnoreResize);
             }
         }
 
@@ -369,6 +296,130 @@ namespace GRemote
             e.Value = (e.ListItem as Process).ProcessName;
         }
 
+        private void resizeButton_Click(object sender, EventArgs e)
+        {
+            ResizeToTargetWindow();
+        }
+
+        public void ResizeToTargetWindow()
+        {
+            IntPtr hwnd = TargetWindow;
+
+            if (hwnd == IntPtr.Zero)
+            {
+                return;
+            }
+
+            RECT rect;
+            int w, h;
+            GetWindowRect(hwnd, out rect);
+
+            w = rect.Right - rect.Left;
+            h = rect.Bottom - rect.Top;
+
+            if (cropBorders.Checked)
+            {
+                h -= 25;
+                w -= 6;
+            }
+
+            if ((w % 2) == 1)
+            {
+                w++;
+            }
+
+            if ((h % 2) == 1)
+            {
+                h++;
+            }
+
+            Width = w;
+            Height = h;
+        }
+
+        private void moveButton_Click(object sender, EventArgs e)
+        {
+            MoveToTargetWindow();
+        }
+
+        public void MoveToTargetWindow()
+        {
+            IntPtr hwnd = TargetWindow;
+
+            if (hwnd == IntPtr.Zero)
+            {
+                return;
+            }
+
+            RECT rect;
+            GetWindowRect(hwnd, out rect);
+
+            if (cropBorders.Checked)
+            {
+                rect.Top += 22;
+                rect.Left += 3;
+            }
+
+            Top = rect.Top;
+            Left = rect.Left;
+        }
+
+        private void widthBox_ValueChanged(object sender, EventArgs e)
+        {
+            if (Width != widthBox.Value)
+            {
+                Width = (int)widthBox.Value;
+            }
+        }
+
+        private void heightBox_ValueChanged(object sender, EventArgs e)
+        {
+            if (Height != heightBox.Value)
+            {
+                Height = (int)heightBox.Value;
+            }
+        }
+
+        private void processComboBox_SelectedValueChanged(object sender, EventArgs e)
+        {
+            gRemote.SetWindow(TargetWindow);
+        }
+
+        public IntPtr GetWindowByTitle()
+        {
+            return FindWindowEx(IntPtr.Zero, IntPtr.Zero, null, windowTitle.Text);
+        }
+
+        private void noneWindow_CheckedChanged(object sender, EventArgs e)
+        {
+            gRemote.SetWindow(TargetWindow);
+        }
+
+        private void windowByProcess_CheckedChanged(object sender, EventArgs e)
+        {
+            gRemote.SetWindow(TargetWindow);
+        }
+
+        private void windowByTitle_CheckedChanged(object sender, EventArgs e)
+        {
+            gRemote.SetWindow(TargetWindow);
+        }
+
+        private void windowTitle_TextChanged(object sender, EventArgs e)
+        {
+            gRemote.SetWindow(TargetWindow);
+        }
+
+        private void FollowWindowTick(object sender, EventArgs e)
+        {
+            MoveToTargetWindow();
+        }
+
+        private void followWindowBox_CheckedChanged(object sender, EventArgs e)
+        {
+            followTimer.Enabled = followWindowBox.Checked;
+        }
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
@@ -379,70 +430,32 @@ namespace GRemote
             public int Left, Top, Right, Bottom;
         }
 
-        private void resizeButton_Click(object sender, EventArgs e)
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
+        [Flags()]
+        private enum SetWindowPosFlags : uint
         {
-            if (processComboBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            if (processComboBox.SelectedItem.GetType() != typeof(Process))
-            {
-                return;
-            }
-
-            Process p = processComboBox.SelectedItem as Process;
-
-            if (p.MainWindowHandle == IntPtr.Zero)
-            {
-                return;
-            }
-            
-            RECT rect;
-
-            GetWindowRect(p.MainWindowHandle, out rect);
-
-            Width = rect.Right - rect.Left;
-            Height = rect.Bottom - rect.Top;
-
-            if ((Width % 2) == 1)
-            {
-                Width++;
-                
-            }
-
-            if ((Height % 2) == 1)
-            {
-                Height++;
-               
-            }
-        }
-
-        private void moveButton_Click(object sender, EventArgs e)
-        {
-            if (processComboBox.SelectedItem == null)
-            {
-                return;
-            }
-
-            if (processComboBox.SelectedItem.GetType() != typeof(Process))
-            {
-                return;
-            }
-
-            Process p = processComboBox.SelectedItem as Process;
-
-            if (p.MainWindowHandle == IntPtr.Zero)
-            {
-                return;
-            }
-
-            RECT rect;
-
-            GetWindowRect(p.MainWindowHandle, out rect);
-
-            Top = rect.Top;
-            Left = rect.Left;
+            AsynchronousWindowPosition = 0x4000,
+            DeferErase = 0x2000,
+            DrawFrame = 0x0020,
+            FrameChanged = 0x0020,
+            HideWindow = 0x0080,
+            DoNotActivate = 0x0010,
+            DoNotCopyBits = 0x0100,
+            IgnoreMove = 0x0002,
+            DoNotChangeOwnerZOrder = 0x0200,
+            DoNotRedraw = 0x0008,
+            DoNotReposition = 0x0200,
+            DoNotSendChangingEvent = 0x0400,
+            IgnoreResize = 0x0001,
+            IgnoreZOrder = 0x0004,
+            ShowWindow = 0x0040,
         }
     }
 }

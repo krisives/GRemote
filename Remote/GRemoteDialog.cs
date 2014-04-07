@@ -15,8 +15,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Cache;
 
-// using DirectShowLib;
-
 namespace GRemote
 {
     public partial class GRemoteDialog : Form
@@ -25,33 +23,33 @@ namespace GRemote
         {
             get
             {
-                return "0.0.9";
+                return "0.0.10";
             }
         }
 
-        VideoCapture videoCapture;
-        CaptureArea boundsForm;
-        FFMpeg ffmpeg;
-        VirtualInput virtualInput;
-        IntPtr targetWindowPtr;
-        SessionDialog sessionDialog;
-        PreferencesDialog prefsDialog;
-        AboutDialog aboutDialog;
-        ServerSettings serverSettings = new ServerSettings();
-        ServerSession serverSession;
-        ClientSession clientSession;
-        UpdateChecker updateChecker;
-        int lastEncodedBytes = 0;
-        int lastKBps = 0;
+        private VideoCapture videoCapture;
+        private CaptureArea areaDialog;
+        private FFMpeg ffmpeg;
+        private SessionDialog sessionDialog;
+        private PreferencesDialog prefsDialog;
+        private AboutDialog aboutDialog;
+        private ServerSettings serverSettings = new ServerSettings();
+        private ServerSession serverSession;
+        private ClientSession clientSession;
+        private UpdateChecker updateChecker;
+        private int lastEncodedBytes = 0;
+        private int lastKBps = 0;
 
         public GRemoteDialog()
         {
             ffmpeg = new FFMpeg();
-            boundsForm = new CaptureArea(this);
+            areaDialog = new CaptureArea(this);
             sessionDialog = new SessionDialog();
             prefsDialog = new PreferencesDialog();
 
             InitializeComponent();
+
+            Text = String.Format("GRemote ({0})", Version);
         }
 
         /// <summary>
@@ -141,8 +139,8 @@ namespace GRemote
 
             if (videoCapture == null)
             {
-                videoCapture = new VideoCapture(boundsForm.Width, boundsForm.Height);
-                videoCapture.SetCapturePos(boundsForm.Left, boundsForm.Top);
+                videoCapture = new VideoCapture(areaDialog.Width, areaDialog.Height);
+                videoCapture.SetCapturePos(areaDialog.Left, areaDialog.Top);
             }
 
             videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
@@ -151,6 +149,7 @@ namespace GRemote
             serverSettings.PortString = sessionDialog.portBox.Text;
             
             serverSession = new ServerSession(FFmpeg, videoCapture, serverSettings);
+            serverSession.TargetWindow = areaDialog.TargetWindow;
             serverSession.Preview = videoPreview;
             serverSession.StartServer();
             statusLabel.Text = "Recording...";
@@ -210,6 +209,7 @@ namespace GRemote
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 portNumber = 9999;
             }
 
@@ -252,6 +252,20 @@ namespace GRemote
 
             StopServer();
             StopClient();
+
+            if (aboutDialog != null)
+            {
+                aboutDialog.Close();
+                aboutDialog.Dispose();
+                aboutDialog = null;
+            }
+
+            if (areaDialog != null)
+            {
+                areaDialog.Close();
+                areaDialog.Dispose();
+                areaDialog = null;
+            }
         }
 
         /// <summary>
@@ -432,6 +446,14 @@ namespace GRemote
             lastEncodedBytes = encodedBytes;
         }
 
+        public void SetWindow(IntPtr hwnd)
+        {
+            if (serverSession != null)
+            {
+                serverSession.TargetWindow = hwnd;
+            }
+        }
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
@@ -499,15 +521,15 @@ namespace GRemote
                 updateChecker = new UpdateChecker();
             }
 
-            updateChecker.Check(delegate(bool hasUpdate)
+            updateChecker.Check(delegate(bool hasUpdate, String message)
             {
                 if (hasUpdate)
                 {
-                    MessageBox.Show("New version is available");
+                    MessageBox.Show(message);
                 }
                 else
                 {
-                    MessageBox.Show("Already up to date");
+                    MessageBox.Show(message);
                 }
             });
         }
@@ -547,7 +569,7 @@ namespace GRemote
 
         private void selectAreaButton_Click(object sender, EventArgs e)
         {
-            boundsForm.Show();
+            areaDialog.Show();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)

@@ -99,6 +99,7 @@ namespace GRemote
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine(e);
                     Port = 9999;
                 }
             }

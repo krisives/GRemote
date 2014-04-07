@@ -13,17 +13,17 @@ namespace GRemote
 {
     public class VideoDecoder
     {
-        volatile bool started;
-        FFMpeg ffmpeg;
-        Process process;
-        StoppableThread readThread;
-        StoppableThread writeThread;
-        StoppableThread errorThread;
-        BufferPool encodedBuffers = new BufferPool();
-        BufferPool decodedBuffers = new BufferPool();
-        int width, height;
-        int totalBytesDecoded = 0;
-        VideoPreview videoPreview;
+        private volatile bool started;
+        private FFMpeg ffmpeg;
+        private Process process;
+        private StoppableThread readThread;
+        private StoppableThread writeThread;
+        private StoppableThread errorThread;
+        private BufferPool encodedBuffers = new BufferPool();
+        private BufferPool decodedBuffers = new BufferPool();
+        private int width, height;
+        private int totalBytesDecoded = 0;
+        private VideoPreview videoPreview;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
         {
@@ -202,7 +202,7 @@ namespace GRemote
 
     public class VideoDecoderErrorThread : StoppableThread
     {
-        StreamReader reader;
+        private StreamReader reader;
 
         public VideoDecoderErrorThread(VideoDecoder decoder, Process process)
         {
@@ -217,15 +217,15 @@ namespace GRemote
 
     public class VideoDecoderReadThread : StoppableThread
     {
-        VideoDecoder decoder;
-        BufferPool decodedBuffers;
-        Stream stream;
-        int frameSize;
-        byte[] readBuffer;
-        int pos;
-        VideoPreview preview;
-        Bitmap decodeBuffer;
-        Rectangle lockBounds;
+        private VideoDecoder decoder;
+        private BufferPool decodedBuffers;
+        private Stream stream;
+        private int frameSize;
+        private byte[] readBuffer;
+        private int pos;
+        private VideoPreview preview;
+        private Bitmap decodeBuffer;
+        private Rectangle lockBounds;
 
         public VideoDecoderReadThread(VideoDecoder decoder, Process process, BufferPool decodedBuffers)
         {
@@ -275,9 +275,9 @@ namespace GRemote
 
     public class VideoDecoderWriteThread : StoppableThread
     {
-        VideoDecoder decoder;
-        BufferPool encodedBuffers;
-        Stream stream;
+        private VideoDecoder decoder;
+        private BufferPool encodedBuffers;
+        private Stream stream;
 
         public VideoDecoderWriteThread(VideoDecoder decoder, Process process, BufferPool encodedBuffers)
         {

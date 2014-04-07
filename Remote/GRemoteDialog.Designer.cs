@@ -513,12 +513,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(792, 573);
-            this.Controls.Add(this.videoPreview);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.videoPreview);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GRemoteDialog";
-            this.Text = "GRemote";
+            this.Text = "GRemote (x.y.z)";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GRemoteDialog_FormClosed);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
