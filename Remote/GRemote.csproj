@@ -92,6 +92,7 @@
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="AudioCapture.cs" />
+    <Compile Include="AudioPlayback.cs" />
     <Compile Include="CaptureArea.cs">
       <SubType>Form</SubType>
     </Compile>

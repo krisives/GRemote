@@ -8,11 +8,11 @@ namespace GRemote
 {
     public class ServerSettings
     {
-        string address;
-        int port;
-        EncoderSettings encoderSettings = new EncoderSettings();
-        bool enableFileOutput;
-        string fileOutput;
+        private string address;
+        private int port;
+        private EncoderSettings encoderSettings = new EncoderSettings();
+        private bool enableFileOutput;
+        private string fileOutput;
 
         public bool FileOutputEnabled
         {

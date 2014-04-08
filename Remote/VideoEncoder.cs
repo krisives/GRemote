@@ -26,7 +26,6 @@ namespace GRemote
         private StoppableThread readThread;
         private List<Stream> listenerStreams = new List<Stream>();
         private volatile int totalBytes = 0;
-        private Stream fout;
         private String fileOutputPath;
         private bool enableFileRecording = false;
 
@@ -113,11 +112,6 @@ namespace GRemote
             totalBytes = 0;
             frameBuffers.Clear();
 
-            if (enableFileRecording)
-            {
-                fout = new BufferedStream(File.Open(fileOutputPath, FileMode.Create));
-            }
-
             // Create new buffer pools in case threads are still doing things
             frameBuffers = new BufferPool();
             encodedBuffers = new BufferPool();
@@ -133,16 +127,16 @@ namespace GRemote
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.Start();
 
-            readThread = new VideoEncoderReadThread(this, process, encodedBuffers);//new Thread(new ThreadStart(readThreadMain));
-            writeThread = new VideoEncoderWriteThread(this, process, frameBuffers);//new Thread(new ThreadStart(writeThreadMain));
-            errorThread = new VideoEncoderErrorThread(this, process);//new Thread(new ThreadStart(errorThreadMain));
+            readThread = new VideoEncoderReadThread(this, process, encodedBuffers);
+            writeThread = new VideoEncoderWriteThread(this, process, frameBuffers);
+            errorThread = new VideoEncoderErrorThread(this, process);
 
             errorThread.Start();
             readThread.Start();
             writeThread.Start();
         }
 
-        public string GetFFMpegArguments(EncoderSettings settings)
+        private string GetFFMpegArguments(EncoderSettings settings)
         {
             String args = "";
 
@@ -329,6 +323,7 @@ namespace GRemote
         private VideoEncoder encoder;
         private BufferPool encodedBuffers;
         private int pos;
+        private Stream fileStream;
 
         public VideoEncoderReadThread(VideoEncoder encoder, Process process, BufferPool encodedBuffers)
         {
@@ -342,6 +337,25 @@ namespace GRemote
         {
             this.readBuffer = new byte[1024 * 3];
             this.pos = 0;
+
+            if (this.encoder.FileRecordingEnabled)
+            {
+                Console.WriteLine("Writing to {0}", encoder.FileRecordingPath);
+                try
+                {
+                    this.fileStream = File.Open(encoder.FileRecordingPath, FileMode.Create);
+                    this.fileStream = new BufferedStream(this.fileStream, 1024 * 64);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    this.fileStream = null;
+                }
+            }
+            else
+            {
+                this.fileStream = null;
+            }
         }
 
         protected override void RunThread()
@@ -372,8 +386,23 @@ namespace GRemote
             }
 
             pos = 0;
+
+            if (fileStream != null)
+            {
+                fileStream.Write(readBuffer, 0, readBuffer.Length);
+            }
+
             encodedBuffers.Add((byte[])readBuffer.Clone());
             return true;
+        }
+
+        protected override void OnThreadFinish()
+        {
+            if (fileStream != null)
+            {
+                fileStream.Close();
+                fileStream = null;
+            }
         }
     }
 }

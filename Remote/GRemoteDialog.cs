@@ -23,7 +23,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.12";
+                return "0.0.13";
             }
         }
 
@@ -300,8 +300,10 @@ namespace GRemote
         {
             if (prefsDialog.ShowDialog(this) != DialogResult.OK)
             {
-                return;
+                //return;
             }
+
+            Console.WriteLine("Settings saved");
 
             if (prefsDialog.FileOutputEnabled)
             {
@@ -443,6 +445,22 @@ namespace GRemote
             SetBitrate(int.Parse(str));
         }
 
+        public void SetWindow(IntPtr hwnd)
+        {
+            if (serverSession != null)
+            {
+                //serverSession.TargetWindow = hwnd;
+            }
+        }
+
+        public void SetScaleMode(ScaleMode scaleMode)
+        {
+            centerItem.Checked = (scaleMode == ScaleMode.CENTER);
+            stretchItem.Checked = (scaleMode == ScaleMode.STRETCHED);
+
+            videoPreview.ScaleMode = scaleMode;
+        }
+
         protected void UpdateBandwidth()
         {
             int encodedBytes = 0;
@@ -475,14 +493,6 @@ namespace GRemote
 
             lastKBps = KBps;
             lastEncodedBytes = encodedBytes;
-        }
-
-        public void SetWindow(IntPtr hwnd)
-        {
-            if (serverSession != null)
-            {
-                //serverSession.TargetWindow = hwnd;
-            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -624,5 +634,16 @@ namespace GRemote
         {
             SetBitrate((sender as ToolStripMenuItem).Tag as String);
         }
+
+        private void centerItem_Click(object sender, EventArgs e)
+        {
+            SetScaleMode(ScaleMode.CENTER);
+        }
+
+        private void stretchItem_Click(object sender, EventArgs e)
+        {
+            SetScaleMode(ScaleMode.STRETCHED);
+        }
+
     }
 }

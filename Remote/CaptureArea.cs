@@ -250,10 +250,17 @@ namespace GRemote
             }
             
             IntPtr hwnd = TargetWindow;
+            int dx = 0, dy = 0;
+
+            if (cropBorders.Checked)
+            {
+                dx = 3;
+                dy = 22;
+            }
 
             if (hwnd != IntPtr.Zero)
             {
-                SetWindowPos(hwnd, (IntPtr)0, Left, Top, 0, 0, SetWindowPosFlags.DoNotActivate | SetWindowPosFlags.IgnoreResize);
+                SetWindowPos(hwnd, (IntPtr)0, Left - dx, Top - dy, 0, 0, SetWindowPosFlags.DoNotActivate | SetWindowPosFlags.IgnoreResize);
             }
         }
 

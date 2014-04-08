@@ -18,13 +18,19 @@ namespace GRemote
         private BufferedGraphicsContext bufferContext;
         private BufferedGraphics bg;
         private Graphics g;
-        private Rectangle leftHalf = new Rectangle();
-        private Rectangle rightHalf = new Rectangle();
+        private ScaleMode scaleMode = ScaleMode.CENTER;
+        private int width, height;
 
         public VideoPreview()
         {
             bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();
+
+            width = Width;
+            height = Height;
+
+            bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
+            g = bg.Graphics;
         }
 
         public GRemoteDialog GRemote
@@ -39,37 +45,60 @@ namespace GRemote
             }
         }
 
+        public int VideoWidth
+        {
+            get
+            {
+                return width;
+            }
+        }
+
+        public int VideoHeight
+        {
+            get
+            {
+                return height;
+            }
+        }
+
+        public ScaleMode ScaleMode
+        {
+            get
+            {
+                return scaleMode;
+            }
+            set
+            {
+                scaleMode = value;
+
+                if (scaleMode == ScaleMode.CENTER)
+                {
+                    ResizeVideo();
+                }
+            }
+        }
+
         public void SetSize(int width, int height)
         {
-            bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, width, height));
-            g = bg.Graphics;
-
-            leftHalf.X = 0;
-            leftHalf.Y = 0;
-            leftHalf.Width = width / 2;
-            leftHalf.Height = height;
-
-            rightHalf.X = leftHalf.Width;
-            rightHalf.Y = 0;
-            rightHalf.Width = leftHalf.Width;
-            rightHalf.Height = height;
+            this.width = width;
+            this.height = height;
 
             if (InvokeRequired)
             {
                 Invoke(new Action(delegate()
                 {
-                    ResizeVideo(width, height);
+                    ResizeVideo();
                 }));
             }
             else
             {
-                ResizeVideo(width, height);
+                ResizeVideo();
             }
 
             Console.WriteLine("Preview set to {0}x{1}", width, height);
         }
 
-        protected void ResizeVideo(int width, int height)
+        protected void ResizeVideo()
         {
             int dx;
             int dy;
@@ -83,8 +112,8 @@ namespace GRemote
                 gRemote.Height = height + dy;
             }
 
-            Width = width;
-            Height = height;
+            // Width = width;
+            // Height = height;
         }
 
         public void SetBuffers(Bitmap uncompressedImage, Bitmap compressedImage)
@@ -123,9 +152,36 @@ namespace GRemote
 
             lock (screen)
             {
-                g.DrawImage(screen, 0, 0);
+                switch (scaleMode)
+                {
+                    case ScaleMode.CENTER:
+                        RenderDirectCentered(screen);
+                        break;
+                    case ScaleMode.STRETCHED:
+                        RenderDirectStretched(screen);
+                        break;
+                }
+
                 bg.Render();
             }
+        }
+
+        protected void RenderDirectCentered(Bitmap screen)
+        {
+            int cx = (Width / 2) - (screen.Width / 2);
+            int cy = (Height / 2) - (screen.Height / 2);
+            g.DrawImage(screen, cx, cy);
+        }
+
+        protected void RenderDirectStretched(Bitmap screen)
+        {
+            g.DrawImage(screen, 0, 0, Width, Height);
+        }
+
+        private void VideoPreview_Resize(object sender, EventArgs e)
+        {
+            bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
+            g = bg.Graphics;
         }
     }
 
@@ -135,5 +191,11 @@ namespace GRemote
         COMPRESSED,
         SPLIT,
         UNCOMPRESSED
+    }
+
+    public enum ScaleMode
+    {
+        CENTER,
+        STRETCHED
     }
 }
