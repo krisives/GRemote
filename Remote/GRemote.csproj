@@ -73,6 +73,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Interceptor.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio">
+      <HintPath>..\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -85,82 +88,82 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutDialog.cs">
+    <Compile Include="UI\AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutDialog.Designer.cs">
+    <Compile Include="UI\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="AudioCapture.cs" />
-    <Compile Include="AudioPlayback.cs" />
-    <Compile Include="CaptureArea.cs">
+    <Compile Include="Audio\AudioCapture.cs" />
+    <Compile Include="Audio\AudioPlayback.cs" />
+    <Compile Include="UI\CaptureArea.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CaptureArea.Designer.cs">
+    <Compile Include="UI\CaptureArea.Designer.cs">
       <DependentUpon>CaptureArea.cs</DependentUpon>
     </Compile>
-    <Compile Include="ClientSession.cs" />
-    <Compile Include="CustomBitrateForm.cs">
+    <Compile Include="Network\ClientSession.cs" />
+    <Compile Include="UI\CustomBitrateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CustomBitrateForm.Designer.cs">
+    <Compile Include="UI\CustomBitrateForm.Designer.cs">
       <DependentUpon>CustomBitrateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="FFMpeg.cs" />
-    <Compile Include="GRemoteDialog.cs">
+    <Compile Include="UI\GRemoteDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GRemoteDialog.Designer.cs">
+    <Compile Include="UI\GRemoteDialog.Designer.cs">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="InputPlayback.cs" />
-    <Compile Include="Packet.cs" />
-    <Compile Include="ServerSettings.cs" />
-    <Compile Include="SessionDialog.cs">
+    <Compile Include="Input\InputPlayback.cs" />
+    <Compile Include="Network\Packet.cs" />
+    <Compile Include="Network\ServerSettings.cs" />
+    <Compile Include="UI\SessionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SessionDialog.Designer.cs">
+    <Compile Include="UI\SessionDialog.Designer.cs">
       <DependentUpon>SessionDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="PreferencesDialog.cs">
+    <Compile Include="UI\PreferencesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PreferencesDialog.Designer.cs">
+    <Compile Include="UI\PreferencesDialog.Designer.cs">
       <DependentUpon>PreferencesDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerSession.cs" />
+    <Compile Include="Network\ServerSession.cs" />
     <Compile Include="StoppableThread.cs" />
     <Compile Include="UpdateChecker.cs" />
-    <Compile Include="VideoCapture.cs" />
-    <Compile Include="VideoDecoder.cs" />
+    <Compile Include="Video\VideoCapture.cs" />
+    <Compile Include="Video\VideoDecoder.cs" />
     <Compile Include="BufferPool.cs" />
-    <Compile Include="VideoEncoder.cs" />
-    <Compile Include="VideoPreview.cs">
+    <Compile Include="Video\VideoEncoder.cs" />
+    <Compile Include="UI\VideoPreview.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="VideoPreview.Designer.cs">
+    <Compile Include="UI\VideoPreview.Designer.cs">
       <DependentUpon>VideoPreview.cs</DependentUpon>
     </Compile>
-    <Compile Include="InputCapture.cs" />
-    <EmbeddedResource Include="AboutDialog.resx">
+    <Compile Include="Input\InputCapture.cs" />
+    <EmbeddedResource Include="UI\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CaptureArea.resx">
+    <EmbeddedResource Include="UI\CaptureArea.resx">
       <DependentUpon>CaptureArea.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CustomBitrateForm.resx">
+    <EmbeddedResource Include="UI\CustomBitrateForm.resx">
       <DependentUpon>CustomBitrateForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GRemoteDialog.resx">
+    <EmbeddedResource Include="UI\GRemoteDialog.resx">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SessionDialog.resx">
+    <EmbeddedResource Include="UI\SessionDialog.resx">
       <DependentUpon>SessionDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PreferencesDialog.resx">
+    <EmbeddedResource Include="UI\PreferencesDialog.resx">
       <DependentUpon>PreferencesDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -173,7 +176,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="VideoPreview.resx">
+    <EmbeddedResource Include="UI\VideoPreview.resx">
       <DependentUpon>VideoPreview.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
