@@ -20,9 +20,9 @@ namespace GRemote
         private volatile bool started;
         private FFMpeg ffmpeg;
         private Process process;
-        private StoppableThread readThread;
-        private StoppableThread writeThread;
-        private StoppableThread errorThread;
+        private VideoDecoderReadThread readThread;
+        private VideoDecoderWriteThread writeThread;
+        private VideoDecoderErrorThread errorThread;
         private BufferPool encodedBuffers = new BufferPool();
         private BufferPool decodedBuffers = new BufferPool();
         private int width, height;
@@ -33,6 +33,7 @@ namespace GRemote
         {
             if ((width % 2) != 0 || (height % 2) != 0)
             {
+                Console.WriteLine("Dimensions {0}x{1}", width, height);
                 throw new Exception("Capture dimensions must be even (divisible by two)");
             }
 
@@ -89,6 +90,14 @@ namespace GRemote
             get
             {
                 return totalBytes;
+            }
+        }
+
+        public int FrameIndex
+        {
+            get
+            {
+                return (readThread == null) ? 0 : readThread.FrameIndex;
             }
         }
 
@@ -163,6 +172,7 @@ namespace GRemote
             args += "  -tune zerolatency ";
             args += " -video_size " + width.ToString() + "x" + height.ToString() + " ";
             args += " -pixel_format bgr24 -pix_fmt bgr24 ";
+            args += " -vf \"fps=30\" ";
             args += " - ";
 
             return args;
@@ -273,21 +283,30 @@ namespace GRemote
         private int frameSize;
         private byte[] readBuffer;
         private int pos;
-        private VideoScreen preview;
+        private VideoScreen screen;
         private Bitmap decodeBuffer;
         private Rectangle lockBounds;
+        private int frameIndex = 0;
 
         public VideoDecoderReadThread(VideoDecoder decoder, Process process, BufferPool decodedBuffers)
         {
             this.decoder = decoder;
-            this.preview = decoder.VideoPreview;
+            this.screen = decoder.VideoPreview;
             this.decodedBuffers = decodedBuffers;
-            this.lockBounds = new Rectangle(0, 0, decoder.VideoWidth, decoder.VideoWidth);
-            this.decodeBuffer = new Bitmap(decoder.VideoWidth, decoder.VideoWidth, PixelFormat.Format24bppRgb);
-            this.stream = process.StandardOutput.BaseStream;// new BufferedStream(process.StandardOutput.BaseStream);
+            this.lockBounds = new Rectangle(0, 0, decoder.VideoWidth, decoder.VideoHeight);
+            this.decodeBuffer = new Bitmap(decoder.VideoWidth, decoder.VideoHeight, PixelFormat.Format24bppRgb);
+            this.stream = process.StandardOutput.BaseStream;
             this.frameSize = decoder.VideoWidth * decoder.VideoHeight * 3;
             this.readBuffer = new byte[frameSize];
             this.pos = 0;
+        }
+
+        public int FrameIndex
+        {
+            get
+            {
+                return frameIndex;
+            }
         }
 
         protected override void ThreadRun()
@@ -322,13 +341,14 @@ namespace GRemote
 
         protected void FinishBuffer()
         {
+            frameIndex++;
             BitmapData data = decodeBuffer.LockBits(lockBounds, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
             Marshal.Copy(readBuffer, 0, data.Scan0, readBuffer.Length);
             decodeBuffer.UnlockBits(data);
 
-            if (preview != null)
+            if (screen != null)
             {
-                preview.RenderDirect(decodeBuffer);
+                screen.RenderDirect(decodeBuffer);
             }
 
             pos = 0;

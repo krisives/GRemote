@@ -14,7 +14,7 @@ namespace GRemote
         private GRemoteDialog gRemote;
         private ClientWriteThread writeThread;
         private ClientReadThread readThread;
-        private VideoScreen videoPreview;
+        private VideoScreen screen;
         private InputCapture inputCapture;
         private String address;
         private int port;
@@ -25,7 +25,7 @@ namespace GRemote
             this.gRemote = gRemote;
             this.address = address;
             this.port = port;
-            this.videoPreview = gRemote.VideoPreview;
+            this.screen = gRemote.VideoPreview;
         }
 
         public InputCapture InputCapture
@@ -60,11 +60,11 @@ namespace GRemote
             }
         }
 
-        public VideoScreen Preview
+        public VideoScreen VideoScreen
         {
             get
             {
-                return videoPreview;
+                return screen;
             }
         }
 
@@ -137,8 +137,27 @@ namespace GRemote
                 inputCapture = null;
             }
         }
+
+        public int TotalEncodedBytes
+        {
+            get
+            {
+                return readThread.TotalEncodedBytes;
+            }
+        }
+
+        public int FrameIndex
+        {
+            get
+            {
+                return (readThread == null) ? 0 : readThread.FrameIndex;
+            }
+        }
     }
 
+    /// <summary>
+    /// A thread that writes data to the network.
+    /// </summary>
     public class ClientWriteThread : StoppableThread
     {
         public ClientWriteThread()
@@ -152,23 +171,42 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A thread that reads data from the network.
+    /// </summary>
     public class ClientReadThread : StoppableThread
     {
         private FFMpeg ffmpeg;
-        private VideoScreen preview;
+        private VideoScreen screen;
         private ClientSession client;
         private Socket socket;
-        private NetworkStream networkStream;
-        private BinaryReader binaryReader;
+        private NetworkStream stream;
         private VideoDecoder decoder;
 
         public ClientReadThread(ClientSession client)
         {
             this.client = client;
             this.ffmpeg = client.FFMpeg;
-            this.preview = client.Preview;
-            this.decoder = null;// client.Decoder;
-            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this.screen = client.VideoScreen;
+            this.decoder = null;
+            this.socket = null;
+            this.stream = null;
+        }
+
+        public int TotalEncodedBytes
+        {
+            get
+            {
+                return (decoder == null) ? 0 : decoder.TotalBytes;
+            }
+        }
+
+        public int FrameIndex
+        {
+            get
+            {
+                return (decoder == null) ? 0 : decoder.FrameIndex;
+            }
         }
 
         public VideoDecoder Decoder
@@ -184,10 +222,9 @@ namespace GRemote
             IPAddress hostIP = (Dns.Resolve(client.Address)).AddressList[0];
             IPEndPoint ep = new IPEndPoint(hostIP, client.Port);
 
-            socket.Connect(ep);
-
-            this.networkStream = new NetworkStream(socket);
-            this.binaryReader = new BinaryReader(networkStream);
+            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this.socket.Connect(ep);
+            this.stream = new NetworkStream(socket);
         }
 
         public override void Stop()
@@ -203,25 +240,31 @@ namespace GRemote
 
         protected override void ThreadRun()
         {
-            byte packetType;
+            Packet packet = Packet.Read(stream);
 
-            packetType = binaryReader.ReadByte();
+            if (packet == null)
+            {
+                return;
+            }
 
-            switch ((PacketType)packetType)
+            switch (packet.Type)
             {
                 case PacketType.VIDEO_START:
-                    readVideoStart();
+                    readVideoStart(packet as VideoStartPacket);
                     break;
                 case PacketType.VIDEO_UPDATE:
-                    readVideoPacket();
+                    readVideoUpdate(packet as VideoUpdatePacket);
+                    break;
+                case PacketType.VIDEO_END:
+                    readVideoEnd(packet as VideoEndPacket);
                     break;
                 case PacketType.KEYBOARD:
-                    readKeyboardPacket();
+                    readKeyboardPacket(packet as KeyboardPacket);
                     break;
             }
         }
 
-        protected void readVideoStart()
+        protected void readVideoStart(VideoStartPacket packet)
         {
             if (decoder != null)
             {
@@ -229,36 +272,50 @@ namespace GRemote
                 decoder = null;
             }
 
-            byte[] buffer = new byte[9];
-            buffer[0] = (byte)PacketType.VIDEO_START;
-            binaryReader.Read(buffer, 1, 8);
-            VideoStartPacket packet = new VideoStartPacket(buffer);
-
             decoder = new VideoDecoder(ffmpeg, packet.VideoWidth, packet.VideoHeight);
-            preview.SetSize(packet.VideoWidth, packet.VideoHeight);
-            decoder.VideoPreview = preview;
+            screen.SetVideoSize(packet.VideoWidth, packet.VideoHeight);
+            decoder.VideoPreview = screen;
             decoder.StartDecoding();
         }
 
-        protected void readVideoPacket()
+        protected void readVideoUpdate(VideoUpdatePacket packet)
         {
-            int packetLength = binaryReader.ReadInt32();
-            byte[] buffer = binaryReader.ReadBytes(packetLength);
+            byte[] buffer = new byte[packet.VideoDataLength];
+
+            readBuffer(buffer);
 
             if (decoder != null)
             {
                 decoder.Decode(buffer);
             }
-
-            //videoPreview.RenderDirect(videoDecoder.Buffer);
         }
 
-        protected void readKeyboardPacket()
+        protected void readVideoEnd(VideoEndPacket packet)
         {
-            byte[] buffer = new byte[6];
-            buffer[0] = (byte)PacketType.KEYBOARD;
-            binaryReader.Read(buffer, 1, 5);
-            KeyboardPacket packet = new KeyboardPacket(buffer);
+
+        }
+
+        protected void readKeyboardPacket(KeyboardPacket packet)
+        {
+
+        }
+
+        private void readBuffer(byte[] buffer)
+        {
+            int pos = 0;
+            int readCount;
+
+            while (pos < buffer.Length)
+            {
+                readCount = stream.Read(buffer, pos, buffer.Length - pos);
+
+                if (readCount < 0)
+                {
+                    throw new Exception("End of stream");
+                }
+
+                pos += readCount;
+            }
         }
     }
 }

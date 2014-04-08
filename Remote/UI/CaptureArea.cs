@@ -426,5 +426,15 @@ namespace GRemote
         {
             followTimer.Enabled = followWindowBox.Checked;
         }
+
+        private void yBox_ValueChanged(object sender, EventArgs e)
+        {
+            Top = (int)yBox.Value;
+        }
+
+        private void xBox_ValueChanged(object sender, EventArgs e)
+        {
+            Left = (int)xBox.Value;
+        }
     }
 }

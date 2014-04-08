@@ -22,7 +22,7 @@ namespace GRemote
         private int height;
         private BufferPool buffers = new BufferPool();
         private Rectangle bounds, lockBounds;
-        private StoppableThread captureThread;
+        private CaptureThread captureThread;
         private SnapshotListener listener;
 
         public VideoCapture(int width, int height)
@@ -43,6 +43,19 @@ namespace GRemote
             this.height = height;
             this.bounds = new Rectangle(0, 0, width, height);
             this.lockBounds = new Rectangle(0, 0, width, height);
+        }
+
+        public int FrameIndex
+        {
+            get
+            {
+                if (captureThread == null)
+                {
+                    return 0;
+                }
+
+                return captureThread.FrameIndex;
+            }
         }
 
         /// <summary>
@@ -211,6 +224,14 @@ namespace GRemote
             this.size = new Size(videoCapture.Width, videoCapture.Height);
         }
 
+        public int FrameIndex
+        {
+            get
+            {
+                return frameIndex;
+            }
+        }
+
         protected override void OnThreadStart()
         {
             captureBuffer = new Bitmap(videoCapture.Width, videoCapture.Height, PixelFormat.Format24bppRgb);
@@ -272,13 +293,6 @@ namespace GRemote
             // Save frame that just happened
             last = now;
             frameIndex++;
-
-            if ((last - lastFrameSample) > TimeSpan.TicksPerSecond)
-            {
-                Console.WriteLine("{0} capture fps", frameIndex);
-                frameIndex = 0;
-                lastFrameSample = last;
-            }
 
             try
             {

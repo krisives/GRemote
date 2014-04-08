@@ -46,13 +46,13 @@
             this.codecMpeg2 = new System.Windows.Forms.ToolStripMenuItem();
             this.codecMSMpeg4 = new System.Windows.Forms.ToolStripMenuItem();
             this.theoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem10 = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem15 = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem20 = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem25 = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem30 = new System.Windows.Forms.ToolStripMenuItem();
-            this.fpsItem60 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem10 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem15 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem20 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem25 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem30 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rateItem60 = new System.Windows.Forms.ToolStripMenuItem();
             this.downscaleItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,12 +63,8 @@
             this.bitrateItem900 = new System.Windows.Forms.ToolStripMenuItem();
             this.bitrateItem600 = new System.Windows.Forms.ToolStripMenuItem();
             this.bitrateItem300 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.bitrateItemCustom = new System.Windows.Forms.ToolStripMenuItem();
-            this.previewItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.uncompressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.compressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.splitViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.selectAreaItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playbackItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -85,10 +81,11 @@
             this.checkUpdatesItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bandwidthTimer = new System.Windows.Forms.Timer(this.components);
+            this.statsTimer = new System.Windows.Forms.Timer(this.components);
             this.statusBar = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.fpsLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.bandwidthLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.inputDropdown = new System.Windows.Forms.ToolStripDropDownButton();
             this.noInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -96,6 +93,12 @@
             this.desktopInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
             this.videoScreen = new GRemote.VideoScreen();
+            this.filtersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sharpenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.negateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.framerateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.noiseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu.SuspendLayout();
             this.statusBar.SuspendLayout();
             this.SuspendLayout();
@@ -169,10 +172,9 @@
             // 
             this.recordItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.codecItem,
-            this.fpsItem,
+            this.rateItem,
             this.downscaleItem,
             this.bitrateItem,
-            this.previewItem,
             this.toolStripSeparator2,
             this.selectAreaItem});
             this.recordItem.Name = "recordItem";
@@ -239,62 +241,62 @@
             this.theoraToolStripMenuItem.Text = "theora";
             this.theoraToolStripMenuItem.Click += new System.EventHandler(this.codecItem_Click);
             // 
-            // fpsItem
+            // rateItem
             // 
-            this.fpsItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fpsItem10,
-            this.fpsItem15,
-            this.fpsItem20,
-            this.fpsItem25,
-            this.fpsItem30,
-            this.fpsItem60});
-            this.fpsItem.Name = "fpsItem";
-            this.fpsItem.Size = new System.Drawing.Size(152, 22);
-            this.fpsItem.Text = "Framerate";
+            this.rateItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rateItem10,
+            this.rateItem15,
+            this.rateItem20,
+            this.rateItem25,
+            this.rateItem30,
+            this.rateItem60});
+            this.rateItem.Name = "rateItem";
+            this.rateItem.Size = new System.Drawing.Size(152, 22);
+            this.rateItem.Text = "Framerate";
             // 
-            // fpsItem10
+            // rateItem10
             // 
-            this.fpsItem10.Name = "fpsItem10";
-            this.fpsItem10.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem10.Tag = "10";
-            this.fpsItem10.Text = "10";
+            this.rateItem10.Name = "rateItem10";
+            this.rateItem10.Size = new System.Drawing.Size(86, 22);
+            this.rateItem10.Tag = "10";
+            this.rateItem10.Text = "10";
             // 
-            // fpsItem15
+            // rateItem15
             // 
-            this.fpsItem15.Name = "fpsItem15";
-            this.fpsItem15.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem15.Tag = "15";
-            this.fpsItem15.Text = "15";
+            this.rateItem15.Name = "rateItem15";
+            this.rateItem15.Size = new System.Drawing.Size(86, 22);
+            this.rateItem15.Tag = "15";
+            this.rateItem15.Text = "15";
             // 
-            // fpsItem20
+            // rateItem20
             // 
-            this.fpsItem20.Name = "fpsItem20";
-            this.fpsItem20.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem20.Tag = "20";
-            this.fpsItem20.Text = "20";
+            this.rateItem20.Name = "rateItem20";
+            this.rateItem20.Size = new System.Drawing.Size(86, 22);
+            this.rateItem20.Tag = "20";
+            this.rateItem20.Text = "20";
             // 
-            // fpsItem25
+            // rateItem25
             // 
-            this.fpsItem25.Name = "fpsItem25";
-            this.fpsItem25.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem25.Tag = "25";
-            this.fpsItem25.Text = "25";
+            this.rateItem25.Name = "rateItem25";
+            this.rateItem25.Size = new System.Drawing.Size(86, 22);
+            this.rateItem25.Tag = "25";
+            this.rateItem25.Text = "25";
             // 
-            // fpsItem30
+            // rateItem30
             // 
-            this.fpsItem30.Checked = true;
-            this.fpsItem30.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.fpsItem30.Name = "fpsItem30";
-            this.fpsItem30.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem30.Tag = "30";
-            this.fpsItem30.Text = "30";
+            this.rateItem30.Checked = true;
+            this.rateItem30.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.rateItem30.Name = "rateItem30";
+            this.rateItem30.Size = new System.Drawing.Size(86, 22);
+            this.rateItem30.Tag = "30";
+            this.rateItem30.Text = "30";
             // 
-            // fpsItem60
+            // rateItem60
             // 
-            this.fpsItem60.Name = "fpsItem60";
-            this.fpsItem60.Size = new System.Drawing.Size(86, 22);
-            this.fpsItem60.Tag = "60";
-            this.fpsItem60.Text = "60";
+            this.rateItem60.Name = "rateItem60";
+            this.rateItem60.Size = new System.Drawing.Size(86, 22);
+            this.rateItem60.Tag = "60";
+            this.rateItem60.Text = "60";
             // 
             // downscaleItem
             // 
@@ -344,6 +346,7 @@
             this.bitrateItem900,
             this.bitrateItem600,
             this.bitrateItem300,
+            this.toolStripSeparator7,
             this.bitrateItemCustom});
             this.bitrateItem.Name = "bitrateItem";
             this.bitrateItem.Size = new System.Drawing.Size(152, 22);
@@ -383,6 +386,11 @@
             this.bitrateItem300.Text = "300 Kbps (38 KB/s)";
             this.bitrateItem300.Click += new System.EventHandler(this.bitrateItem_Click);
             // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(168, 6);
+            // 
             // bitrateItemCustom
             // 
             this.bitrateItemCustom.Name = "bitrateItemCustom";
@@ -390,47 +398,6 @@
             this.bitrateItemCustom.Tag = "0";
             this.bitrateItemCustom.Text = "Custom";
             this.bitrateItemCustom.Click += new System.EventHandler(this.bitrateItemCustom_Click);
-            // 
-            // previewItem
-            // 
-            this.previewItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.uncompressedToolStripMenuItem,
-            this.compressedToolStripMenuItem,
-            this.splitViewToolStripMenuItem,
-            this.noneToolStripMenuItem});
-            this.previewItem.Name = "previewItem";
-            this.previewItem.Size = new System.Drawing.Size(152, 22);
-            this.previewItem.Text = "Preview";
-            // 
-            // uncompressedToolStripMenuItem
-            // 
-            this.uncompressedToolStripMenuItem.Name = "uncompressedToolStripMenuItem";
-            this.uncompressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.uncompressedToolStripMenuItem.Text = "Uncompressed";
-            this.uncompressedToolStripMenuItem.Click += new System.EventHandler(this.uncompressedToolStripMenuItem_Click);
-            // 
-            // compressedToolStripMenuItem
-            // 
-            this.compressedToolStripMenuItem.Checked = true;
-            this.compressedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.compressedToolStripMenuItem.Name = "compressedToolStripMenuItem";
-            this.compressedToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.compressedToolStripMenuItem.Text = "Compressed";
-            this.compressedToolStripMenuItem.Click += new System.EventHandler(this.compressedToolStripMenuItem_Click);
-            // 
-            // splitViewToolStripMenuItem
-            // 
-            this.splitViewToolStripMenuItem.Name = "splitViewToolStripMenuItem";
-            this.splitViewToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.splitViewToolStripMenuItem.Text = "Split View";
-            this.splitViewToolStripMenuItem.Click += new System.EventHandler(this.splitViewToolStripMenuItem_Click);
-            // 
-            // noneToolStripMenuItem
-            // 
-            this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.noneToolStripMenuItem.Text = "None";
-            this.noneToolStripMenuItem.Click += new System.EventHandler(this.noneToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -448,7 +415,9 @@
             // 
             this.playbackItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.centerItem,
-            this.stretchItem});
+            this.stretchItem,
+            this.toolStripSeparator8,
+            this.filtersToolStripMenuItem});
             this.playbackItem.Name = "playbackItem";
             this.playbackItem.Size = new System.Drawing.Size(61, 20);
             this.playbackItem.Text = "Playback";
@@ -546,17 +515,18 @@
             this.aboutItem.Text = "About";
             this.aboutItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
-            // bandwidthTimer
+            // statsTimer
             // 
-            this.bandwidthTimer.Enabled = true;
-            this.bandwidthTimer.Interval = 1000;
-            this.bandwidthTimer.Tick += new System.EventHandler(this.bandwidthTimer_Tick);
+            this.statsTimer.Enabled = true;
+            this.statsTimer.Interval = 1000;
+            this.statsTimer.Tick += new System.EventHandler(this.bandwidthTimer_Tick);
             // 
             // statusBar
             // 
             this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel,
             this.toolStripStatusLabel1,
+            this.fpsLabel,
             this.bandwidthLabel,
             this.inputDropdown});
             this.statusBar.Location = new System.Drawing.Point(0, 551);
@@ -574,8 +544,14 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(603, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(572, 17);
             this.toolStripStatusLabel1.Spring = true;
+            // 
+            // fpsLabel
+            // 
+            this.fpsLabel.Name = "fpsLabel";
+            this.fpsLabel.Size = new System.Drawing.Size(31, 17);
+            this.fpsLabel.Text = "0 fps";
             // 
             // bandwidthLabel
             // 
@@ -630,10 +606,49 @@
             this.videoScreen.GRemote = null;
             this.videoScreen.Location = new System.Drawing.Point(0, 27);
             this.videoScreen.Name = "videoScreen";
-            this.videoScreen.PreviewMode = GRemote.PreviewMode.COMPRESSED;
             this.videoScreen.ScaleMode = GRemote.ScaleMode.CENTER;
             this.videoScreen.Size = new System.Drawing.Size(792, 521);
             this.videoScreen.TabIndex = 7;
+            // 
+            // filtersToolStripMenuItem
+            // 
+            this.filtersToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.framerateToolStripMenuItem,
+            this.sharpenToolStripMenuItem,
+            this.negateToolStripMenuItem,
+            this.noiseToolStripMenuItem});
+            this.filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
+            this.filtersToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.filtersToolStripMenuItem.Text = "Filters";
+            // 
+            // sharpenToolStripMenuItem
+            // 
+            this.sharpenToolStripMenuItem.Name = "sharpenToolStripMenuItem";
+            this.sharpenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.sharpenToolStripMenuItem.Text = "Sharpen";
+            // 
+            // negateToolStripMenuItem
+            // 
+            this.negateToolStripMenuItem.Name = "negateToolStripMenuItem";
+            this.negateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.negateToolStripMenuItem.Text = "Negate";
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(149, 6);
+            // 
+            // framerateToolStripMenuItem
+            // 
+            this.framerateToolStripMenuItem.Name = "framerateToolStripMenuItem";
+            this.framerateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.framerateToolStripMenuItem.Text = "Framerate";
+            // 
+            // noiseToolStripMenuItem
+            // 
+            this.noiseToolStripMenuItem.Name = "noiseToolStripMenuItem";
+            this.noiseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.noiseToolStripMenuItem.Text = "Noise";
             // 
             // GRemoteDialog
             // 
@@ -675,10 +690,7 @@
         private System.Windows.Forms.ToolStripMenuItem bitrateItem;
         private System.Windows.Forms.ToolStripMenuItem bitrateItem900;
         private System.Windows.Forms.ToolStripMenuItem aboutItem;
-        private System.Windows.Forms.Timer bandwidthTimer;
-        private System.Windows.Forms.ToolStripMenuItem previewItem;
-        private System.Windows.Forms.ToolStripMenuItem uncompressedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem compressedToolStripMenuItem;
+        private System.Windows.Forms.Timer statsTimer;
         private System.Windows.Forms.ToolStripMenuItem connectItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem selectAreaItem;
@@ -691,20 +703,19 @@
         private System.Windows.Forms.ToolStripMenuItem hostItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private VideoScreen videoScreen;
-        private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
         private System.Windows.Forms.Timer playbackTimer;
         private System.Windows.Forms.ToolStripMenuItem x264Item;
         private System.Windows.Forms.ToolStripMenuItem theoraToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bitrateItem1200;
         private System.Windows.Forms.ToolStripMenuItem bitrateItem600;
         private System.Windows.Forms.ToolStripMenuItem bitrateItem300;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem10;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem15;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem20;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem25;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem30;
-        private System.Windows.Forms.ToolStripMenuItem fpsItem60;
+        private System.Windows.Forms.ToolStripMenuItem rateItem;
+        private System.Windows.Forms.ToolStripMenuItem rateItem10;
+        private System.Windows.Forms.ToolStripMenuItem rateItem15;
+        private System.Windows.Forms.ToolStripMenuItem rateItem20;
+        private System.Windows.Forms.ToolStripMenuItem rateItem25;
+        private System.Windows.Forms.ToolStripMenuItem rateItem30;
+        private System.Windows.Forms.ToolStripMenuItem rateItem60;
         private System.Windows.Forms.ToolStripMenuItem bitrateItemCustom;
         private System.Windows.Forms.ToolStripMenuItem codecItem265;
         private System.Windows.Forms.ToolStripMenuItem codecMpeg2;
@@ -716,7 +727,6 @@
         private System.Windows.Forms.ToolStripMenuItem playbackItem;
         private System.Windows.Forms.ToolStripMenuItem centerItem;
         private System.Windows.Forms.ToolStripMenuItem stretchItem;
-        private System.Windows.Forms.ToolStripMenuItem splitViewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem macroItem;
         private System.Windows.Forms.ToolStripMenuItem startMacroItem;
         private System.Windows.Forms.ToolStripMenuItem stopMacroItem;
@@ -724,6 +734,14 @@
         private System.Windows.Forms.ToolStripMenuItem PlayMacroItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem customizeMacroItem;
+        private System.Windows.Forms.ToolStripStatusLabel fpsLabel;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.ToolStripMenuItem filtersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem framerateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sharpenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem negateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem noiseToolStripMenuItem;
     }
 }
 

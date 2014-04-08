@@ -36,12 +36,11 @@
             this.label4 = new System.Windows.Forms.Label();
             this.widthBox = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
-            this.yBox = new System.Windows.Forms.TextBox();
-            this.xBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.innerPanel = new System.Windows.Forms.Panel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cropBorders = new System.Windows.Forms.CheckBox();
             this.moveButton = new System.Windows.Forms.Button();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.moveWindowBox = new System.Windows.Forms.RadioButton();
@@ -55,7 +54,8 @@
             this.windowTitle = new System.Windows.Forms.TextBox();
             this.refreshButton = new System.Windows.Forms.Button();
             this.followTimer = new System.Windows.Forms.Timer(this.components);
-            this.cropBorders = new System.Windows.Forms.CheckBox();
+            this.xBox = new System.Windows.Forms.NumericUpDown();
+            this.yBox = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.opacityBar)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.heightBox)).BeginInit();
@@ -63,6 +63,8 @@
             this.innerPanel.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.xBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.yBox)).BeginInit();
             this.SuspendLayout();
             // 
             // opacityBar
@@ -99,12 +101,12 @@
             // panel1
             // 
             this.panel1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.panel1.Controls.Add(this.yBox);
+            this.panel1.Controls.Add(this.xBox);
             this.panel1.Controls.Add(this.heightBox);
             this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.widthBox);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.yBox);
-            this.panel1.Controls.Add(this.xBox);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Cursor = System.Windows.Forms.Cursors.Default;
@@ -179,22 +181,6 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "Height:";
             // 
-            // yBox
-            // 
-            this.yBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.yBox.Location = new System.Drawing.Point(209, 6);
-            this.yBox.Name = "yBox";
-            this.yBox.Size = new System.Drawing.Size(100, 20);
-            this.yBox.TabIndex = 6;
-            // 
-            // xBox
-            // 
-            this.xBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.xBox.Location = new System.Drawing.Point(56, 6);
-            this.xBox.Name = "xBox";
-            this.xBox.Size = new System.Drawing.Size(100, 20);
-            this.xBox.TabIndex = 5;
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -252,6 +238,18 @@
             this.groupBox2.TabIndex = 20;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Recording Area";
+            // 
+            // cropBorders
+            // 
+            this.cropBorders.AutoSize = true;
+            this.cropBorders.Checked = true;
+            this.cropBorders.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cropBorders.Location = new System.Drawing.Point(12, 128);
+            this.cropBorders.Name = "cropBorders";
+            this.cropBorders.Size = new System.Drawing.Size(87, 17);
+            this.cropBorders.TabIndex = 15;
+            this.cropBorders.Text = "Crop Borders";
+            this.cropBorders.UseVisualStyleBackColor = true;
             // 
             // moveButton
             // 
@@ -397,17 +395,41 @@
             this.followTimer.Interval = 500;
             this.followTimer.Tick += new System.EventHandler(this.FollowWindowTick);
             // 
-            // cropBorders
+            // xBox
             // 
-            this.cropBorders.AutoSize = true;
-            this.cropBorders.Checked = true;
-            this.cropBorders.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cropBorders.Location = new System.Drawing.Point(12, 128);
-            this.cropBorders.Name = "cropBorders";
-            this.cropBorders.Size = new System.Drawing.Size(87, 17);
-            this.cropBorders.TabIndex = 15;
-            this.cropBorders.Text = "Crop Borders";
-            this.cropBorders.UseVisualStyleBackColor = true;
+            this.xBox.Location = new System.Drawing.Point(56, 7);
+            this.xBox.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.xBox.Minimum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            -2147483648});
+            this.xBox.Name = "xBox";
+            this.xBox.Size = new System.Drawing.Size(100, 20);
+            this.xBox.TabIndex = 21;
+            this.xBox.ValueChanged += new System.EventHandler(this.xBox_ValueChanged);
+            // 
+            // yBox
+            // 
+            this.yBox.Location = new System.Drawing.Point(209, 7);
+            this.yBox.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.yBox.Minimum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            -2147483648});
+            this.yBox.Name = "yBox";
+            this.yBox.Size = new System.Drawing.Size(100, 20);
+            this.yBox.TabIndex = 22;
+            this.yBox.ValueChanged += new System.EventHandler(this.yBox_ValueChanged);
             // 
             // CaptureArea
             // 
@@ -442,6 +464,8 @@
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.xBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.yBox)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -454,8 +478,6 @@
         private System.Windows.Forms.Panel innerPanel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox yBox;
-        private System.Windows.Forms.TextBox xBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox processComboBox;
@@ -475,5 +497,7 @@
         private System.Windows.Forms.RadioButton noneWindow;
         private System.Windows.Forms.Timer followTimer;
         private System.Windows.Forms.CheckBox cropBorders;
+        private System.Windows.Forms.NumericUpDown yBox;
+        private System.Windows.Forms.NumericUpDown xBox;
     }
 }

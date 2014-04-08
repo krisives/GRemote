@@ -30,13 +30,12 @@
         {
             this.SuspendLayout();
             // 
-            // VideoPreview
+            // VideoScreen
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.Black;
-            this.Name = "VideoPreview";
-            this.Size = new System.Drawing.Size(320, 240);
+            this.Name = "VideoScreen";
+            this.Size = new System.Drawing.Size(640, 480);
             this.Resize += new System.EventHandler(this.OnSizeChanged);
             this.ResumeLayout(false);
 

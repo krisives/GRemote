@@ -99,6 +99,14 @@ namespace GRemote
             }
         }
 
+        public int FrameIndex
+        {
+            get
+            {
+                return (videoCapture == null) ? 0 : videoCapture.FrameIndex;
+            }
+        }
+
         /// <summary>
         /// Starts the server. This begins the video capture, encoding, and network
         /// processes. It's safe to start a server more than once.

@@ -12,27 +12,26 @@ namespace GRemote
     public partial class VideoScreen : UserControl
     {
         private GRemoteDialog gRemote; 
-        private PreviewMode previewMode = PreviewMode.COMPRESSED;
-        private Bitmap uncompressedImage;
-        private Bitmap compressedImage;
+        private ScaleMode scaleMode = ScaleMode.CENTER;
         private BufferedGraphicsContext bufferContext;
         private BufferedGraphics bg;
         private Graphics g;
-        private ScaleMode scaleMode = ScaleMode.CENTER;
         private int width, height;
 
         public VideoScreen()
         {
             bufferContext = BufferedGraphicsManager.Current;
-            InitializeComponent();
-
             width = Width;
             height = Height;
-
             bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
             g = bg.Graphics;
+
+            InitializeComponent();
         }
 
+        /// <summary>
+        /// Control owner (used to resize window if too small)
+        /// </summary>
         public GRemoteDialog GRemote
         {
             get
@@ -45,6 +44,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Width of the video being displayed
+        /// </summary>
         public int VideoWidth
         {
             get
@@ -53,6 +55,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Height of the video being displayed
+        /// </summary>
         public int VideoHeight
         {
             get
@@ -61,6 +66,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Get or set how to display the video (centered or stretched)
+        /// </summary>
         public ScaleMode ScaleMode
         {
             get
@@ -73,12 +81,18 @@ namespace GRemote
 
                 if (scaleMode == ScaleMode.CENTER)
                 {
-                    ResizeVideo();
+                    UpdateVideoSize();
                 }
             }
         }
 
-        public void SetSize(int width, int height)
+        /// <summary>
+        /// Change the size of the video being displayed. This may expand the size of
+        /// the parent control to fit.
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public void SetVideoSize(int width, int height)
         {
             this.width = width;
             this.height = height;
@@ -87,21 +101,30 @@ namespace GRemote
             {
                 Invoke(new Action(delegate()
                 {
-                    ResizeVideo();
+                    UpdateVideoSize();
                 }));
             }
             else
             {
-                ResizeVideo();
+                UpdateVideoSize();
             }
 
-            Console.WriteLine("Preview set to {0}x{1}", width, height);
+            Console.WriteLine("Screen set to {0}x{1}", width, height);
         }
 
-        protected void ResizeVideo()
+        /// <summary>
+        /// Invoked after the video size has been changed. This method exists because
+        /// of internal windows threading
+        /// </summary>
+        protected void UpdateVideoSize()
         {
             int dx;
             int dy;
+
+            if (gRemote == null)
+            {
+                return;
+            }
 
             if (Width < width || Height < height)
             {
@@ -111,45 +134,10 @@ namespace GRemote
                 gRemote.Width = width + dx;
                 gRemote.Height = height + dy;
             }
-
-            // Width = width;
-            // Height = height;
-        }
-
-        public void SetBuffers(Bitmap uncompressedImage, Bitmap compressedImage)
-        {
-            if (uncompressedImage == null || compressedImage == null)
-            {
-                throw new Exception("Bitmap images cannot be null");
-            }
-
-            int w = uncompressedImage.Width;
-            int h = uncompressedImage.Height;
-
-            this.uncompressedImage = uncompressedImage;
-            this.compressedImage = compressedImage;
-        }
-
-        public PreviewMode PreviewMode
-        {
-            get
-            {
-                return previewMode;
-            }
-            set
-            {
-                previewMode = value;
-                Refresh();
-            }
         }
 
         public void RenderDirect(Bitmap screen)
         {
-            if (previewMode == PreviewMode.NONE)
-            {
-                return;
-            }
-
             lock (screen)
             {
                 switch (scaleMode)
@@ -180,32 +168,24 @@ namespace GRemote
 
         private void OnSizeChanged(object sender, EventArgs e)
         {
-            if (Width < 0)
-            {
-                Width = 2;
-            }
-
-            if (Height < 0)
-            {
-                Height = 2;
-            }
-
             bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
             g = bg.Graphics;
         }
     }
 
-    public enum PreviewMode
-    {
-        NONE,
-        COMPRESSED,
-        SPLIT,
-        UNCOMPRESSED
-    }
-
+    /// <summary>
+    /// How to layout the screen if it's not the same size as the window
+    /// </summary>
     public enum ScaleMode
     {
+        /// <summary>
+        /// Center screen (no scaling)
+        /// </summary>
         CENTER,
+
+        /// <summary>
+        /// Stretch the screen to fit (does not respect aspect ratio)
+        /// </summary>
         STRETCHED
     }
 }

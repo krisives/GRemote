@@ -23,7 +23,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.14";
+                return "0.0.15";
             }
         }
 
@@ -39,6 +39,7 @@ namespace GRemote
         private UpdateChecker updateChecker;
         private int lastEncodedBytes = 0;
         private int lastKBps = 0;
+        private int lastFrameCount = 0;
 
         public GRemoteDialog()
         {
@@ -144,7 +145,7 @@ namespace GRemote
                 videoCapture.SetPosition(areaDialog.Left, areaDialog.Top);
             }
 
-            videoScreen.SetSize(videoCapture.Width, videoCapture.Height);
+            videoScreen.SetVideoSize(videoCapture.Width, videoCapture.Height);
 
             serverSettings.Address = sessionDialog.addressBox.Text;
             serverSettings.PortString = sessionDialog.portBox.Text;
@@ -214,7 +215,7 @@ namespace GRemote
                 portNumber = 9999;
             }
 
-            videoScreen.SetSize(800, 600);
+            videoScreen.SetVideoSize(800, 600);
             clientSession = new ClientSession(this, sessionDialog.addressBox.Text, portNumber);
             clientSession.StartClient();
             statusLabel.Text = "Connecting...";
@@ -320,42 +321,6 @@ namespace GRemote
             }
         }
 
-        public void SetPreviewMode(PreviewMode mode)
-        {
-            if (videoScreen != null)
-            {
-                videoScreen.PreviewMode = mode;
-            }
-
-            switch (mode)
-            {
-                case PreviewMode.NONE:
-                    noneToolStripMenuItem.Checked = true;
-                    uncompressedToolStripMenuItem.Checked = false;
-                    compressedToolStripMenuItem.Checked = false;
-                    splitViewToolStripMenuItem.Checked = false;
-                    break;
-                case PreviewMode.UNCOMPRESSED:
-                    noneToolStripMenuItem.Checked = false;
-                    uncompressedToolStripMenuItem.Checked = true;
-                    compressedToolStripMenuItem.Checked = false;
-                    splitViewToolStripMenuItem.Checked = false;
-                    break;
-                case PreviewMode.COMPRESSED:
-                    noneToolStripMenuItem.Checked = false;
-                    uncompressedToolStripMenuItem.Checked = false;
-                    compressedToolStripMenuItem.Checked = true;
-                    splitViewToolStripMenuItem.Checked = false;
-                    break;
-                case PreviewMode.SPLIT:
-                    noneToolStripMenuItem.Checked = false;
-                    uncompressedToolStripMenuItem.Checked = false;
-                    compressedToolStripMenuItem.Checked = false;
-                    splitViewToolStripMenuItem.Checked = true;
-                    break;
-            }
-        }
-
         /// <summary>
         /// Gets the VideoPreview control used to display playback
         /// or recording.
@@ -402,15 +367,12 @@ namespace GRemote
                 serverSettings.EncoderSettings.codec = codec;
             }
 
-            foreach (ToolStripMenuItem item in codecItem.DropDownItems)
-            {
-                item.Checked = serverSettings.EncoderSettings.codec.Equals(item.Tag);
-            }
+            UI.UpdateMenuCheckGroup(codecItem, codec);
         }
 
         public void SetBitrate(int kbps)
         {
-            bool isCustom = true;
+            ToolStripMenuItem item;
 
             if (IsServerRunning)
             {
@@ -421,20 +383,10 @@ namespace GRemote
                 serverSettings.EncoderSettings.videoRate = kbps;
             }
 
-            foreach (ToolStripMenuItem item in bitrateItem.DropDownItems)
-            {
-                if (int.Parse(item.Tag as String) == kbps)
-                {
-                    item.Checked = true;
-                    isCustom = false;
-                } else {
-                    item.Checked = false;
-                }
-            }
+            item = UI.UpdateMenuCheckGroup(bitrateItem, kbps.ToString());
+            bitrateItemCustom.Checked = (item == null);
 
-            bitrateItemCustom.Checked = isCustom;
-
-            if (isCustom)
+            if (bitrateItemCustom.Checked)
             {
                 bitrateItemCustom.Text = String.Format("Custom ({0} KB/s)", (kbps / 8));
             }
@@ -461,38 +413,43 @@ namespace GRemote
             videoScreen.ScaleMode = scaleMode;
         }
 
-        protected void UpdateBandwidth()
+        protected void UpdateStats()
         {
             int encodedBytes = 0;
-            VideoDecoder decoder;
+            int frameCount = 0;
 
             if (IsServerRunning)
             {
                 encodedBytes = serverSession.Encoder.TotalBytes;
+                frameCount = serverSession.FrameIndex;
             }
             else if (IsClientRunning)
             {
-                decoder = clientSession.Decoder;
-
-                if (decoder != null)
-                {
-                    encodedBytes = decoder.TotalBytes;
-                }
+                encodedBytes = clientSession.TotalEncodedBytes;
+                frameCount = clientSession.FrameIndex;
             }
             else
             {
-                return;
+                frameCount = 0;
+                encodedBytes = 0;
+                lastFrameCount = 0;
+                lastEncodedBytes = 0;
             }
             
             int delta = (encodedBytes - lastEncodedBytes);
-            int bytesPerSecond = delta * (1000 / bandwidthTimer.Interval);
+            int bytesPerSecond = delta * (1000 / statsTimer.Interval);
             int KBps = (bytesPerSecond / 1024);
             int adjustedKBps = ((KBps + lastKBps) / 2);
 
-            bandwidthLabel.Text = adjustedKBps + " KB/s";
+            bandwidthLabel.Text = String.Format("{0} KB/s", adjustedKBps);
 
             lastKBps = KBps;
             lastEncodedBytes = encodedBytes;
+
+            int fps = (frameCount - lastFrameCount);
+
+            fpsLabel.Text = String.Format("{0} fps", fps);
+            lastFrameCount = frameCount;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -502,7 +459,7 @@ namespace GRemote
 
         private void bandwidthTimer_Tick(object sender, EventArgs e)
         {
-            UpdateBandwidth();
+            UpdateStats();
         }
 
         private void pToolStripMenuItem_Click(object sender, EventArgs e)
@@ -523,26 +480,6 @@ namespace GRemote
         private void joinMenuItem_Click(object sender, EventArgs e)
         {
             ToggleClient();
-        }
-
-        private void uncompressedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetPreviewMode(PreviewMode.UNCOMPRESSED);
-        }
-
-        private void compressedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetPreviewMode(PreviewMode.COMPRESSED);
-        }
-
-        private void splitViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetPreviewMode(PreviewMode.SPLIT);
-        }
-
-        private void noneToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetPreviewMode(PreviewMode.NONE);
         }
 
         private void toolStripStatusLabel2_Click(object sender, EventArgs e)
