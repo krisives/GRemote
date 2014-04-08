@@ -57,7 +57,17 @@ to file a bug. Don't forget to mention:
 
 Released under a MIT license. See 
 [LICENSE.md](https://github.com/krisives/GRemote/blob/master/LICENSE.md)
-if you wish.
+if you wish. Other projects used and their licenses:
 
-This project **does not** modify, redistribute, or even
-link against FFMpeg, which uses the GPL/LGPL.
+* This project **does not** modify, or even link against FFMpeg,
+  which uses the GPL/LGPL.
+
+* This project makes use of the Interceptor virtual keyboard/mouse
+  library created by Jason Pang. He never made it clear what license
+  it was released under so I have contacted him.
+
+* This project also makes use of the Interception C# bindings created
+  by Francisco Lopes. He never made it clear what license it was
+  released under so I have contacted him.
+
+

@@ -117,4 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="richTextBox1.Text" xml:space="preserve">
+    <value>Thanks to the creators of:
+
+* FFMpeg
+* Interceptor and Interception Library
+* NAudio Library
+* libx264 and libxvid
+* C# and Visual Studio
+
+Authors:
+
+* Kristopher Ives
+* Mikhail Medvedev
+
+Library Authors:
+
+* Jason Pang
+* Francisco Lopes
+
+Licenses:
+
+See LICENSE-NAudio.md to read a copy of the Microsoft Public License (MS-PL) which NAudio is licensed under.
+
+</value>
+  </data>
 </root>
