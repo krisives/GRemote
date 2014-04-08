@@ -26,7 +26,7 @@ namespace GRemote
         private BufferPool outputBuffers = new BufferPool();
         private VideoCapture videoCapture;
         private VideoEncoder videoEncoder;
-        private VideoPreview videoPreview;
+        private VideoScreen videoPreview;
         private ServerSettings settings;
         private List<ConnectedClient> killList = new List<ConnectedClient>();
         private InputPlayback inputPlayback;
@@ -87,7 +87,7 @@ namespace GRemote
         /// <summary>
         /// Gets the video preview control used to preview the video capture.
         /// </summary>
-        public VideoPreview Preview
+        public VideoScreen Preview
         {
             set
             {
@@ -414,7 +414,7 @@ namespace GRemote
             socket.Listen(20);
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             Socket clientSocket;
             IPEndPoint ep = new IPEndPoint(settings.IPAddress, settings.Port);
@@ -472,7 +472,7 @@ namespace GRemote
             input.Load();
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             Thread.Sleep(1000);
         }
@@ -507,7 +507,7 @@ namespace GRemote
             this.killList = killList;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             byte[] nextBuffer = null;
 

@@ -88,7 +88,7 @@
             this.windowInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.desktopInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playbackTimer = new System.Windows.Forms.Timer(this.components);
-            this.videoPreview = new GRemote.VideoPreview();
+            this.videoPreview = new GRemote.VideoScreen();
             this.macroItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startMacroItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopMacroItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -690,7 +690,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem hostMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private VideoPreview videoPreview;
+        private VideoScreen videoPreview;
         private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
         private System.Windows.Forms.Timer playbackTimer;
         private System.Windows.Forms.ToolStripMenuItem x264Item;

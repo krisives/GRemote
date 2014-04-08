@@ -140,11 +140,11 @@
     <Compile Include="Video\VideoDecoder.cs" />
     <Compile Include="BufferPool.cs" />
     <Compile Include="Video\VideoEncoder.cs" />
-    <Compile Include="UI\VideoPreview.cs">
+    <Compile Include="UI\VideoScreen.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UI\VideoPreview.Designer.cs">
-      <DependentUpon>VideoPreview.cs</DependentUpon>
+    <Compile Include="UI\VideoScreen.Designer.cs">
+      <DependentUpon>VideoScreen.cs</DependentUpon>
     </Compile>
     <Compile Include="Input\InputCapture.cs" />
     <EmbeddedResource Include="UI\AboutDialog.resx">
@@ -176,8 +176,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\VideoPreview.resx">
-      <DependentUpon>VideoPreview.cs</DependentUpon>
+    <EmbeddedResource Include="UI\VideoScreen.resx">
+      <DependentUpon>VideoScreen.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">

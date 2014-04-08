@@ -11,6 +11,10 @@ using System.Runtime.InteropServices;
 
 namespace GRemote
 {
+    /// <summary>
+    /// Decodes encoded video data into Bitmap frames. Internally this starts an ffmpeg.exe
+    /// process, supplying it encoded data and reading from it decoded video frames.
+    /// </summary>
     public class VideoDecoder
     {
         private volatile bool started;
@@ -23,7 +27,7 @@ namespace GRemote
         private BufferPool decodedBuffers = new BufferPool();
         private int width, height;
         private int totalBytes = 0;
-        private VideoPreview videoPreview;
+        private VideoScreen videoPreview;
 
         public VideoDecoder(FFMpeg ffmpeg, int width, int height)
         {
@@ -39,6 +43,9 @@ namespace GRemote
             this.height = height;
         }
 
+        /// <summary>
+        /// Get the width of the video being decoded
+        /// </summary>
         public int VideoWidth
         {
             get
@@ -47,6 +54,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the height of the video being decoded
+        /// </summary>
         public int VideoHeight
         {
             get
@@ -55,7 +65,11 @@ namespace GRemote
             }
         }
 
-        public VideoPreview VideoPreview
+        /// <summary>
+        /// Gets or sets a video screen that is playing the decoded video frames (or null
+        /// if no playback)
+        /// </summary>
+        public VideoScreen VideoPreview
         {
             get
             {
@@ -67,6 +81,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the total encoded bytes that have been read.
+        /// </summary>
         public int TotalBytes
         {
             get
@@ -75,6 +92,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Checks if the decoding process has been started
+        /// </summary>
         public bool IsDecoding
         {
             get
@@ -86,6 +106,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Starts the decoding process
+        /// </summary>
         public void StartDecoding()
         {
             if (IsDecoding)
@@ -125,7 +148,11 @@ namespace GRemote
             
         }
 
-        public string GetFFMpegArguments()
+        /// <summary>
+        /// Generates the argument string for ffmpeg.exe
+        /// </summary>
+        /// <returns></returns>
+        protected string GetFFMpegArguments()
         {
             String args = "";
 
@@ -141,6 +168,12 @@ namespace GRemote
             return args;
         }
 
+        /// <summary>
+        /// Adds a buffer of encoded data to be decoded. This is processed by another
+        /// thread and supplied to ffmpeg. Decoded video frames will be supplied to the
+        /// VideoScreen.Render() method
+        /// </summary>
+        /// <param name="buffer"></param>
         public void Decode(byte[] buffer)
         {
             if (buffer == null)
@@ -211,6 +244,9 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A thread that reads the diagnostic output from the ffmpeg decoder process.
+    /// </summary>
     public class VideoDecoderErrorThread : StoppableThread
     {
         private StreamReader reader;
@@ -220,12 +256,15 @@ namespace GRemote
             reader = process.StandardError;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             String msg = reader.ReadLine();
         }
     }
-
+    
+    /// <summary>
+    /// A thread that reads the decoded frame bitmaps from the ffmpeg decoder process.
+    /// </summary>
     public class VideoDecoderReadThread : StoppableThread
     {
         private VideoDecoder decoder;
@@ -234,7 +273,7 @@ namespace GRemote
         private int frameSize;
         private byte[] readBuffer;
         private int pos;
-        private VideoPreview preview;
+        private VideoScreen preview;
         private Bitmap decodeBuffer;
         private Rectangle lockBounds;
 
@@ -251,7 +290,7 @@ namespace GRemote
             this.pos = 0;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             while (HandleBuffer())
             {
@@ -296,6 +335,9 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A thread that writes encoded data buffers to the ffmpeg decoder process.
+    /// </summary>
     public class VideoDecoderWriteThread : StoppableThread
     {
         private VideoDecoder decoder;
@@ -306,10 +348,10 @@ namespace GRemote
         {
             this.decoder = decoder;
             this.encodedBuffers = encodedBuffers;
-            this.stream = process.StandardInput.BaseStream;// new BufferedStream(process.StandardInput.BaseStream);
+            this.stream = process.StandardInput.BaseStream;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             byte[] nextBuffer;
 

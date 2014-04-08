@@ -14,7 +14,7 @@ namespace GRemote
         private GRemoteDialog gRemote;
         private ClientWriteThread writeThread;
         private ClientReadThread readThread;
-        private VideoPreview videoPreview;
+        private VideoScreen videoPreview;
         private InputCapture inputCapture;
         private String address;
         private int port;
@@ -60,7 +60,7 @@ namespace GRemote
             }
         }
 
-        public VideoPreview Preview
+        public VideoScreen Preview
         {
             get
             {
@@ -146,7 +146,7 @@ namespace GRemote
 
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             Stop();
         }
@@ -155,7 +155,7 @@ namespace GRemote
     public class ClientReadThread : StoppableThread
     {
         private FFMpeg ffmpeg;
-        private VideoPreview preview;
+        private VideoScreen preview;
         private ClientSession client;
         private Socket socket;
         private NetworkStream networkStream;
@@ -201,7 +201,7 @@ namespace GRemote
             }
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             byte packetType;
 

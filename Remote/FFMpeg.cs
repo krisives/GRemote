@@ -6,10 +6,16 @@ using System.IO;
 
 namespace GRemote
 {
+    /// <summary>
+    /// Describes FFMpeg and settings for using it.
+    /// </summary>
     public class FFMpeg
     {
-        String path;
+        private String path;
 
+        /// <summary>
+        /// Constructs an FFMpeg object looking for ffmpeg.exe in the working
+        /// </summary>
         public FFMpeg()
         {
             this.path = Directory.GetCurrentDirectory() + "\\ffmpeg.exe";
@@ -20,6 +26,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the full path to ffmpeg.exe
+        /// </summary>
         public string Path
         {
             get {

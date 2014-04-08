@@ -11,6 +11,9 @@ using System.IO;
 
 namespace GRemote
 {
+    /// <summary>
+    /// Captures images in another thread.
+    /// </summary>
     public class VideoCapture
     {
         private bool capturing;
@@ -43,7 +46,8 @@ namespace GRemote
         }
 
         /// <summary>
-        /// A simple callback that is invoked after a snapshot has taken place.
+        /// A simple callback that is invoked after a snapshot has taken place. The
+        /// buffer should not used outside the callback (you should copy from it)
         /// </summary>
         public delegate void SnapshotListener(Bitmap buffer);
 
@@ -104,6 +108,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the width of the area being captured
+        /// </summary>
         public int Width
         {
             get
@@ -112,6 +119,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Gets the height of the area being captured
+        /// </summary>
         public int Height
         {
             get
@@ -120,6 +130,11 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Begins the capturing process. Calls to the snapshot listener will begin
+        /// from a different thread after invoking this method. It's safe to start
+        /// the video capture more than once (if already started this method does nothing)
+        /// </summary>
         public void StartCapturing()
         {
             if (IsCapturing)
@@ -136,6 +151,11 @@ namespace GRemote
             captureThread.Start();
         }
 
+        /// <summary>
+        /// Stops the capturing process. Calls to the snapshot listener will
+        /// stop after invoking this method. It's safe to stop the video capture
+        /// more than once (if already stopped this method does nothing)
+        /// </summary>
         public void StopCapturing()
         {
             if (!capturing)
@@ -155,6 +175,9 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Checks if the capture process has been started
+        /// </summary>
         public bool IsCapturing
         {
             get
@@ -167,6 +190,10 @@ namespace GRemote
         }
     }
 
+    /// <summary>
+    /// A thread that captures video at a specific interval and calls the
+    /// snapshot listener.
+    /// </summary>
     public class CaptureThread : StoppableThread
     {
         private VideoCapture videoCapture;
@@ -195,7 +222,7 @@ namespace GRemote
             Console.WriteLine("{0} ticks per frame", frameDelay);
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             long target;
             long now;

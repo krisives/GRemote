@@ -276,7 +276,7 @@ namespace GRemote
             this.stream = process.StandardInput.BaseStream;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             byte[] nextBuffer;
 
@@ -309,7 +309,7 @@ namespace GRemote
             this.reader = process.StandardError;
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             String str = reader.ReadLine();
         }
@@ -358,7 +358,7 @@ namespace GRemote
             }
         }
 
-        protected override void RunThread()
+        protected override void ThreadRun()
         {
             while (HandleBuffer())
             {

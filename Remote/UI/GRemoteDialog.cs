@@ -23,7 +23,7 @@ namespace GRemote
         {
             get
             {
-                return "0.0.13";
+                return "0.0.14";
             }
         }
 
@@ -360,7 +360,7 @@ namespace GRemote
         /// Gets the VideoPreview control used to display playback
         /// or recording.
         /// </summary>
-        public VideoPreview VideoPreview
+        public VideoScreen VideoPreview
         {
             get
             {

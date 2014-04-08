@@ -1,6 +1,6 @@
 ﻿namespace GRemote
 {
-    partial class VideoPreview
+    partial class VideoScreen
     {
         /// <summary> 
         /// Required designer variable.

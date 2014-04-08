@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace GRemote
 {
-    public partial class VideoPreview : UserControl
+    public partial class VideoScreen : UserControl
     {
         private GRemoteDialog gRemote; 
         private PreviewMode previewMode = PreviewMode.COMPRESSED;
@@ -21,7 +21,7 @@ namespace GRemote
         private ScaleMode scaleMode = ScaleMode.CENTER;
         private int width, height;
 
-        public VideoPreview()
+        public VideoScreen()
         {
             bufferContext = BufferedGraphicsManager.Current;
             InitializeComponent();

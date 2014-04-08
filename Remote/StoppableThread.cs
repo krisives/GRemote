@@ -126,6 +126,11 @@ namespace GRemote
             }
         }
 
+        /// <summary>
+        /// Runs the thread. This is the main method of the thread and
+        /// should not be overriden. Instead override the ThreadStart(),
+        /// ThreadRun(), and ThreadEnd() methods.
+        /// </summary>
         public void Run()
         {
             // Use one lock
@@ -159,7 +164,7 @@ namespace GRemote
             {
                 try
                 {
-                    RunThread();
+                    ThreadRun();
                 }
                 catch (Exception e)
                 {
@@ -188,7 +193,7 @@ namespace GRemote
         /// A method that is invoked within a loop as long as it's started and
         /// not stopped.
         /// </summary>
-        protected abstract void RunThread();
+        protected abstract void ThreadRun();
 
         /// <summary>
         /// Optional method to override that will be invoked when the thread
