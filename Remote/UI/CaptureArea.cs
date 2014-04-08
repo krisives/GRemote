@@ -260,7 +260,7 @@ namespace GRemote
 
             if (hwnd != IntPtr.Zero)
             {
-                SetWindowPos(hwnd, (IntPtr)0, Left - dx, Top - dy, 0, 0, SetWindowPosFlags.DoNotActivate | SetWindowPosFlags.IgnoreResize);
+                Win32.SetWindowPos(hwnd, (IntPtr)0, Left - dx, Top - dy, 0, 0, Win32.SetWindowPosFlags.DoNotActivate | Win32.SetWindowPosFlags.IgnoreResize);
             }
         }
 
@@ -317,9 +317,9 @@ namespace GRemote
                 return;
             }
 
-            RECT rect;
+            Win32.RECT rect;
             int w, h;
-            GetWindowRect(hwnd, out rect);
+            Win32.GetWindowRect(hwnd, out rect);
 
             w = rect.Right - rect.Left;
             h = rect.Bottom - rect.Top;
@@ -358,8 +358,8 @@ namespace GRemote
                 return;
             }
 
-            RECT rect;
-            GetWindowRect(hwnd, out rect);
+            Win32.RECT rect;
+            Win32.GetWindowRect(hwnd, out rect);
 
             if (cropBorders.Checked)
             {
@@ -394,7 +394,7 @@ namespace GRemote
 
         public IntPtr GetWindowByTitle()
         {
-            return FindWindowEx(IntPtr.Zero, IntPtr.Zero, null, windowTitle.Text);
+            return Win32.FindWindowEx(IntPtr.Zero, IntPtr.Zero, null, windowTitle.Text);
         }
 
         private void noneWindow_CheckedChanged(object sender, EventArgs e)
@@ -425,44 +425,6 @@ namespace GRemote
         private void followWindowBox_CheckedChanged(object sender, EventArgs e)
         {
             followTimer.Enabled = followWindowBox.Checked;
-        }
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left, Top, Right, Bottom;
-        }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
-
-        [Flags()]
-        private enum SetWindowPosFlags : uint
-        {
-            AsynchronousWindowPosition = 0x4000,
-            DeferErase = 0x2000,
-            DrawFrame = 0x0020,
-            FrameChanged = 0x0020,
-            HideWindow = 0x0080,
-            DoNotActivate = 0x0010,
-            DoNotCopyBits = 0x0100,
-            IgnoreMove = 0x0002,
-            DoNotChangeOwnerZOrder = 0x0200,
-            DoNotRedraw = 0x0008,
-            DoNotReposition = 0x0200,
-            DoNotSendChangingEvent = 0x0400,
-            IgnoreResize = 0x0001,
-            IgnoreZOrder = 0x0004,
-            ShowWindow = 0x0040,
         }
     }
 }

@@ -49,7 +49,7 @@ namespace GRemote
 
             InitializeComponent();
 
-            videoPreview.GRemote = this;
+            videoScreen.GRemote = this;
             Text = String.Format("GRemote ({0})", Version);
         }
 
@@ -84,17 +84,17 @@ namespace GRemote
             if (IsServerRunning)
             {
                 StopServer();
-                hostMenuItem.Text = "Host";
-                joinMenuItem.Enabled = true;
-                hostMenuItem.Enabled = true;
+                hostItem.Text = "Host";
+                connectItem.Enabled = true;
+                hostItem.Enabled = true;
             }
             else
             {
                 if (StartServer())
                 {
-                    hostMenuItem.Text = "Stop Server";
-                    hostMenuItem.Enabled = true;
-                    joinMenuItem.Enabled = false;
+                    hostItem.Text = "Stop Server";
+                    hostItem.Enabled = true;
+                    connectItem.Enabled = false;
                 }
             }
         }
@@ -110,13 +110,13 @@ namespace GRemote
             if (IsClientRunning)
             {
                 StopClient();
-                joinMenuItem.Text = "Connect";
+                connectItem.Text = "Connect";
             }
             else
             {
                 if (StartClient())
                 {
-                    joinMenuItem.Text = "Disconnect";
+                    connectItem.Text = "Disconnect";
                 }
             }
         }
@@ -144,14 +144,14 @@ namespace GRemote
                 videoCapture.SetPosition(areaDialog.Left, areaDialog.Top);
             }
 
-            videoPreview.SetSize(videoCapture.Width, videoCapture.Height);
+            videoScreen.SetSize(videoCapture.Width, videoCapture.Height);
 
             serverSettings.Address = sessionDialog.addressBox.Text;
             serverSettings.PortString = sessionDialog.portBox.Text;
             
             serverSession = new ServerSession(FFmpeg, videoCapture, serverSettings);
             //serverSession.TargetWindow = areaDialog.TargetWindow;
-            serverSession.Preview = videoPreview;
+            serverSession.Preview = videoScreen;
             serverSession.StartServer();
             statusLabel.Text = "Recording...";
 
@@ -175,7 +175,7 @@ namespace GRemote
             }
 
             statusLabel.Text = "Not Recording";
-            videoPreview.Refresh();
+            videoScreen.Refresh();
         }
 
         /// <summary>
@@ -214,12 +214,12 @@ namespace GRemote
                 portNumber = 9999;
             }
 
-            videoPreview.SetSize(800, 600);
+            videoScreen.SetSize(800, 600);
             clientSession = new ClientSession(this, sessionDialog.addressBox.Text, portNumber);
             clientSession.StartClient();
             statusLabel.Text = "Connecting...";
             recordItem.Enabled = false;
-            joinMenuItem.Text = "Disconnect";
+            connectItem.Text = "Disconnect";
             Refresh();
 
             return true;
@@ -237,7 +237,7 @@ namespace GRemote
             }
 
             recordItem.Enabled = true;
-            joinMenuItem.Text = "Connect";
+            connectItem.Text = "Connect";
             Refresh();
         }
 
@@ -322,9 +322,9 @@ namespace GRemote
 
         public void SetPreviewMode(PreviewMode mode)
         {
-            if (videoPreview != null)
+            if (videoScreen != null)
             {
-                videoPreview.PreviewMode = mode;
+                videoScreen.PreviewMode = mode;
             }
 
             switch (mode)
@@ -364,7 +364,7 @@ namespace GRemote
         {
             get
             {
-                return videoPreview;
+                return videoScreen;
             }
         }
 
@@ -458,7 +458,7 @@ namespace GRemote
             centerItem.Checked = (scaleMode == ScaleMode.CENTER);
             stretchItem.Checked = (scaleMode == ScaleMode.STRETCHED);
 
-            videoPreview.ScaleMode = scaleMode;
+            videoScreen.ScaleMode = scaleMode;
         }
 
         protected void UpdateBandwidth()
@@ -620,7 +620,7 @@ namespace GRemote
 
         private void bitrateItemCustom_Click(object sender, EventArgs e)
         {
-            CustomBitrateForm bitrateForm = new CustomBitrateForm();
+            CustomBitrateDialog bitrateForm = new CustomBitrateDialog();
             
             if (bitrateForm.ShowDialog(this) != DialogResult.OK)
             {

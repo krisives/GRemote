@@ -39,14 +39,15 @@
             this.convertFormat = new System.Windows.Forms.CheckBox();
             this.formatBox = new System.Windows.Forms.ComboBox();
             this.helpText = new System.Windows.Forms.ToolTip(this.components);
+            this.cancelButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(312, 110);
+            this.saveButton.Location = new System.Drawing.Point(236, 103);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(123, 23);
+            this.saveButton.Size = new System.Drawing.Size(123, 30);
             this.saveButton.TabIndex = 0;
             this.saveButton.Text = "Save Preferences";
             this.saveButton.UseVisualStyleBackColor = true;
@@ -142,12 +143,23 @@
             this.formatBox.Size = new System.Drawing.Size(132, 21);
             this.formatBox.TabIndex = 13;
             // 
+            // cancelButton
+            // 
+            this.cancelButton.Location = new System.Drawing.Point(365, 103);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 30);
+            this.cancelButton.TabIndex = 14;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            // 
             // PreferencesDialog
             // 
             this.AcceptButton = this.saveButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 145);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.formatBox);
             this.Controls.Add(this.convertFormat);
             this.Controls.Add(this.browseFFMpeg);
@@ -182,5 +194,6 @@
         private System.Windows.Forms.CheckBox convertFormat;
         private System.Windows.Forms.ComboBox formatBox;
         private System.Windows.Forms.ToolTip helpText;
+        private System.Windows.Forms.Button cancelButton;
     }
 }

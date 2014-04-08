@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace GRemote
 {
-    public partial class CustomBitrateForm : Form
+    public partial class CustomBitrateDialog : Form
     {
-        public CustomBitrateForm()
+        public CustomBitrateDialog()
         {
             InitializeComponent();
             UpdateLabels();
@@ -47,6 +47,12 @@ namespace GRemote
             {
                 return (int)bitsBox.Value;
             }
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

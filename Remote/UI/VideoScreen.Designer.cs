@@ -37,7 +37,7 @@
             this.BackColor = System.Drawing.Color.Black;
             this.Name = "VideoPreview";
             this.Size = new System.Drawing.Size(320, 240);
-            this.Resize += new System.EventHandler(this.VideoPreview_Resize);
+            this.Resize += new System.EventHandler(this.OnSizeChanged);
             this.ResumeLayout(false);
 
         }

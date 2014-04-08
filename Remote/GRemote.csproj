@@ -103,11 +103,11 @@
       <DependentUpon>CaptureArea.cs</DependentUpon>
     </Compile>
     <Compile Include="Network\ClientSession.cs" />
-    <Compile Include="UI\CustomBitrateForm.cs">
+    <Compile Include="UI\CustomBitrateDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\CustomBitrateForm.Designer.cs">
-      <DependentUpon>CustomBitrateForm.cs</DependentUpon>
+    <Compile Include="UI\CustomBitrateDialog.Designer.cs">
+      <DependentUpon>CustomBitrateDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="FFMpeg.cs" />
     <Compile Include="UI\GRemoteDialog.cs">
@@ -147,14 +147,15 @@
       <DependentUpon>VideoScreen.cs</DependentUpon>
     </Compile>
     <Compile Include="Input\InputCapture.cs" />
+    <Compile Include="Win32.cs" />
     <EmbeddedResource Include="UI\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CaptureArea.resx">
       <DependentUpon>CaptureArea.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\CustomBitrateForm.resx">
-      <DependentUpon>CustomBitrateForm.cs</DependentUpon>
+    <EmbeddedResource Include="UI\CustomBitrateDialog.resx">
+      <DependentUpon>CustomBitrateDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\GRemoteDialog.resx">
       <DependentUpon>GRemoteDialog.cs</DependentUpon>
@@ -211,6 +212,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="VERSION.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

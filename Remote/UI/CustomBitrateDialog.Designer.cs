@@ -1,6 +1,6 @@
 ﻿namespace GRemote
 {
-    partial class CustomBitrateForm
+    partial class CustomBitrateDialog
     {
         /// <summary>
         /// Required designer variable.
@@ -35,6 +35,7 @@
             this.bytesBox = new System.Windows.Forms.NumericUpDown();
             this.megaBitsLabel = new System.Windows.Forms.Label();
             this.megaBytesLabel = new System.Windows.Forms.Label();
+            this.cancelButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.bitsBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bytesBox)).BeginInit();
             this.SuspendLayout();
@@ -68,9 +69,9 @@
             // 
             // closeButton
             // 
-            this.closeButton.Location = new System.Drawing.Point(305, 22);
+            this.closeButton.Location = new System.Drawing.Point(100, 56);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(87, 32);
+            this.closeButton.Size = new System.Drawing.Size(87, 25);
             this.closeButton.TabIndex = 2;
             this.closeButton.Text = "Change Bitrate";
             this.closeButton.UseVisualStyleBackColor = true;
@@ -105,28 +106,39 @@
             // 
             // megaBitsLabel
             // 
-            this.megaBitsLabel.Location = new System.Drawing.Point(12, 42);
+            this.megaBitsLabel.Location = new System.Drawing.Point(12, 38);
             this.megaBitsLabel.Name = "megaBitsLabel";
-            this.megaBitsLabel.Size = new System.Drawing.Size(125, 26);
+            this.megaBitsLabel.Size = new System.Drawing.Size(125, 15);
             this.megaBitsLabel.TabIndex = 5;
             this.megaBitsLabel.Text = "X Mbps";
             this.megaBitsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // megaBytesLabel
             // 
-            this.megaBytesLabel.Location = new System.Drawing.Point(143, 42);
+            this.megaBytesLabel.Location = new System.Drawing.Point(143, 38);
             this.megaBytesLabel.Name = "megaBytesLabel";
-            this.megaBytesLabel.Size = new System.Drawing.Size(125, 26);
+            this.megaBytesLabel.Size = new System.Drawing.Size(125, 15);
             this.megaBytesLabel.TabIndex = 6;
             this.megaBytesLabel.Text = "X MB/s";
             this.megaBytesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // CustomBitrateForm
+            // cancelButton
+            // 
+            this.cancelButton.Location = new System.Drawing.Point(193, 56);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 25);
+            this.cancelButton.TabIndex = 7;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            // 
+            // CustomBitrateDialog
             // 
             this.AcceptButton = this.closeButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(404, 77);
+            this.ClientSize = new System.Drawing.Size(280, 90);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.megaBytesLabel);
             this.Controls.Add(this.megaBitsLabel);
             this.Controls.Add(this.label2);
@@ -137,7 +149,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "CustomBitrateForm";
+            this.Name = "CustomBitrateDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Custom Bitrate";
             ((System.ComponentModel.ISupportInitialize)(this.bitsBox)).EndInit();
@@ -156,5 +168,6 @@
         private System.Windows.Forms.NumericUpDown bytesBox;
         private System.Windows.Forms.Label megaBitsLabel;
         private System.Windows.Forms.Label megaBytesLabel;
+        private System.Windows.Forms.Button cancelButton;
     }
 }

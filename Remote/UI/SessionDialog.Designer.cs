@@ -35,6 +35,7 @@
             this.finishButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.portBox = new System.Windows.Forms.TextBox();
+            this.cancelButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -72,9 +73,9 @@
             // 
             // finishButton
             // 
-            this.finishButton.Location = new System.Drawing.Point(223, 58);
+            this.finishButton.Location = new System.Drawing.Point(142, 58);
             this.finishButton.Name = "finishButton";
-            this.finishButton.Size = new System.Drawing.Size(85, 23);
+            this.finishButton.Size = new System.Drawing.Size(85, 28);
             this.finishButton.TabIndex = 4;
             this.finishButton.Text = "Begin Hosting";
             this.finishButton.UseVisualStyleBackColor = true;
@@ -97,11 +98,23 @@
             this.portBox.TabIndex = 6;
             this.portBox.Text = "9999";
             // 
+            // cancelButton
+            // 
+            this.cancelButton.Location = new System.Drawing.Point(233, 58);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 28);
+            this.cancelButton.TabIndex = 7;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            // 
             // SessionDialog
             // 
+            this.AcceptButton = this.finishButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(320, 92);
+            this.ClientSize = new System.Drawing.Size(320, 98);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.portBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.finishButton);
@@ -130,5 +143,6 @@
         public System.Windows.Forms.TextBox addressBox;
         public System.Windows.Forms.TextBox passwordBox;
         public System.Windows.Forms.TextBox portBox;
+        private System.Windows.Forms.Button cancelButton;
     }
 }

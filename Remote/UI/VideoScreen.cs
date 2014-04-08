@@ -178,8 +178,18 @@ namespace GRemote
             g.DrawImage(screen, 0, 0, Width, Height);
         }
 
-        private void VideoPreview_Resize(object sender, EventArgs e)
+        private void OnSizeChanged(object sender, EventArgs e)
         {
+            if (Width < 0)
+            {
+                Width = 2;
+            }
+
+            if (Height < 0)
+            {
+                Height = 2;
+            }
+
             bg = bufferContext.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
             g = bg.Graphics;
         }

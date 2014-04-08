@@ -81,5 +81,11 @@ namespace GRemote
 
             ffmpegBox.Text = fileDialog.FileName;
         }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
     }
 }
