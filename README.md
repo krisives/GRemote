@@ -1,4 +1,3 @@
-
 ## What is GRemote?
 
 GRemote is a tool for recording and viewing a gaming
@@ -6,18 +5,33 @@ session over a network. Some of the problems and challenges
 with doing this are:
 
 * Broadcasting your screen usually involves a public
-  service like Twitch or a whole-stack RTP server.
+  service like Twitch or a whole-stack RTP server. GRemote
+  instead simply listens on ports. As long as one user has
+  no firewall nobody needs to open a port.
 
 * Latency with most broadcasting servers is not designed
-  for real-time applications.
+  for real-time applications. Most services give you anywhere
+  between 10-30 second delays. GRemote tries to stream as real-time
+  as possible. Internally it uses FFMpeg with zero-latency settings
+  and MPEG transport stream.
 
 * Many applications use DirectInput and other APIs that
   make capturing or replaying input difficult or not
-  compatible with many tools.
+  compatible. GRemote uses an existing virutal keyboard
+  driver to actually look exactly like user input. This is
+  also capable of interacting with UAC dialogs.
 
 ## Download
 
-Not creating releases until `0.1.0`
+Download the latest Windows release [here](https://github.com/krisives/GRemote/releases)
+
+These releases include everything you need to run the program:
+
+* GRemote build from Visual C# Express 2010 (`remote.exe`)
+* FFMpeg static build from [Zeranoe](http://ffmpeg.zeranoe.com/builds/) (`ffmpeg.exe`)
+* Interceptor library made by Jason Pang (`interceptor.dll`)
+* Interception keyboard driver made by Francisco Lopes (`interception.dll` and `install-interception.dll`)
+* Wget for checking for udpates, etc. (`wget.exe`, `libssl32.dll`, `libintl3.dll`, `libiconv2.dll`, and `libeay32.dll`)
 
 ## Build
 
